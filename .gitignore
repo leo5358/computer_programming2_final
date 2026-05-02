@@ -1,0 +1,20 @@
+# 編譯產生的中間檔
+src/*.os
+src/*.o
+*.pyc
+
+# 編譯產出的動態庫
+project/bin/
+
+# Godot 引擎自動產生的緩存
+project/.godot/
+project/.import/
+
+# LSP 與開發工具產生的檔案
+compile_commands.json
+.clangd/
+.cache/
+.DS_Store
+
+# 依賴庫（稍後用 submodule 處理）
+godot-cpp/
