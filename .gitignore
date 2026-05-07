@@ -8,6 +8,9 @@
 *.dylib
 *.so
 *.pyc
+build/
+*.exe
+
 
 # SCons local state
 .sconsign.dblite
