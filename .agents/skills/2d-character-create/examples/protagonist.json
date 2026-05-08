@@ -1,0 +1,100 @@
+{
+  "character": {
+    "id": "swordsman-protagonist",
+    "display_name": "Swordsman Protagonist",
+    "role": "protagonist",
+    "description": "A lean side-view wandering swordsman with a short cloak, dark hair, simple armor, and a katana-like blade.",
+    "style_notes": "Dark fantasy 2D pixel art for a side-scrolling action game. Clean silhouette, readable combat poses, limited muted palette.",
+    "must_keep": [
+      "same cloak length",
+      "same sword length",
+      "same hair shape",
+      "side-view proportions"
+    ],
+    "must_avoid": [
+      "chibi pet proportions",
+      "3D render",
+      "soft glow",
+      "background scenery"
+    ]
+  },
+  "canvas": {
+    "cell_width": 96,
+    "cell_height": 96,
+    "columns": "auto",
+    "background": "transparent",
+    "chroma_key": "#FF00FF",
+    "padding": 8
+  },
+  "animations": [
+    {
+      "id": "idle",
+      "frames": 4,
+      "fps": 6,
+      "loop": true,
+      "prompt": "calm combat breathing stance, hand near blade"
+    },
+    {
+      "id": "walk-right",
+      "frames": 6,
+      "fps": 10,
+      "loop": true,
+      "prompt": "side-view walking right, cautious steps"
+    },
+    {
+      "id": "guard",
+      "frames": 4,
+      "fps": 8,
+      "loop": true,
+      "prompt": "blade raised in defensive guard, planted feet",
+      "combat_tags": [
+        "guard"
+      ]
+    },
+    {
+      "id": "parry",
+      "frames": 4,
+      "fps": 12,
+      "loop": false,
+      "prompt": "short perfect parry deflection pose, tiny hard-edged weapon highlight only",
+      "combat_tags": [
+        "parry",
+        "telegraph"
+      ]
+    },
+    {
+      "id": "attack-light",
+      "frames": 6,
+      "fps": 12,
+      "loop": false,
+      "prompt": "quick horizontal katana slash with anticipation and recovery",
+      "combat_tags": [
+        "attack"
+      ]
+    },
+    {
+      "id": "hurt",
+      "frames": 3,
+      "fps": 8,
+      "loop": false,
+      "prompt": "brief recoil from impact"
+    },
+    {
+      "id": "posture-break",
+      "frames": 4,
+      "fps": 8,
+      "loop": false,
+      "prompt": "guard broken, exposed stance, knees bent",
+      "combat_tags": [
+        "posture"
+      ]
+    },
+    {
+      "id": "death",
+      "frames": 6,
+      "fps": 8,
+      "loop": false,
+      "prompt": "collapse to ground, readable but not gory"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "evals": [
+    {
+      "id": "protagonist-96",
+      "prompt": "Use examples/protagonist.json to create a 96x96 protagonist spritesheet with idle, walk, guard, parry, attack, hurt, posture-break, and death."
+    },
+    {
+      "id": "small-enemy-80",
+      "prompt": "Use examples/small-enemy.json to create a reusable small enemy spritesheet."
+    },
+    {
+      "id": "boss-160",
+      "prompt": "Use examples/boss.json to create a large boss spritesheet with 160x160 cells and heavy attack rows."
+    }
+  ]
+}
