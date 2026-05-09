@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="1_player_scene"]
 [ext_resource type="PackedScene" path="res://scenes/Enemy.tscn" id="2_enemy_scene"]
@@ -6,9 +6,10 @@
 [ext_resource type="Script" path="res://scripts/combat_ui.gd" id="4_ui_script"]
 [ext_resource type="Script" path="res://scripts/debug_overlay.gd" id="5_debug_script"]
 [ext_resource type="Script" path="res://scripts/combat_runtime.gd" id="6_runtime_script"]
+[ext_resource type="Script" path="res://scripts/camera_shake.gd" id="7_camera_shake"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
-size = Vector2(1280, 48)
+size = Vector2(7680, 48)
 
 [node name="Main" type="Node2D"]
 
@@ -25,21 +26,22 @@ position = Vector2(440, 360)
 position = Vector2(820, 360)
 
 [node name="Floor" type="StaticBody2D" parent="."]
-position = Vector2(640, 432)
+position = Vector2(1920, 432)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
 shape = SubResource("RectangleShape2D_floor")
 
 [node name="Visual" type="ColorRect" parent="Floor"]
-offset_left = -640.0
+offset_left = -3840.0
 offset_top = -24.0
-offset_right = 640.0
+offset_right = 3840.0
 offset_bottom = 24.0
 color = Color(0.18, 0.18, 0.18, 1)
 
 [node name="Camera2D" type="Camera2D" parent="Player"]
 position = Vector2(120, -80)
 enabled = true
+script = ExtResource("7_camera_shake")
 
 [node name="CombatUI" type="CanvasLayer" parent="."]
 script = ExtResource("4_ui_script")
@@ -53,16 +55,25 @@ offset_bottom = 194.0
 [node name="VBox" type="VBoxContainer" parent="CombatUI/Panel"]
 
 [node name="Message" type="Label" parent="CombatUI/Panel/VBox"]
-text = "A/D move  Space jump  J attack  K block"
+text = "A/D move  Space jump  J attack  K block/parry  L dash/dodge"
+
+[node name="HealthLabel" type="Label" parent="CombatUI/Panel/VBox"]
+text = "HP"
 
 [node name="HealthBar" type="ProgressBar" parent="CombatUI/Panel/VBox"]
 max_value = 100.0
 value = 100.0
 show_percentage = false
 
+[node name="PostureLabel" type="Label" parent="CombatUI/Panel/VBox"]
+text = "Posture"
+
 [node name="PostureBar" type="ProgressBar" parent="CombatUI/Panel/VBox"]
 max_value = 100.0
 show_percentage = false
+
+[node name="HeartbeatLabel" type="Label" parent="CombatUI/Panel/VBox"]
+text = "Heartbeat"
 
 [node name="HeartbeatBar" type="ProgressBar" parent="CombatUI/Panel/VBox"]
 min_value = 65.0
@@ -70,9 +81,15 @@ max_value = 120.0
 value = 65.0
 show_percentage = false
 
+[node name="EnemyPostureLabel" type="Label" parent="CombatUI/Panel/VBox"]
+text = "Enemy Posture"
+
 [node name="EnemyPostureBar" type="ProgressBar" parent="CombatUI/Panel/VBox"]
 max_value = 100.0
 show_percentage = false
+
+[node name="BossPostureLabel" type="Label" parent="CombatUI/Panel/VBox"]
+text = "Boss Posture"
 
 [node name="BossPostureBar" type="ProgressBar" parent="CombatUI/Panel/VBox"]
 max_value = 100.0

@@ -1,0 +1,64 @@
+{
+  "character": {
+    "id": "ash-bandit",
+    "display_name": "Ash Bandit",
+    "role": "enemy",
+    "description": "A small masked bandit enemy with a short spear and ragged shoulder cloth.",
+    "style_notes": "Readable 2D pixel enemy sprite, slightly hunched, dark fantasy side-scroller.",
+    "must_keep": [
+      "mask",
+      "short spear",
+      "ragged shoulder cloth"
+    ],
+    "must_avoid": [
+      "large boss scale",
+      "cute mascot face",
+      "extra weapons"
+    ]
+  },
+  "canvas": {
+    "cell_width": 80,
+    "cell_height": 80,
+    "columns": "auto",
+    "background": "transparent",
+    "chroma_key": "#FF00FF",
+    "padding": 6
+  },
+  "animations": [
+    {
+      "id": "idle",
+      "frames": 4,
+      "fps": 6,
+      "loop": true,
+      "prompt": "twitchy idle stance, spear held low"
+    },
+    {
+      "id": "walk-right",
+      "frames": 6,
+      "fps": 10,
+      "loop": true,
+      "prompt": "hunched walk right with spear"
+    },
+    {
+      "id": "attack-thrust",
+      "frames": 5,
+      "fps": 12,
+      "loop": false,
+      "prompt": "short spear thrust, clear anticipation and extension"
+    },
+    {
+      "id": "hurt",
+      "frames": 3,
+      "fps": 8,
+      "loop": false,
+      "prompt": "small recoil"
+    },
+    {
+      "id": "death",
+      "frames": 5,
+      "fps": 8,
+      "loop": false,
+      "prompt": "collapse backward"
+    }
+  ]
+}

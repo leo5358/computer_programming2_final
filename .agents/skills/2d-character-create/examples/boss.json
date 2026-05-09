@@ -1,0 +1,101 @@
+{
+  "character": {
+    "id": "iron-temple-boss",
+    "display_name": "Iron Temple Boss",
+    "role": "boss",
+    "description": "A tall armored temple guardian boss with a broken iron mask, long polearm, and heavy layered robes.",
+    "style_notes": "Large dark fantasy 2D pixel boss sprite. Strong silhouette, heavy readable attacks, not chibi, not cute.",
+    "must_keep": [
+      "broken iron mask",
+      "long polearm",
+      "heavy layered robes",
+      "tall scale"
+    ],
+    "must_avoid": [
+      "shrinking to protagonist size",
+      "extra faces",
+      "soft glow background",
+      "pet mascot look"
+    ]
+  },
+  "canvas": {
+    "cell_width": 160,
+    "cell_height": 160,
+    "columns": "auto",
+    "background": "transparent",
+    "chroma_key": "#FF00FF",
+    "padding": 12
+  },
+  "animations": [
+    {
+      "id": "idle",
+      "frames": 4,
+      "fps": 5,
+      "loop": true,
+      "prompt": "heavy breathing idle, polearm grounded"
+    },
+    {
+      "id": "walk-right",
+      "frames": 6,
+      "fps": 8,
+      "loop": true,
+      "prompt": "slow intimidating walk right"
+    },
+    {
+      "id": "attack-sweep",
+      "frames": 8,
+      "fps": 10,
+      "loop": false,
+      "prompt": "wide polearm sweep attack with wind-up, swing, recovery",
+      "combat_tags": [
+        "attack",
+        "boss"
+      ]
+    },
+    {
+      "id": "attack-overhead",
+      "frames": 8,
+      "fps": 10,
+      "loop": false,
+      "prompt": "overhead polearm slam, readable anticipation and impact pose",
+      "combat_tags": [
+        "attack",
+        "boss"
+      ]
+    },
+    {
+      "id": "guard",
+      "frames": 4,
+      "fps": 6,
+      "loop": true,
+      "prompt": "heavy defensive stance with polearm across body",
+      "combat_tags": [
+        "guard"
+      ]
+    },
+    {
+      "id": "posture-break",
+      "frames": 5,
+      "fps": 8,
+      "loop": false,
+      "prompt": "massive guard broken, kneeling exposed pose",
+      "combat_tags": [
+        "posture"
+      ]
+    },
+    {
+      "id": "hurt",
+      "frames": 3,
+      "fps": 7,
+      "loop": false,
+      "prompt": "brief heavy recoil"
+    },
+    {
+      "id": "death",
+      "frames": 8,
+      "fps": 7,
+      "loop": false,
+      "prompt": "slow collapse, armor and polearm remain consistent"
+    }
+  ]
+}

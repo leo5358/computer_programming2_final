@@ -22,6 +22,45 @@ func _initialize() -> void:
 		push_error("Enemy should show hit spark after taking player attack")
 		quit(1)
 		return
+	if enemy.hit_recoil_timer <= 0.0:
+		push_error("Enemy should briefly recoil after taking player attack")
+		quit(1)
+		return
+	if abs(enemy.velocity.x) < 80.0:
+		push_error("Enemy hit recoil should be visible")
+		quit(1)
+		return
+	if enemy.hit_flash_timer <= 0.0:
+		push_error("Enemy should flash bright when player attack lands")
+		quit(1)
+		return
+	if enemy.hit_freeze_timer <= 0.0:
+		push_error("Enemy should briefly freeze when player attack lands")
+		quit(1)
+		return
+
+	enemy.reset_combat_state()
+	enemy.is_winding_up = true
+	enemy.is_attack_cue_active = true
+	enemy.is_attack_active = true
+	enemy.attack_visual.visible = true
+	enemy.receive_block_feedback(true)
+	if enemy.parry_spark_timer <= 0.0:
+		push_error("Enemy should show a distinct spark after being parried")
+		quit(1)
+		return
+	if enemy.hit_recoil_timer <= 0.0:
+		push_error("Enemy should recoil when its attack is parried")
+		quit(1)
+		return
+	if enemy.is_winding_up or enemy.is_attack_cue_active or enemy.is_attack_active:
+		push_error("Perfect parry should interrupt enemy attack state")
+		quit(1)
+		return
+	if enemy.attack_visual.visible:
+		push_error("Perfect parry should hide enemy attack visual immediately")
+		quit(1)
+		return
 
 	enemy.posture = 99.0
 	enemy.receive_player_attack(0.0, 1.0)

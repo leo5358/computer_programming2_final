@@ -32,6 +32,70 @@ func _initialize() -> void:
 		push_error("Player should have death sfx player")
 		quit(1)
 		return
+	if not player.has_node("DashSfx"):
+		push_error("Player should have dash sfx player")
+		quit(1)
+		return
+	if not player.has_node("PerfectDodgeSfx"):
+		push_error("Player should have perfect dodge sfx player")
+		quit(1)
+		return
+
+	var legacy_layout: Dictionary = player._resolve_sheet_layout(Vector2i(768, 512))
+	if legacy_layout["cell_size"] != 64:
+		push_error("Legacy player sheet should resolve to 64x64 layout")
+		quit(1)
+		return
+
+	var samurai_layout: Dictionary = player._resolve_sheet_layout(Vector2i(1152, 864))
+	if samurai_layout["cell_size"] != 96:
+		push_error("Samurai player sheet should resolve to 96x96 layout")
+		quit(1)
+		return
+	if samurai_layout["block"]["source"] != "guard":
+		push_error("Samurai layout should map block state to guard row")
+		quit(1)
+		return
+
+	var player2_layout: Dictionary = player._resolve_sheet_layout(Vector2i(1086, 1448))
+	if player2_layout["cell_size"] != 181:
+		push_error("Player2 sheet should resolve to 181x181 layout")
+		quit(1)
+		return
+	if player2_layout["attack_a"]["count"] != 6:
+		push_error("Player2 attack animation should use its 6-frame attack row")
+		quit(1)
+		return
+
+	var player3_layout: Dictionary = player._resolve_sheet_layout(Vector2i(768, 1152))
+	if player3_layout["cell_size"] != 128:
+		push_error("Player3 sheet should resolve to 128x128 layout")
+		quit(1)
+		return
+	if player3_layout["dash"]["row"] != 2:
+		push_error("Player3 dash animation should use its low dash row")
+		quit(1)
+		return
+
+	var player4_layout: Dictionary = player._resolve_sheet_layout(Vector2i(1024, 1536))
+	if player4_layout["cell_size"] != 128:
+		push_error("Player4 sheet should resolve to 128x128 layout")
+		quit(1)
+		return
+	if player4_layout["death"]["row"] != 8:
+		push_error("Player4 death animation should use row 8")
+		quit(1)
+		return
+
+	var standard_96_layout: Dictionary = player._resolve_sheet_layout(Vector2i(576, 864))
+	if standard_96_layout["cell_size"] != 96:
+		push_error("Standard 96px player sheet should resolve to 96x96 layout")
+		quit(1)
+		return
+	if standard_96_layout["attack_a"]["row"] != 6:
+		push_error("Standard 96px player attack should use row 6")
+		quit(1)
+		return
 
 	player.velocity.x = 400.0
 	player._apply_horizontal_control(0.0, 0.1)
@@ -62,9 +126,45 @@ func _initialize() -> void:
 		return
 
 	player.posture = 0.0
+	player.facing = 1.0
 	player.receive_enemy_attack(1.0, 1.0)
 	if player.hurt_flash_timer <= 0.0:
 		push_error("Failed parry/block should trigger hurt feedback")
+		quit(1)
+		return
+	if player.velocity.x > -210.0:
+		push_error("Unblocked hit should shove player back hard enough to read")
+		quit(1)
+		return
+
+	player.reset_combat_state()
+	player.is_blocking = true
+	player.facing = 1.0
+	player.receive_enemy_attack(0.0, 10.0)
+	if player.block_flash_timer < 0.18:
+		push_error("Blocked hit should show a longer blue impact flash")
+		quit(1)
+		return
+	if player.velocity.x > -130.0:
+		push_error("Blocked hit should shove player back less than a clean hit but still visibly")
+		quit(1)
+		return
+
+	player.reset_combat_state()
+	player.is_parrying = true
+	player.facing = 1.0
+	player.velocity = Vector2(140.0, 0.0)
+	player.receive_enemy_attack(0.0, 10.0)
+	if player.parry_flash_timer < 0.12:
+		push_error("Perfect parry should show a satisfying gold impact flash")
+		quit(1)
+		return
+	if player.hitstop_timer < 0.08:
+		push_error("Perfect parry should briefly freeze the action")
+		quit(1)
+		return
+	if player.stored_velocity.x > -100.0:
+		push_error("Perfect parry should rebound the player backward a little")
 		quit(1)
 		return
 

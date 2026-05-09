@@ -25,6 +25,15 @@ const EXECUTION_SFX_PATH := "res://assets/sfx/execution.wav"
 @export var patrol_distance := 96.0
 @export var patrol_speed := 45.0
 @export var chase_speed := 80.0
+@export var hit_recoil_time := 0.14
+@export var hit_recoil_force := 120.0
+@export var parry_recoil_time := 0.20
+@export var parry_recoil_force := 170.0
+@export var hit_flash_time := 0.09
+@export var hit_freeze_time := 0.055
+@export var parry_spark_time := 0.24
+@export var dodge_posture_damage := 8.0
+@export var dodge_spark_time := 0.20
 
 var health := max_health
 var posture := 0.0
@@ -46,13 +55,20 @@ var facing := -1.0
 var current_animation := ""
 var patrol_direction := -1.0
 var hit_spark_timer := 0.0
+var parry_spark_timer := 0.0
+var dodge_spark_timer := 0.0
 var posture_break_spark_timer := 0.0
+var hit_recoil_timer := 0.0
+var hit_flash_timer := 0.0
+var hit_freeze_timer := 0.0
 
 @onready var math: RefCounted = CombatMathScript.new()
 @onready var body_visual: ColorRect = $Body
 @onready var sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
 @onready var attack_visual: ColorRect = $AttackVisual
 @onready var hit_spark: ColorRect = get_node_or_null("HitSpark") as ColorRect
+@onready var hit_spark_vfx: Line2D = get_node_or_null("HitSparkVfx") as Line2D
+@onready var parry_spark_vfx: Line2D = get_node_or_null("ParrySparkVfx") as Line2D
 @onready var posture_break_spark: ColorRect = get_node_or_null("PostureBreakSpark") as ColorRect
 @onready var countdown_label: Label = get_node_or_null("CountdownLabel") as Label
 @onready var execute_label: Label = get_node_or_null("ExecuteLabel") as Label
@@ -93,6 +109,11 @@ func _physics_process(delta: float) -> void:
 		facing = sign(target.global_position.x - global_position.x)
 		if facing == 0.0:
 			facing = -1.0
+
+	if hit_freeze_timer > 0.0:
+		_update_visuals()
+		stats_changed.emit()
+		return
 
 	posture = max(0.0, posture - posture_recovery * delta)
 	_update_attack_state(delta)
@@ -188,7 +209,31 @@ func receive_block_feedback(perfect: bool) -> void:
 	if posture >= max_posture:
 		_break_posture()
 	else:
+		_trigger_parry_feedback(perfect)
 		stats_changed.emit()
+
+func can_be_perfect_dodged_by(player: Node2D) -> bool:
+	if defeated_flag or posture_broken:
+		return false
+	if not is_attack_cue_active and not is_attack_active:
+		return false
+	return global_position.distance_to(player.global_position) <= attack_range + 24.0
+
+func receive_dodge_feedback() -> void:
+	if defeated_flag:
+		return
+	posture = math.add_posture(posture, dodge_posture_damage)
+	if posture >= max_posture:
+		_break_posture()
+		return
+	dodge_spark_timer = dodge_spark_time
+	hit_flash_timer = hit_flash_time
+	hit_freeze_timer = hit_freeze_time
+	if parry_spark_vfx != null:
+		parry_spark_vfx.position.x = 22.0 * facing
+		parry_spark_vfx.scale.x = facing
+	_shake_camera(12.0, 0.09)
+	stats_changed.emit()
 
 func can_be_executed() -> bool:
 	return posture_broken and not defeated_flag
@@ -205,6 +250,10 @@ func _break_posture() -> void:
 	is_attack_cue_active = false
 	is_attack_active = false
 	attack_visual.visible = false
+	if hit_spark_vfx != null:
+		hit_spark_vfx.visible = false
+	if parry_spark_vfx != null:
+		parry_spark_vfx.visible = false
 	body_visual.color = Color(1.0, 0.86, 0.16, 1.0)
 	if countdown_label != null:
 		countdown_label.visible = false
@@ -215,6 +264,9 @@ func _break_posture() -> void:
 	stats_changed.emit()
 
 func _update_movement(_delta: float) -> void:
+	if hit_recoil_timer > 0.0:
+		return
+
 	if is_winding_up or is_attack_active or posture_broken or defeated_flag:
 		velocity.x = 0.0
 		return
@@ -273,9 +325,16 @@ func reset_combat_state() -> void:
 	defeated_flag = false
 	velocity = Vector2.ZERO
 	hit_spark_timer = 0.0
+	parry_spark_timer = 0.0
+	dodge_spark_timer = 0.0
 	posture_break_spark_timer = 0.0
+	hit_recoil_timer = 0.0
+	hit_flash_timer = 0.0
+	hit_freeze_timer = 0.0
 	global_position = spawn_position
 	body_visual.color = default_body_color
+	if sprite != null:
+		sprite.modulate = Color.WHITE
 	attack_visual.visible = false
 	if countdown_label != null:
 		countdown_label.visible = false
@@ -329,24 +388,93 @@ func _update_visuals() -> void:
 		sprite.play(next_animation)
 
 func _trigger_hit_feedback() -> void:
-	hit_spark_timer = 0.12
-	velocity.x = -facing * 45.0
+	hit_spark_timer = 0.18
+	hit_flash_timer = hit_flash_time
+	hit_freeze_timer = hit_freeze_time
+	hit_recoil_timer = hit_recoil_time
+	velocity.x = -facing * hit_recoil_force
+	if hit_spark != null:
+		hit_spark.position.x = 18.0 * facing
+	if hit_spark_vfx != null:
+		hit_spark_vfx.position.x = 18.0 * facing
+		hit_spark_vfx.scale.x = facing
+	_shake_camera(7.0, 0.075)
 	_play_sfx(enemy_hurt_sfx)
 	_update_feedback(0.0)
+
+func _trigger_parry_feedback(perfect: bool) -> void:
+	if perfect:
+		_interrupt_attack_from_parry()
+		parry_spark_timer = parry_spark_time
+		hit_flash_timer = hit_flash_time
+		hit_freeze_timer = hit_freeze_time
+		hit_recoil_timer = parry_recoil_time
+		velocity.x = -facing * parry_recoil_force
+	else:
+		hit_spark_timer = 0.10
+		hit_recoil_timer = hit_recoil_time * 0.65
+		velocity.x = -facing * (hit_recoil_force * 0.55)
+	if hit_spark != null:
+		hit_spark.position.x = 22.0 * facing
+	if parry_spark_vfx != null:
+		parry_spark_vfx.position.x = 22.0 * facing
+		parry_spark_vfx.scale.x = facing
+	_shake_camera(16.0 if perfect else 9.0, 0.11 if perfect else 0.08)
+	_update_feedback(0.0)
+
+func _interrupt_attack_from_parry() -> void:
+	is_winding_up = false
+	is_attack_cue_active = false
+	is_attack_active = false
+	active_timer = 0.0
+	windup_timer = 0.0
+	attack_cooldown = max(attack_interval * 0.45, 0.28)
+	attack_visual.visible = false
+	if countdown_label != null:
+		countdown_label.visible = false
 
 func _trigger_posture_break_feedback() -> void:
 	posture_break_spark_timer = 0.28
 	hit_spark_timer = 0.0
+	parry_spark_timer = 0.0
+	dodge_spark_timer = 0.0
+	hit_recoil_timer = 0.0
+	hit_flash_timer = 0.0
+	hit_freeze_timer = 0.0
 	_play_sfx(posture_break_sfx)
+	_shake_camera(22.0, 0.16)
 	_update_feedback(0.0)
 
 func _update_feedback(delta: float) -> void:
 	hit_spark_timer = max(0.0, hit_spark_timer - delta)
+	parry_spark_timer = max(0.0, parry_spark_timer - delta)
+	dodge_spark_timer = max(0.0, dodge_spark_timer - delta)
 	posture_break_spark_timer = max(0.0, posture_break_spark_timer - delta)
+	hit_recoil_timer = max(0.0, hit_recoil_timer - delta)
+	hit_flash_timer = max(0.0, hit_flash_timer - delta)
+	hit_freeze_timer = max(0.0, hit_freeze_timer - delta)
 	if hit_spark != null:
-		hit_spark.visible = hit_spark_timer > 0.0
+		hit_spark.visible = false
+		hit_spark.color = Color(0.62, 0.95, 1.0, 0.82) if parry_spark_timer > 0.0 else Color(1, 0.95, 0.45, 0.78)
+	if hit_spark_vfx != null:
+		hit_spark_vfx.visible = hit_spark_timer > 0.0
+	if parry_spark_vfx != null:
+		parry_spark_vfx.visible = parry_spark_timer > 0.0 or dodge_spark_timer > 0.0
+		parry_spark_vfx.default_color = Color(0.65, 0.95, 1.0, 0.95) if dodge_spark_timer > 0.0 else Color(0.55, 0.95, 1, 0.95)
 	if posture_break_spark != null:
 		posture_break_spark.visible = posture_break_spark_timer > 0.0
+	if sprite != null:
+		if hit_flash_timer > 0.0:
+			sprite.modulate = Color(1.7, 1.7, 1.35, 1.0) if parry_spark_timer <= 0.0 else Color(1.25, 1.75, 2.0, 1.0)
+		else:
+			sprite.modulate = Color.WHITE
+	elif not posture_broken and not defeated_flag:
+		body_visual.color = Color(1.0, 0.95, 0.72, 1.0) if hit_flash_timer > 0.0 else default_body_color
+
+func _shake_camera(amount: float, duration: float) -> void:
+	var camera := get_tree().get_first_node_in_group("feedback_camera")
+	if camera != null and camera.has_method("shake"):
+		camera.shake(amount, duration)
 
 func _load_optional_sfx() -> void:
 	_load_optional_stream(ENEMY_HURT_SFX_PATH, enemy_hurt_sfx)
