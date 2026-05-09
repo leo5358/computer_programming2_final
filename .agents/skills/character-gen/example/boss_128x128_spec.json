@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "engine": "godot",
+  "asset_type": "boss",
+  "name": "boss",
+  "description": "Imposing boss enemy for a 2D side-scrolling action game. Large, deliberate movements.",
+  "cell": {
+    "width": 128,
+    "height": 128
+  },
+  "columns": 10,
+  "chroma_key": "#FF00FF",
+  "direction": "left",
+  "style_notes": "Side-view 2D pixel art boss sprite. Large imposing silhouette. High-contrast limited palette. Thick 2-3 px dark outline for readability at scale. Detailed enough to read at 128×128 but not overworked. No soft gradients, no painterly rendering, no UI, no text, no scenery.",
+  "animations": [
+    {
+      "name": "idle",
+      "frames": 6,
+      "fps": 6,
+      "loop": true,
+      "action": "Imposing idle stance with slow threatening sway. Subtle weight shift. Weapon or limbs move slightly. Menacing but patient energy."
+    },
+    {
+      "name": "walk",
+      "frames": 8,
+      "fps": 8,
+      "loop": true,
+      "action": "Slow deliberate advance toward the player. Heavy footfalls implied by pose. Left-facing."
+    },
+    {
+      "name": "tell",
+      "frames": 4,
+      "fps": 8,
+      "loop": false,
+      "action": "Visual telegraph before a big attack. Dramatic windup or raised weapon. Readable warning pose. Gives the player a cue."
+    },
+    {
+      "name": "heavy_attack",
+      "frames": 8,
+      "fps": 12,
+      "loop": false,
+      "action": "Slow powerful slash with long windup, full commitment swing, and long recovery. Wide sweep, clearly telegraphed. Frames: windup start, windup peak, swing begin, swing apex, follow-through, slow recovery 1, slow recovery 2, end."
+    },
+    {
+      "name": "special_attack",
+      "frames": 10,
+      "fps": 12,
+      "loop": false,
+      "action": "Boss's signature move — dramatic multi-hit or area attack. Make it visually distinct from heavy_attack.",
+      "prompt_notes": "This is the boss's most iconic move. Make the silhouette clearly different from heavy_attack."
+    },
+    {
+      "name": "stagger",
+      "frames": 5,
+      "fps": 10,
+      "loop": false,
+      "action": "Posture-break stagger: the boss reels backward, brief vulnerability window with shaky recovery pose. Clearly a weakness state."
+    },
+    {
+      "name": "hurt",
+      "frames": 3,
+      "fps": 10,
+      "loop": false,
+      "action": "Minor hit reaction: brief flinch, body absorbs the blow, quick recovery. Less dramatic than stagger."
+    },
+    {
+      "name": "death",
+      "frames": 10,
+      "fps": 8,
+      "loop": false,
+      "action": "Dramatic death sequence: stagger on hit, slow collapse, fall, final prone pose. Should feel weighty and conclusive."
+    }
+  ]
+}

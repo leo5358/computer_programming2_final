@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "engine": "godot",
+  "asset_type": "character",
+  "name": "player",
+  "description": "Side-view shinobi protagonist. Dark armored shinobi carrying a katana. Combat is posture-and-heartbeat-driven: perfect deflects break enemy posture; sustained blocking raises the player's own heartbeat, limiting guard duration and forcing aggression.",
+  "cell": {
+    "width": 96,
+    "height": 96
+  },
+  "columns": 8,
+  "chroma_key": "#FF00FF",
+  "direction": "right",
+  "style_notes": "Side-view 2D pixel art combat sprite. Japanese shinobi aesthetic — dark body armor, cloth wrappings, katana. Limited dark palette: blacks, deep grays, muted navy, crimson accent on blade or trim. Crisp hard-edged shapes, 1-2 px continuous dark outline, flat cel shading with one highlight step. Readable silhouette at 96×96. No painterly shading, no soft gradients, no UI, no text, no scenery.",
+  "animations": [
+    {
+      "name": "idle",
+      "frames": 6,
+      "fps": 8,
+      "loop": true,
+      "action": "Calm battle-ready idle stance. Katana held at hip or low guard. Subtle chest breathing. Feet planted. First and last frames nearly identical for smooth loop. Conveys tense composure, not relaxation."
+    },
+    {
+      "name": "walk",
+      "frames": 6,
+      "fps": 8,
+      "loop": true,
+      "action": "Slow deliberate right-facing walk with katana held ready. Short steps, weight low. Legs alternate with clear contact frames. Used for both walk-right (default) and walk-left (flipped by Godot). Body stays at consistent height across all frames."
+    },
+    {
+      "name": "run",
+      "frames": 8,
+      "fps": 12,
+      "loop": true,
+      "action": "Right-facing sprint. Leaning forward, arms and legs pumping, katana trailing behind or gripped low. Clear alternating foot strike. Faster and more aggressive posture than walk."
+    },
+    {
+      "name": "jump",
+      "frames": 4,
+      "fps": 10,
+      "loop": false,
+      "action": "Jump arc: takeoff crouch (frame 0), full extension off ground (frame 1), airborne peak with body slightly tucked (frame 2), beginning of descent (frame 3). Character rises clearly across frames 0→2."
+    },
+    {
+      "name": "fall",
+      "frames": 3,
+      "fps": 8,
+      "loop": true,
+      "action": "Controlled freefall loop. Body angled slightly forward, cloth or hair catching air. Minimal frame difference between frames — calm descent, not panic."
+    },
+    {
+      "name": "land",
+      "frames": 3,
+      "fps": 14,
+      "loop": false,
+      "action": "Landing impact: feet strike ground (frame 0), sharp crouch absorbing force (frame 1), recovery rising back to ready (frame 2). Snappy and grounded."
+    },
+    {
+      "name": "attack",
+      "frames": 6,
+      "fps": 14,
+      "loop": false,
+      "action": "Single katana slash — clean horizontal cut. Frames: weight shift back (0), windup raising sword (1), slash apex with blade fully extended (2), blade follow-through low (3), recovery begin (4), return to guard (5). Blade arc must be clearly readable. Body leans into the strike."
+    },
+    {
+      "name": "guard",
+      "frames": 2,
+      "fps": 8,
+      "loop": true,
+      "action": "Raised-blade guard stance. Katana held upright to block incoming attacks. Minimal motion — slight weight shift between two frames. This is the sustained block pose; holding it raises the player's heartbeat in gameplay."
+    },
+    {
+      "name": "deflect",
+      "frames": 4,
+      "fps": 18,
+      "loop": false,
+      "action": "Perfect deflect timing animation. Frames: weapon raised sharply to intercept (0), hard clash contact pose — blade meets blade, body fully braced (1), sharp rebound with weapon still up (2), snap return to ready (3). Must look explosive and decisive — this is the core Sekiro-style parry moment. In easy mode the game highlights the weapon tip at frame 0."
+    },
+    {
+      "name": "backdash",
+      "frames": 5,
+      "fps": 14,
+      "loop": false,
+      "action": "Quick evasive back-step (後墊步). Frames: weight drop and push-off (0), body shooting backward with foot leaving ground (1), mid-air glide backward (2), foot contact on landing (3), recovery crouch settling to ready (4). Fast and agile — not a roll, just a sharp horizontal retreat."
+    },
+    {
+      "name": "hurt",
+      "frames": 3,
+      "fps": 10,
+      "loop": false,
+      "action": "Hit reaction. Sharp torso recoil backward away from the blow (frame 0), body hunched in pain (frame 1), recovery beginning (frame 2). Readable silhouette change. Does not show falling — just the flinch."
+    },
+    {
+      "name": "death",
+      "frames": 8,
+      "fps": 10,
+      "loop": false,
+      "action": "Defeat collapse. Stagger back (0), knees buckle (1–2), falling forward or to side (3–4), hitting the ground (5), final slide settle (6–7). Final frame is fully prone. Katana may drop. Conveys finality."
+    }
+  ]
+}
