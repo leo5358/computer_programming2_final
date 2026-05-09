@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ro63yui7l6cj"
-path="res://.godot/imported/player_sheet_legacy_64.png-c581ebe7ffe04fb88d4130955d7fcb97.ctex"
+uid="uid://b1c0kt1sscw85"
+path="res://.godot/imported/hurt.png-7401b2039dabeccd3e15cd3fe3c208e6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/player/player_sheet_legacy_64.png"
-dest_files=["res://.godot/imported/player_sheet_legacy_64.png-c581ebe7ffe04fb88d4130955d7fcb97.ctex"]
+source_file="res://assets/sprites/player/hurt.png"
+dest_files=["res://.godot/imported/hurt.png-7401b2039dabeccd3e15cd3fe3c208e6.ctex"]
 
 [params]
 

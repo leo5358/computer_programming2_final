@@ -9,6 +9,7 @@ const ENEMY_SHEET: Texture2D = preload("res://assets/sprites/enemy/enemy_sheet.p
 const ENEMY_HURT_SFX_PATH := "res://assets/sfx/enemy_hurt.wav"
 const POSTURE_BREAK_SFX_PATH := "res://assets/sfx/posture_break.wav"
 const EXECUTION_SFX_PATH := "res://assets/sfx/execution.wav"
+const DAMAGE_NUMBER_SCENE: PackedScene = preload("res://scenes/DamageNumber.tscn")
 
 @export var display_name := "Enemy"
 @export var max_health := 45.0
@@ -189,6 +190,7 @@ func receive_player_attack(damage: float, posture_damage: float) -> void:
 	if defeated_flag:
 		return
 
+	_spawn_damage_number(damage)
 	health = math.apply_damage(health, damage)
 	posture = math.add_posture(posture, posture_damage)
 	if posture >= max_posture:
@@ -401,6 +403,16 @@ func _trigger_hit_feedback() -> void:
 	_shake_camera(7.0, 0.075)
 	_play_sfx(enemy_hurt_sfx)
 	_update_feedback(0.0)
+
+func _spawn_damage_number(damage: float) -> void:
+	var number := DAMAGE_NUMBER_SCENE.instantiate()
+	var parent := get_parent()
+	if parent == null:
+		parent = get_tree().root
+	parent.add_child(number)
+	number.global_position = global_position + Vector2(0.0, -64.0)
+	if number.has_method("setup"):
+		number.setup(damage)
 
 func _trigger_parry_feedback(perfect: bool) -> void:
 	if perfect:

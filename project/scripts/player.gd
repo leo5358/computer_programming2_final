@@ -5,13 +5,45 @@ signal died
 
 const CombatMathScript = preload("res://scripts/combat_math.gd")
 const CombatServerScript = preload("res://scripts/combat_server.gd")
-const PLAYER_SHEET: Texture2D = preload("res://assets/sprites/player/player4.png")
-const ATTACK_SFX_PATH := "res://assets/sfx/player_attack.wav"
+const PLAYER_SHEET_PATHS := [
+	"res://assets/sprites/player/player4.png",
+	"res://assets/sprites/player/player3_spritesheet.png",
+	"res://assets/sprites/player/player2.png",
+	"res://assets/sprites/player/player_sheet.png",
+]
+const PLAYER_STRIP_CELL_SIZE := 96
+const PLAYER_STRIP_PATHS := {
+	"idle": "res://assets/sprites/player/idle.png",
+	"run": "res://assets/sprites/player/run.png",
+	"attack_a": "res://assets/sprites/player/attack.png",
+	"attack_chop": "res://assets/sprites/player/chop.png",
+	"parry": "res://assets/sprites/player/deflect.png",
+	"block": "res://assets/sprites/player/deflect.png",
+	"dash": "res://assets/sprites/player/dash.png",
+	"jump": "res://assets/sprites/player/jump.png",
+	"hurt": "res://assets/sprites/player/hurt.png",
+	"death": "res://assets/sprites/player/death.png",
+}
+const HIT_IMPACT_SHEET_PATH := "res://assets/sprites/vfx/hit_impact_sheet.png"
+const HIT_IMPACT_CELL_SIZE := 128
+const HIT_IMPACT_FRAME_COUNT := 6
+const ATTACK_HIT_SFX_PATHS := [
+	"res://assets/sfx/attack1.WAV",
+	"res://assets/sfx/attack2.WAV",
+	"res://assets/sfx/attack3.WAV",
+	"res://assets/sfx/attack4.WAV",
+	"res://assets/sfx/attack5.WAV",
+]
+const CHOP_HIT_SFX_PATH := "res://assets/sfx/attack6.WAV"
+const ATTACK_MISS_SFX_PATHS := [
+	"res://assets/sfx/attack_miss1.WAV",
+	"res://assets/sfx/attack_miss2.WAV",
+]
 const PARRY_SFX_PATH := "res://assets/sfx/player_parry.wav"
 const BLOCK_SFX_PATH := "res://assets/sfx/player_block.wav"
 const HURT_SFX_PATH := "res://assets/sfx/player_hurt.wav"
 const DEATH_SFX_PATH := "res://assets/sfx/player_death.wav"
-const DASH_SFX_PATH := "res://assets/sfx/player_dash.wav"
+const DASH_SFX_PATH := "res://assets/sfx/dodge.WAV"
 const PERFECT_DODGE_SFX_PATH := "res://assets/sfx/player_perfect_dodge.wav"
 
 enum PlayerState {
@@ -43,6 +75,14 @@ enum PlayerState {
 @export var attack_startup := 0.25
 @export var attack_active_time := 0.08
 @export var attack_recovery := 0.17
+@export var attack_step_impulse := 140.0
+@export var chop_step_impulse := 95.0
+@export var attack_soft_lock_impulse := 260.0
+@export var chop_soft_lock_impulse := 190.0
+@export var attack_lunge_time := 0.09
+@export var attack_soft_lock_min_distance := 58.0
+@export var attack_soft_lock_max_distance := 110.0
+@export var attack_soft_lock_vertical_tolerance := 52.0
 @export var parry_window := 0.45
 @export var parry_flash_time := 0.14
 @export var dash_duration := 0.20
@@ -50,14 +90,20 @@ enum PlayerState {
 @export var perfect_dodge_impulse := 680.0
 @export var perfect_dodge_hitstop_time := 0.09
 @export var hurt_time := 0.22
-@export var stunned_time := 0.5
+@export var stunned_time := 1.2
+@export var posture_break_animation_speed := 0.72
 @export var impact_flash_time := 0.20
-@export var attack_hitstop_time := 0.055
+@export var attack_hitstop_time := 0.078
+@export var chop_hitstop_time := 0.12
+@export var attack_hit_shake_amount := 9.0
+@export var chop_hit_shake_amount := 14.0
+@export var attack_hit_shake_duration := 0.085
+@export var chop_hit_shake_duration := 0.11
+@export var hit_impact_vfx_time := 0.09
 @export var parry_hitstop_time := 0.13
 @export var block_knockback := 150.0
 @export var hurt_knockback := 240.0
 @export var parry_rebound := 120.0
-@export var show_debug_shapes := false
 
 var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
 var health := max_health
@@ -79,33 +125,28 @@ var action_timer := 0.0
 var dash_timer := 0.0
 var dash_direction := 1.0
 var attack_has_hit := false
+var attack_combo_step := 0
+var current_attack_animation := "attack_a"
+var attack_lunge_timer := 0.0
 var current_animation := ""
 var parry_flash_timer := 0.0
 var block_flash_timer := 0.0
 var hurt_flash_timer := 0.0
 var perfect_dodge_timer := 0.0
+var hit_impact_vfx_timer := 0.0
 var hitstop_timer := 0.0
 var stored_velocity := Vector2.ZERO
 var combat_runtime: Node
 var spawn_position := Vector2.ZERO
 var sprite_sheet_layout: Dictionary = {}
+var player_sheet: Texture2D = null
+var attack_hit_streams: Array[AudioStream] = []
+var chop_hit_stream: AudioStream = null
+var attack_miss_streams: Array[AudioStream] = []
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
-@onready var body_visual: ColorRect = $Body
 @onready var attack_area: Area2D = $AttackArea
-@onready var attack_visual: ColorRect = $AttackVisual
-@onready var block_visual: ColorRect = $BlockVisual
-@onready var parry_visual: ColorRect = $ParryVisual
-@onready var block_impact_visual: ColorRect = $BlockImpactVisual
-@onready var hurt_impact_visual: ColorRect = $HurtImpactVisual
-@onready var dash_visual: ColorRect = $DashVisual
-@onready var attack_slash_vfx: Line2D = get_node_or_null("AttackSlashVfx") as Line2D
-@onready var parry_spark_vfx: Line2D = get_node_or_null("ParrySparkVfx") as Line2D
-@onready var block_spark_vfx: Line2D = get_node_or_null("BlockSparkVfx") as Line2D
-@onready var hurt_slash_vfx: Line2D = get_node_or_null("HurtSlashVfx") as Line2D
-@onready var perfect_dodge_vfx: Line2D = get_node_or_null("PerfectDodgeVfx") as Line2D
-@onready var dodge_afterimage_vfx: Line2D = get_node_or_null("DodgeAfterimageVfx") as Line2D
-@onready var state_label: Label = $StateLabel
+@onready var hit_impact_vfx: AnimatedSprite2D = get_node_or_null("HitImpactVfx") as AnimatedSprite2D
 @onready var attack_sfx: AudioStreamPlayer2D = $AttackSfx
 @onready var parry_sfx: AudioStreamPlayer2D = $ParrySfx
 @onready var block_sfx: AudioStreamPlayer2D = $BlockSfx
@@ -120,6 +161,7 @@ func _ready() -> void:
 	spawn_position = global_position
 	combat_runtime = get_tree().get_first_node_in_group("combat_runtime")
 	_setup_sprite_frames()
+	_setup_hit_impact_vfx()
 	_load_optional_sfx()
 	_set_state(PlayerState.IDLE)
 	stats_changed.emit()
@@ -174,7 +216,13 @@ func _update_inputs() -> void:
 		_set_state(PlayerState.JUMP)
 
 func _update_movement(delta: float) -> void:
-	if state in [PlayerState.ATTACK, PlayerState.PARRY, PlayerState.HURT, PlayerState.STUNNED]:
+	if state == PlayerState.ATTACK:
+		attack_lunge_timer -= delta
+		if attack_lunge_timer <= 0.0:
+			velocity.x = move_toward(velocity.x, 0.0, friction * delta)
+		return
+
+	if state in [PlayerState.PARRY, PlayerState.HURT, PlayerState.STUNNED]:
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 		return
 
@@ -186,7 +234,6 @@ func _update_movement(delta: float) -> void:
 	_apply_horizontal_control(direction, delta)
 
 	attack_area.position.x = 34.0 * facing
-	attack_visual.position.x = 18.0 * facing
 
 	if state in [PlayerState.IDLE, PlayerState.MOVE, PlayerState.JUMP]:
 		if not is_on_floor():
@@ -244,6 +291,7 @@ func _update_action_state(delta: float) -> void:
 		if action_timer <= 0.0:
 			posture = min(posture, max_posture * 0.55)
 			is_invulnerable = false
+			sprite.speed_scale = 1.0
 			_set_state(PlayerState.IDLE)
 
 func _update_combat(delta: float) -> void:
@@ -259,14 +307,42 @@ func _update_combat(delta: float) -> void:
 
 func _start_attack() -> void:
 	_register_combat_input(CombatServerScript.InputType.ATTACK)
-	_play_sfx(attack_sfx)
+	current_attack_animation = "attack_chop" if attack_combo_step == 2 else "attack_a"
+	attack_combo_step = (attack_combo_step + 1) % 3
+	attack_lunge_timer = attack_lunge_time
+	velocity.x = facing * _attack_step_impulse()
 	_set_state(PlayerState.ATTACK)
 	action_timer = attack_startup + attack_active_time + attack_recovery
 	is_attacking = false
 	attack_has_hit = false
 
+func _attack_step_impulse() -> float:
+	var has_soft_lock_target := _find_attack_soft_lock_target() != null
+	if current_attack_animation == "attack_chop":
+		return chop_soft_lock_impulse if has_soft_lock_target else chop_step_impulse
+	return attack_soft_lock_impulse if has_soft_lock_target else attack_step_impulse
+
+func _find_attack_soft_lock_target() -> Node2D:
+	for group_name in ["enemy", "boss"]:
+		for target in get_tree().get_nodes_in_group(group_name):
+			if target is Node2D and _is_valid_attack_soft_lock_target(target):
+				return target
+	return null
+
+func _is_valid_attack_soft_lock_target(target: Node2D) -> bool:
+	var offset := target.global_position - global_position
+	var forward_distance := offset.x * facing
+	if forward_distance < attack_soft_lock_min_distance:
+		return false
+	if forward_distance > attack_soft_lock_max_distance:
+		return false
+	if abs(offset.y) > attack_soft_lock_vertical_tolerance:
+		return false
+	return true
+
 func _apply_attack_hit() -> void:
 	var damage: float = math.damage_with_adrenaline(base_attack_damage, heartbeat)
+	var posture_damage: float = math.posture_damage_with_adrenaline(attack_posture_damage, heartbeat)
 	var hit_confirmed := false
 	for body in attack_area.get_overlapping_bodies():
 		if body.has_method("can_be_executed") and body.can_be_executed() and body.has_method("execute"):
@@ -274,10 +350,13 @@ func _apply_attack_hit() -> void:
 			hit_confirmed = true
 			continue
 		if body.has_method("receive_player_attack"):
-			body.receive_player_attack(damage, attack_posture_damage)
+			body.receive_player_attack(damage, posture_damage)
 			hit_confirmed = true
 	if hit_confirmed:
+		_play_random_attack_hit_sfx()
 		_trigger_attack_hit_feedback()
+	else:
+		_play_random_attack_miss_sfx()
 
 func _start_parry() -> void:
 	_register_combat_input(CombatServerScript.InputType.PARRY)
@@ -325,7 +404,7 @@ func _start_perfect_dodge(attacker: Node2D) -> void:
 	hitstop_timer = perfect_dodge_hitstop_time
 	stored_velocity = Vector2(dash_direction * perfect_dodge_impulse, velocity.y)
 	sprite.speed_scale = 0.0
-	_play_sfx(perfect_dodge_sfx)
+	_play_sfx(dash_sfx)
 	if attacker.has_method("receive_dodge_feedback"):
 		attacker.receive_dodge_feedback()
 	_shake_camera(14.0, 0.10)
@@ -374,12 +453,7 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 			is_invulnerable = true
 
 	if posture >= max_posture:
-		_set_state(PlayerState.STUNNED)
-		posture = 100.0
-		action_timer = stunned_time
-		is_blocking = false
-		is_parrying = false
-		is_invulnerable = true
+		_enter_stunned()
 
 	stats_changed.emit()
 	if health <= 0.0:
@@ -392,6 +466,22 @@ func _set_state(next_state: int) -> void:
 	previous_state = state
 	state = next_state
 
+func _enter_stunned() -> void:
+	_set_state(PlayerState.STUNNED)
+	posture = 100.0
+	action_timer = stunned_time
+	is_blocking = false
+	is_attacking = false
+	is_parrying = false
+	is_dashing = false
+	is_perfect_dodging = false
+	is_invulnerable = true
+	hitstop_timer = 0.0
+	stored_velocity = Vector2.ZERO
+	velocity = Vector2.ZERO
+	sprite.speed_scale = 1.0
+	current_animation = ""
+
 func _can_start_action() -> bool:
 	return state in [PlayerState.IDLE, PlayerState.MOVE, PlayerState.JUMP, PlayerState.BLOCK]
 
@@ -399,76 +489,86 @@ func _can_jump() -> bool:
 	return state not in [PlayerState.ATTACK, PlayerState.PARRY, PlayerState.DASH, PlayerState.HURT, PlayerState.STUNNED]
 
 func _update_visuals() -> void:
-	attack_visual.visible = show_debug_shapes and state == PlayerState.ATTACK
-	block_visual.visible = show_debug_shapes and is_blocking
 	parry_flash_timer = max(0.0, parry_flash_timer - get_physics_process_delta_time())
 	block_flash_timer = max(0.0, block_flash_timer - get_physics_process_delta_time())
 	hurt_flash_timer = max(0.0, hurt_flash_timer - get_physics_process_delta_time())
 	perfect_dodge_timer = max(0.0, perfect_dodge_timer - get_physics_process_delta_time())
-	parry_visual.visible = show_debug_shapes and (is_parrying or parry_flash_timer > 0.0)
-	block_impact_visual.visible = show_debug_shapes and block_flash_timer > 0.0
-	hurt_impact_visual.visible = show_debug_shapes and hurt_flash_timer > 0.0
-	dash_visual.visible = is_dashing
-	if attack_slash_vfx != null:
-		attack_slash_vfx.visible = state == PlayerState.ATTACK
-		attack_slash_vfx.scale.x = facing
-	if parry_spark_vfx != null:
-		parry_spark_vfx.visible = is_parrying or parry_flash_timer > 0.0
-	if block_spark_vfx != null:
-		block_spark_vfx.visible = block_flash_timer > 0.0
-	if hurt_slash_vfx != null:
-		hurt_slash_vfx.visible = hurt_flash_timer > 0.0
-	if perfect_dodge_vfx != null:
-		perfect_dodge_vfx.visible = perfect_dodge_timer > 0.0
-		perfect_dodge_vfx.scale.x = dash_direction
-	if dodge_afterimage_vfx != null:
-		dodge_afterimage_vfx.visible = is_perfect_dodging or perfect_dodge_timer > 0.0
-		dodge_afterimage_vfx.scale.x = dash_direction
-	state_label.text = _state_name()
-	body_visual.visible = show_debug_shapes
-	body_visual.color = _state_color()
+	hit_impact_vfx_timer = max(0.0, hit_impact_vfx_timer - get_physics_process_delta_time())
+	if hit_impact_vfx != null:
+		hit_impact_vfx.visible = hit_impact_vfx_timer > 0.0
 	sprite.flip_h = facing < 0.0
 	_play_state_animation()
 
 func _state_name() -> String:
 	return PlayerState.keys()[state]
 
-func _state_color() -> Color:
-	match state:
-		PlayerState.IDLE:
-			return Color(0.12, 0.42, 0.9, 1)
-		PlayerState.MOVE:
-			return Color(0.1, 0.62, 0.95, 1)
-		PlayerState.ATTACK:
-			return Color(0.95, 0.83, 0.25, 1)
-		PlayerState.PARRY:
-			return Color(0.5, 0.9, 1.0, 1)
-		PlayerState.BLOCK:
-			return Color(0.2, 0.55, 0.9, 1)
-		PlayerState.DASH:
-			return Color(0.8, 0.8, 1.0, 1)
-		PlayerState.HURT, PlayerState.STUNNED:
-			return Color(1.0, 0.25, 0.25, 1)
-		PlayerState.DEAD:
-			return Color(0.1, 0.1, 0.1, 1)
-		_:
-			return Color(0.12, 0.42, 0.9, 1)
-
 func _setup_sprite_frames() -> void:
-	sprite_sheet_layout = _resolve_sheet_layout(PLAYER_SHEET.get_size())
 	var frames := SpriteFrames.new()
-	_add_layout_animation(frames, "idle")
-	_add_layout_animation(frames, "run")
-	_add_layout_animation(frames, "attack_a")
-	_add_layout_animation(frames, "parry")
-	_add_layout_animation(frames, "block")
-	_add_layout_animation(frames, "dash")
-	_add_layout_animation(frames, "jump")
-	_add_layout_animation(frames, "hurt")
-	_add_layout_animation(frames, "death")
+	if _player_strips_available():
+		sprite_sheet_layout = {"cell_size": PLAYER_STRIP_CELL_SIZE, "source": "strips"}
+		_add_strip_animation(frames, "idle", 6.0, true)
+		_add_strip_animation(frames, "run", 12.0, true)
+		_add_strip_animation(frames, "attack_a", 14.0, false)
+		_add_strip_animation(frames, "attack_chop", 14.0, false)
+		_add_strip_animation(frames, "parry", 14.0, false)
+		_add_strip_animation(frames, "block", 8.0, true)
+		_add_strip_animation(frames, "dash", 18.0, false)
+		_add_strip_animation(frames, "jump", 10.0, true)
+		_add_strip_animation(frames, "hurt", 8.0, false)
+		_add_strip_animation(frames, "death", 7.0, false)
+	else:
+		player_sheet = _load_first_available_player_sheet()
+		if player_sheet == null:
+			push_error("No player art found in res://assets/sprites/player")
+			return
+		sprite_sheet_layout = _resolve_sheet_layout(player_sheet.get_size())
+		_add_layout_animation(frames, "idle")
+		_add_layout_animation(frames, "run")
+		_add_layout_animation(frames, "attack_a")
+		_add_layout_animation(frames, "attack_chop", "attack_a")
+		_add_layout_animation(frames, "parry")
+		_add_layout_animation(frames, "block")
+		_add_layout_animation(frames, "dash")
+		_add_layout_animation(frames, "jump")
+		_add_layout_animation(frames, "hurt")
+		_add_layout_animation(frames, "death")
 	sprite.sprite_frames = frames
 	sprite.position = Vector2(0, -float(sprite_sheet_layout["cell_size"]) * 0.5)
 	sprite.play("idle")
+
+func _setup_hit_impact_vfx() -> void:
+	if hit_impact_vfx == null or not ResourceLoader.exists(HIT_IMPACT_SHEET_PATH):
+		return
+	var texture := load(HIT_IMPACT_SHEET_PATH) as Texture2D
+	if texture == null:
+		return
+	var frames := SpriteFrames.new()
+	_add_hit_impact_animation(frames, "hit", texture, 0, 28.0)
+	_add_hit_impact_animation(frames, "chop", texture, 1, 24.0)
+	hit_impact_vfx.sprite_frames = frames
+	hit_impact_vfx.visible = false
+
+func _add_hit_impact_animation(frames: SpriteFrames, animation: StringName, texture: Texture2D, row: int, fps: float) -> void:
+	frames.add_animation(animation)
+	frames.set_animation_speed(animation, fps)
+	frames.set_animation_loop(animation, false)
+	for column in HIT_IMPACT_FRAME_COUNT:
+		var atlas_texture := AtlasTexture.new()
+		atlas_texture.atlas = texture
+		atlas_texture.region = Rect2(column * HIT_IMPACT_CELL_SIZE, row * HIT_IMPACT_CELL_SIZE, HIT_IMPACT_CELL_SIZE, HIT_IMPACT_CELL_SIZE)
+		frames.add_frame(animation, atlas_texture)
+
+func _player_strips_available() -> bool:
+	for path in PLAYER_STRIP_PATHS.values():
+		if not ResourceLoader.exists(path):
+			return false
+	return true
+
+func _load_first_available_player_sheet() -> Texture2D:
+	for path in PLAYER_SHEET_PATHS:
+		if ResourceLoader.exists(path):
+			return load(path) as Texture2D
+	return null
 
 func _resolve_sheet_layout(size: Vector2i) -> Dictionary:
 	if size == Vector2i(576, 864):
@@ -549,8 +649,9 @@ func _resolve_sheet_layout(size: Vector2i) -> Dictionary:
 		"death": {"row": 7, "count": 8, "fps": 8.0, "loop": false, "source": "death"},
 	}
 
-func _add_layout_animation(frames: SpriteFrames, animation: StringName) -> void:
-	var config: Dictionary = sprite_sheet_layout[String(animation)]
+func _add_layout_animation(frames: SpriteFrames, animation: StringName, source_animation: String = "") -> void:
+	var config_key := String(animation) if source_animation.is_empty() else source_animation
+	var config: Dictionary = sprite_sheet_layout[config_key]
 	_add_sheet_animation(
 		frames,
 		animation,
@@ -560,6 +661,19 @@ func _add_layout_animation(frames: SpriteFrames, animation: StringName) -> void:
 		bool(config["loop"])
 	)
 
+func _add_strip_animation(frames: SpriteFrames, animation: StringName, fps: float, loop: bool) -> void:
+	var texture := load(String(PLAYER_STRIP_PATHS[String(animation)])) as Texture2D
+	var cell_size := PLAYER_STRIP_CELL_SIZE
+	var frame_count := int(texture.get_width() / cell_size)
+	frames.add_animation(animation)
+	frames.set_animation_speed(animation, fps)
+	frames.set_animation_loop(animation, loop)
+	for column in frame_count:
+		var atlas_texture := AtlasTexture.new()
+		atlas_texture.atlas = texture
+		atlas_texture.region = Rect2(column * cell_size, 0, cell_size, cell_size)
+		frames.add_frame(animation, atlas_texture)
+
 func _add_sheet_animation(frames: SpriteFrames, animation: StringName, row: int, count: int, fps: float, loop: bool) -> void:
 	var cell_size: int = int(sprite_sheet_layout["cell_size"])
 	frames.add_animation(animation)
@@ -567,7 +681,7 @@ func _add_sheet_animation(frames: SpriteFrames, animation: StringName, row: int,
 	frames.set_animation_loop(animation, loop)
 	for column in count:
 		var texture := AtlasTexture.new()
-		texture.atlas = PLAYER_SHEET
+		texture.atlas = player_sheet
 		texture.region = Rect2(column * cell_size, row * cell_size, cell_size, cell_size)
 		frames.add_frame(animation, texture)
 
@@ -579,7 +693,7 @@ func _play_state_animation() -> void:
 		PlayerState.MOVE:
 			next_animation = "run"
 		PlayerState.ATTACK:
-			next_animation = "attack_a"
+			next_animation = current_attack_animation
 		PlayerState.PARRY:
 			next_animation = "parry"
 		PlayerState.BLOCK:
@@ -588,14 +702,29 @@ func _play_state_animation() -> void:
 			next_animation = "dash"
 		PlayerState.JUMP:
 			next_animation = "jump"
-		PlayerState.HURT, PlayerState.STUNNED:
+		PlayerState.HURT:
 			next_animation = "hurt"
+		PlayerState.STUNNED:
+			_play_stunned_animation()
+			return
 		PlayerState.DEAD:
 			next_animation = "death"
 
 	if current_animation != next_animation:
 		current_animation = next_animation
 		sprite.play(next_animation)
+
+func _play_stunned_animation() -> void:
+	var recovery_started := action_timer <= stunned_time * 0.5
+	var next_animation := "stunned_death_reverse" if recovery_started else "stunned_death_forward"
+	if current_animation == next_animation:
+		return
+	current_animation = next_animation
+	sprite.speed_scale = posture_break_animation_speed
+	if recovery_started:
+		sprite.play_backwards("death")
+	else:
+		sprite.play("death")
 
 func _trigger_parry_feedback() -> void:
 	parry_flash_timer = parry_flash_time
@@ -616,11 +745,22 @@ func _trigger_hurt_feedback() -> void:
 	_shake_camera(13.0, 0.12)
 
 func _trigger_attack_hit_feedback() -> void:
-	hitstop_timer = max(hitstop_timer, attack_hitstop_time)
-	stored_velocity = velocity
+	var is_chop := current_attack_animation == "attack_chop"
+	var shake_amount := chop_hit_shake_amount if current_attack_animation == "attack_chop" else attack_hit_shake_amount
+	var shake_duration := chop_hit_shake_duration if current_attack_animation == "attack_chop" else attack_hit_shake_duration
 	velocity = Vector2.ZERO
-	sprite.speed_scale = 0.0
-	_shake_camera(7.0, 0.075)
+	_trigger_hit_impact_vfx(is_chop)
+	_shake_camera(shake_amount, shake_duration)
+
+func _trigger_hit_impact_vfx(is_chop: bool) -> void:
+	if hit_impact_vfx == null:
+		return
+	hit_impact_vfx_timer = hit_impact_vfx_time
+	hit_impact_vfx.visible = true
+	hit_impact_vfx.position = attack_area.position + Vector2(20.0 * facing, 0.0)
+	hit_impact_vfx.flip_h = facing < 0.0
+	if hit_impact_vfx.sprite_frames != null:
+		hit_impact_vfx.play("chop" if is_chop else "hit")
 
 func _shake_camera(amount: float, duration: float) -> void:
 	var camera := get_tree().get_first_node_in_group("feedback_camera")
@@ -647,7 +787,10 @@ func _enter_dead() -> void:
 	_update_visuals()
 
 func _load_optional_sfx() -> void:
-	_load_optional_stream(ATTACK_SFX_PATH, attack_sfx)
+	attack_hit_streams = _load_optional_streams(ATTACK_HIT_SFX_PATHS)
+	if ResourceLoader.exists(CHOP_HIT_SFX_PATH):
+		chop_hit_stream = load(CHOP_HIT_SFX_PATH)
+	attack_miss_streams = _load_optional_streams(ATTACK_MISS_SFX_PATHS)
 	_load_optional_stream(PARRY_SFX_PATH, parry_sfx)
 	_load_optional_stream(BLOCK_SFX_PATH, block_sfx)
 	_load_optional_stream(HURT_SFX_PATH, hurt_sfx)
@@ -658,6 +801,30 @@ func _load_optional_sfx() -> void:
 func _load_optional_stream(path: String, player: AudioStreamPlayer2D) -> void:
 	if ResourceLoader.exists(path):
 		player.stream = load(path)
+
+func _load_optional_streams(paths: Array) -> Array[AudioStream]:
+	var streams: Array[AudioStream] = []
+	for path in paths:
+		if ResourceLoader.exists(path):
+			streams.append(load(path))
+	return streams
+
+func _play_random_attack_hit_sfx() -> void:
+	if current_attack_animation == "attack_chop" and chop_hit_stream != null:
+		attack_sfx.stream = chop_hit_stream
+		attack_sfx.play()
+		return
+	_play_random_stream(attack_sfx, attack_hit_streams)
+
+func _play_random_attack_miss_sfx() -> void:
+	_play_random_stream(attack_sfx, attack_miss_streams)
+
+func _play_random_stream(player: AudioStreamPlayer2D, streams: Array[AudioStream]) -> void:
+	if streams.is_empty():
+		return
+	var index := randi() % streams.size()
+	player.stream = streams[index]
+	player.play()
 
 func _play_sfx(player: AudioStreamPlayer2D) -> void:
 	if player.stream != null:
@@ -687,15 +854,21 @@ func reset_combat_state() -> void:
 	dash_timer = 0.0
 	dash_direction = 1.0
 	attack_has_hit = false
+	attack_combo_step = 0
+	current_attack_animation = "attack_a"
+	attack_lunge_timer = 0.0
 	parry_flash_timer = 0.0
 	block_flash_timer = 0.0
 	hurt_flash_timer = 0.0
 	perfect_dodge_timer = 0.0
+	hit_impact_vfx_timer = 0.0
 	hitstop_timer = 0.0
 	stored_velocity = Vector2.ZERO
 	velocity = Vector2.ZERO
 	global_position = spawn_position
 	sprite.speed_scale = 1.0
+	if hit_impact_vfx != null:
+		hit_impact_vfx.visible = false
 	_set_state(PlayerState.IDLE)
 	_update_visuals()
 	stats_changed.emit()

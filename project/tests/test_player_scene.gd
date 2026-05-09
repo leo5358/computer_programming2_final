@@ -40,6 +40,40 @@ func _initialize() -> void:
 		push_error("Player should have perfect dodge sfx player")
 		quit(1)
 		return
+	for removed_node in [
+		"Body",
+		"AttackVisual",
+		"BlockVisual",
+		"ParryVisual",
+		"BlockImpactVisual",
+		"HurtImpactVisual",
+		"AttackSlashVfx",
+		"ParrySparkVfx",
+		"BlockSparkVfx",
+		"HurtSlashVfx",
+		"PerfectDodgeVfx",
+		"DodgeAfterimageVfx",
+		"DashVisual",
+		"StateLabel",
+	]:
+		if player.has_node(removed_node):
+			push_error("Player should not keep debug/effect node: %s" % removed_node)
+			quit(1)
+			return
+
+	var sprite := player.get_node("AnimatedSprite2D") as AnimatedSprite2D
+	if sprite.sprite_frames == null:
+		push_error("Player should build sprite frames from the current art assets")
+		quit(1)
+		return
+	if sprite.sprite_frames.get_frame_count("idle") != 8:
+		push_error("Player should use the 8-frame idle strip from assets/sprites/player")
+		quit(1)
+		return
+	if sprite.sprite_frames.get_frame_count("parry") != 8:
+		push_error("Player should use the 8-frame deflect strip for parry")
+		quit(1)
+		return
 
 	var legacy_layout: Dictionary = player._resolve_sheet_layout(Vector2i(768, 512))
 	if legacy_layout["cell_size"] != 64:
@@ -117,9 +151,33 @@ func _initialize() -> void:
 		push_error("Player should enter stunned when posture reaches max")
 		quit(1)
 		return
+	player._update_visuals()
+	if player.current_animation != "stunned_death_forward":
+		push_error("Posture break should start by playing death animation forward as a knockdown")
+		quit(1)
+		return
+	if player.action_timer < 1.19:
+		push_error("Posture break should stun player for about 1.2 seconds")
+		quit(1)
+		return
+	if player.sprite.speed_scale >= 1.0:
+		push_error("Posture break knockdown should slow the death animation to match the longer stun")
+		quit(1)
+		return
 
-	for frame in 45:
-		await physics_frame
+	player._update_action_state(0.61)
+	player._update_visuals()
+	if player.state == player.PlayerState.STUNNED:
+		if player.current_animation != "stunned_death_reverse":
+			push_error("Posture break should reverse death animation for recovery stand-up")
+			quit(1)
+			return
+		if player.sprite.speed_scale >= 1.0:
+			push_error("Posture break stand-up should keep the slowed death animation speed")
+			quit(1)
+			return
+
+	player._update_action_state(0.60)
 	if player.state == player.PlayerState.STUNNED:
 		push_error("Player should recover from stunned after timer")
 		quit(1)

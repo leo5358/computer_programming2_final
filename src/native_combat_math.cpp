@@ -11,6 +11,7 @@ void NativeCombatMath::_bind_methods() {
     ClassDB::bind_method(D_METHOD("add_heartbeat", "current_heartbeat", "amount"), &NativeCombatMath::add_heartbeat);
     ClassDB::bind_method(D_METHOD("block_duration_for_heartbeat", "heartbeat"), &NativeCombatMath::block_duration_for_heartbeat);
     ClassDB::bind_method(D_METHOD("damage_with_adrenaline", "base_damage", "heartbeat"), &NativeCombatMath::damage_with_adrenaline);
+    ClassDB::bind_method(D_METHOD("posture_damage_with_adrenaline", "base_posture_damage", "heartbeat"), &NativeCombatMath::posture_damage_with_adrenaline);
 }
 
 double NativeCombatMath::apply_damage(double current_health, double damage) const {
@@ -31,4 +32,8 @@ double NativeCombatMath::block_duration_for_heartbeat(double heartbeat) const {
 
 double NativeCombatMath::damage_with_adrenaline(double base_damage, double heartbeat) const {
     return combat_damage_with_adrenaline(base_damage, heartbeat);
+}
+
+double NativeCombatMath::posture_damage_with_adrenaline(double base_posture_damage, double heartbeat) const {
+    return combat_posture_damage_with_adrenaline(base_posture_damage, heartbeat);
 }

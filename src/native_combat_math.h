@@ -17,6 +17,7 @@ public:
     double add_heartbeat(double current_heartbeat, double amount) const;
     double block_duration_for_heartbeat(double heartbeat) const;
     double damage_with_adrenaline(double base_damage, double heartbeat) const;
+    double posture_damage_with_adrenaline(double base_posture_damage, double heartbeat) const;
 };
 
 }

@@ -36,3 +36,9 @@ func damage_with_adrenaline(base_damage: float, heartbeat: float) -> float:
 		return native_math.damage_with_adrenaline(base_damage, heartbeat)
 	var tension := inverse_lerp(MIN_HEARTBEAT, MAX_HEARTBEAT, clamp(heartbeat, MIN_HEARTBEAT, MAX_HEARTBEAT))
 	return base_damage * lerp(1.0, 1.5, tension)
+
+func posture_damage_with_adrenaline(base_posture_damage: float, heartbeat: float) -> float:
+	if native_math != null and native_math.has_method("posture_damage_with_adrenaline"):
+		return native_math.posture_damage_with_adrenaline(base_posture_damage, heartbeat)
+	var tension := inverse_lerp(MIN_HEARTBEAT, MAX_HEARTBEAT, clamp(heartbeat, MIN_HEARTBEAT, MAX_HEARTBEAT))
+	return base_posture_damage * lerp(1.0, 1.4, tension)

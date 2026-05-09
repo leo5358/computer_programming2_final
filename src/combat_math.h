@@ -13,6 +13,7 @@ double combat_add_posture(double current_posture, double amount);
 double combat_add_heartbeat(double current_heartbeat, double amount);
 double combat_block_duration_for_heartbeat(double heartbeat);
 double combat_damage_with_adrenaline(double base_damage, double heartbeat);
+double combat_posture_damage_with_adrenaline(double base_posture_damage, double heartbeat);
 
 #ifdef __cplusplus
 }

@@ -42,3 +42,9 @@ double combat_damage_with_adrenaline(double base_damage, double heartbeat) {
     double tension = combat_inverse_lerp(COMBAT_MIN_HEARTBEAT, COMBAT_MAX_HEARTBEAT, clamped_heartbeat);
     return base_damage * combat_lerp(1.0, 1.5, tension);
 }
+
+double combat_posture_damage_with_adrenaline(double base_posture_damage, double heartbeat) {
+    double clamped_heartbeat = combat_clamp(heartbeat, COMBAT_MIN_HEARTBEAT, COMBAT_MAX_HEARTBEAT);
+    double tension = combat_inverse_lerp(COMBAT_MIN_HEARTBEAT, COMBAT_MAX_HEARTBEAT, clamped_heartbeat);
+    return base_posture_damage * combat_lerp(1.0, 1.4, tension);
+}

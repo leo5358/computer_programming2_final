@@ -14,6 +14,8 @@ func _initialize() -> void:
 	_assert_close(math.block_duration_for_heartbeat(65.0), 1.2, "calm heartbeat allows longer block")
 	_assert_close(math.block_duration_for_heartbeat(120.0), 0.35, "high heartbeat shortens block")
 	_assert_close(math.damage_with_adrenaline(20.0, 120.0), 30.0, "high heartbeat increases damage")
+	_assert_close(math.posture_damage_with_adrenaline(20.0, 65.0), 20.0, "calm heartbeat keeps posture damage neutral")
+	_assert_close(math.posture_damage_with_adrenaline(20.0, 120.0), 28.0, "high heartbeat increases posture pressure")
 	quit(0)
 
 func _assert_close(actual: float, expected: float, label: String) -> void:
