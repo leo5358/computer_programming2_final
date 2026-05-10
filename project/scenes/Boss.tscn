@@ -38,12 +38,6 @@ offset_right = 46.0
 offset_bottom = -18.0
 color = Color(1, 0.95, 0.45, 0.78)
 
-[node name="HitSparkVfx" type="Line2D" parent="."]
-visible = false
-points = PackedVector2Array(-42, -70, 34, -36, -8, -88, 46, -60)
-width = 5.0
-default_color = Color(1, 0.88, 0.28, 0.9)
-
 [node name="ParrySparkVfx" type="Line2D" parent="."]
 visible = false
 points = PackedVector2Array(-48, -48, 48, -92, -12, -80, 30, -30)

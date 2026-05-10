@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="1_player_scene"]
 [ext_resource type="PackedScene" path="res://scenes/Enemy.tscn" id="2_enemy_scene"]
@@ -8,11 +8,18 @@
 [ext_resource type="Script" path="res://scripts/combat_runtime.gd" id="6_runtime_script"]
 [ext_resource type="Script" path="res://scripts/camera_shake.gd" id="7_camera_shake"]
 [ext_resource type="PackedScene" path="res://scenes/TrainingDummy.tscn" id="8_training_dummy"]
+[ext_resource type="Script" path="res://scripts/bgm_player.gd" id="9_bgm_script"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(7680, 48)
 
 [node name="Main" type="Node2D"]
+
+[node name="BgmPlayer" type="AudioStreamPlayer" parent="."]
+process_mode = 3
+autoplay = true
+volume_db = -10.0
+script = ExtResource("9_bgm_script")
 
 [node name="CombatRuntime" type="Node" parent="." groups=["combat_runtime"]]
 script = ExtResource("6_runtime_script")
