@@ -54,12 +54,15 @@ libxrandr-dev libxi-dev libgl-dev libasound2-dev libpulse-dev
 
 1.  Clone the repository with submodules (for `godot-cpp`):
     ```bash
-    git clone --recursive <repo_url>
-    cd computer_programming2_final
+    git clone https://github.com/godotengine/godot-cpp.git
+    cd godot-cpp
+    git submodule update --init
+    cd ..
     ```
 2.  Build the GDExtension library using SCons:
     ```bash
-    scons
+    mkdir -p project/bin
+    scons platform=linux target=template_debug arch=x86_64 api_version=4.6
     ```
 3.  Open the project in Godot:
     ```bash
