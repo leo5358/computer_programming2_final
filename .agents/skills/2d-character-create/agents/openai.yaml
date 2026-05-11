@@ -1,7 +1,0 @@
-interface:
-  display_name: "2D Character Create"
-  short_description: "Create JSON-configurable 2D pixel game character spritesheets"
-  default_prompt: >-
-    Create a reusable 2D pixel-art game character asset from a JSON spec, concept, or reference images.
-    Preserve the hatch-pet-style workflow: infer only when necessary, use $imagegen for the base character and grounded animation row strips, keep a canonical base reference, validate consistency, extract frames, compose the configured spritesheet atlas, make QA contact sheets/previews, and package Godot-friendly assets.
-    Do not hardcode Codex pet dimensions. Obey the JSON cell size, animation rows, frame counts, FPS, role, and action list.
