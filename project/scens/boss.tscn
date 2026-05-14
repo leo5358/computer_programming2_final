@@ -629,51 +629,51 @@ animations = [{
 [node name="walk" type="AnimatedSprite2D" parent="." unique_id=1878213863]
 position = Vector2(-308, -25)
 sprite_frames = SubResource("SpriteFrames_lwl85")
-frame_progress = 0.59960955
+frame_progress = 0.8054386
 
 [node name="attack" type="AnimatedSprite2D" parent="." unique_id=166201214]
 position = Vector2(-301, 134)
 sprite_frames = SubResource("SpriteFrames_djskg")
-frame_progress = 0.4258806
+frame_progress = 0.7346096
 
 [node name="attack2" type="AnimatedSprite2D" parent="." unique_id=1465383384]
 position = Vector2(-156, 143)
 sprite_frames = SubResource("SpriteFrames_b04yh")
-frame_progress = 0.5846269
+frame_progress = 0.8417966
 
 [node name="chop" type="AnimatedSprite2D" parent="." unique_id=911814045]
 position = Vector2(-22, 142)
 scale = Vector2(1.0748031, 1.0390625)
 sprite_frames = SubResource("SpriteFrames_eyk5a")
-frame_progress = 0.13996546
+frame_progress = 0.39713505
 
 [node name="thrust" type="AnimatedSprite2D" parent="." unique_id=475032572]
 position = Vector2(140, 146)
 sprite_frames = SubResource("SpriteFrames_oqruh")
-frame_progress = 0.0738259
+frame_progress = 0.33099768
 
 [node name="deflect1" type="AnimatedSprite2D" parent="." unique_id=192451455]
 position = Vector2(290, 140)
 sprite_frames = SubResource("SpriteFrames_wtx2d")
-frame_progress = 0.98457986
+frame_progress = 0.24175109
 
 [node name="deflect2" type="AnimatedSprite2D" parent="." unique_id=1311113646]
 position = Vector2(150, -14)
 sprite_frames = SubResource("SpriteFrames_5tlje")
-frame_progress = 0.76529276
+frame_progress = 0.022465108
 
 [node name="death" type="AnimatedSprite2D" parent="." unique_id=1103665301]
 position = Vector2(-11, -6)
 sprite_frames = SubResource("SpriteFrames_snxs2")
-frame_progress = 0.56421167
+frame_progress = 0.82138145
 
 [node name="jump" type="AnimatedSprite2D" parent="." unique_id=541746296]
 position = Vector2(-157, -16)
 sprite_frames = SubResource("SpriteFrames_ajlch")
-frame_progress = 0.8359566
+frame_progress = 0.093128644
 
 [node name="hurt" type="AnimatedSprite2D" parent="." unique_id=399960659]
 position = Vector2(295.00003, -11)
 scale = Vector2(0.9609375, 0.9375)
 sprite_frames = SubResource("SpriteFrames_6i4wt")
-frame_progress = 0.53729814
+frame_progress = 0.79446733
