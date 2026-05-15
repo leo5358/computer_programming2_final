@@ -74,6 +74,41 @@ func _initialize() -> void:
 		push_error("Player should use the 8-frame deflect strip for parry")
 		quit(1)
 		return
+	var run_first_frame := sprite.sprite_frames.get_frame_texture("run", 0) as AtlasTexture
+	if run_first_frame == null or run_first_frame.region != Rect2(0, 0, 96, 96):
+		push_error("Current player strip art should keep the full 96px frame to avoid clipping")
+		quit(1)
+		return
+	var attack_regions := [
+		Rect2(0, 0, 96, 96),
+		Rect2(96, 0, 96, 96),
+		Rect2(192, 0, 92, 96),
+		Rect2(284, 0, 92, 96),
+		Rect2(376, 0, 111, 96),
+		Rect2(487, 0, 109, 96),
+		Rect2(596, 0, 96, 96),
+		Rect2(692, 0, 96, 96),
+	]
+	if sprite.sprite_frames.get_frame_count("attack_a") != attack_regions.size():
+		push_error("Player attack strip should use all 8 variable-width attack frames")
+		quit(1)
+		return
+	for index in attack_regions.size():
+		var attack_frame := sprite.sprite_frames.get_frame_texture("attack_a", index) as AtlasTexture
+		if attack_frame == null or attack_frame.region != attack_regions[index]:
+			push_error("Player attack frame %d should match the 788x96 variable-width attack strip" % index)
+			quit(1)
+			return
+	var attack_fifth_frame := sprite.sprite_frames.get_frame_texture("attack_a", 4) as AtlasTexture
+	if attack_fifth_frame == null or attack_fifth_frame.region != Rect2(376, 0, 111, 96):
+		push_error("Player attack strip should use the widened fifth frame for the blade")
+		quit(1)
+		return
+	var dash_sixth_frame := sprite.sprite_frames.get_frame_texture("dash", 5) as AtlasTexture
+	if dash_sixth_frame == null or dash_sixth_frame.region != Rect2(480, 0, 96, 96):
+		push_error("Player dash strip should keep full-width frames because the current art reaches the frame edge")
+		quit(1)
+		return
 
 	var legacy_layout: Dictionary = player._resolve_sheet_layout(Vector2i(768, 512))
 	if legacy_layout["cell_size"] != 64:

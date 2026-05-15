@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/boss.gd" id="1_boss_script"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
-size = Vector2(54, 74)
+size = Vector2(54, 96)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_attack"]
 size = Vector2(124, 78)
@@ -19,11 +19,11 @@ offset_bottom = 0.0
 color = Color(0.48, 0.1, 0.64, 1)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-position = Vector2(0, -56)
+position = Vector2(0, -64)
 texture_filter = 1
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, -37)
+position = Vector2(0, -48)
 shape = SubResource("RectangleShape2D_body")
 
 [node name="AttackVisual" type="ColorRect" parent="."]

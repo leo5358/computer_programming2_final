@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://ddv47vgx716ig" path="res://assets/sprites/vfx/hit_impact_sheet.png" id="2_hit_impact"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
-size = Vector2(32, 48)
+size = Vector2(42, 76)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_attack"]
 size = Vector2(52, 34)
@@ -16,7 +16,7 @@ script = ExtResource("1_player_script")
 position = Vector2(0, -32)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, -24)
+position = Vector2(0, -38)
 shape = SubResource("RectangleShape2D_player")
 
 [node name="AttackArea" type="Area2D" parent="."]

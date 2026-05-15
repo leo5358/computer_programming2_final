@@ -39,6 +39,9 @@ func reset_combat() -> void:
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		if enemy.has_method("reset_combat_state"):
 			enemy.reset_combat_state()
+	for boss in get_tree().get_nodes_in_group("boss"):
+		if boss.has_method("reset_combat_state"):
+			boss.reset_combat_state()
 
 func get_combat_update(delta: float = 0.0) -> Dictionary:
 	var update: Dictionary = combat.get_combat_update(delta)

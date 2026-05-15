@@ -24,6 +24,18 @@ const PLAYER_STRIP_PATHS := {
 	"hurt": "res://assets/sprites/player/hurt.png",
 	"death": "res://assets/sprites/player/death.png",
 }
+const PLAYER_STRIP_FRAME_REGIONS := {
+	"attack_a": [
+		[0, 0, 96, 96],
+		[96, 0, 96, 96],
+		[192, 0, 92, 96],
+		[284, 0, 92, 96],
+		[376, 0, 111, 96],
+		[487, 0, 109, 96],
+		[596, 0, 96, 96],
+		[692, 0, 96, 96],
+	],
+}
 const HIT_IMPACT_SHEET_PATH := "res://assets/sprites/vfx/hit_impact_sheet.png"
 const HIT_IMPACT_CELL_SIZE := 128
 const HIT_IMPACT_FRAME_COUNT := 6
@@ -666,15 +678,25 @@ func _add_layout_animation(frames: SpriteFrames, animation: StringName, source_a
 
 func _add_strip_animation(frames: SpriteFrames, animation: StringName, fps: float, loop: bool) -> void:
 	var texture := load(String(PLAYER_STRIP_PATHS[String(animation)])) as Texture2D
+	var custom_regions: Array = PLAYER_STRIP_FRAME_REGIONS.get(String(animation), [])
 	var cell_size := PLAYER_STRIP_CELL_SIZE
 	var frame_count := int(texture.get_width() / cell_size)
 	frames.add_animation(animation)
 	frames.set_animation_speed(animation, fps)
 	frames.set_animation_loop(animation, loop)
+	if not custom_regions.is_empty():
+		for region in custom_regions:
+			var atlas_texture := AtlasTexture.new()
+			atlas_texture.atlas = texture
+			atlas_texture.region = Rect2(float(region[0]), float(region[1]), float(region[2]), float(region[3]))
+			atlas_texture.filter_clip = true
+			frames.add_frame(animation, atlas_texture)
+		return
 	for column in frame_count:
 		var atlas_texture := AtlasTexture.new()
 		atlas_texture.atlas = texture
 		atlas_texture.region = Rect2(column * cell_size, 0, cell_size, cell_size)
+		atlas_texture.filter_clip = true
 		frames.add_frame(animation, atlas_texture)
 
 func _add_sheet_animation(frames: SpriteFrames, animation: StringName, row: int, count: int, fps: float, loop: bool) -> void:

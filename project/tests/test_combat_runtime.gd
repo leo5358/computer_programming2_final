@@ -35,10 +35,15 @@ func _initialize() -> void:
 
 	runtime.force_bpm(200.0)
 	var player = get_root().get_tree().get_first_node_in_group("player")
+	var boss = get_root().get_tree().get_first_node_in_group("boss")
 	if abs(player.heartbeat - 200.0) > 0.001:
 		push_error("Force BPM should affect live player heartbeat")
 		quit(1)
 		return
+	boss.health = 10.0
+	boss.posture = 90.0
+	boss.defeated_flag = true
+	boss.global_position += Vector2(48.0, 0.0)
 
 	runtime.reset_combat()
 	if abs(player.heartbeat - 65.0) > 0.001:
@@ -47,6 +52,14 @@ func _initialize() -> void:
 		return
 	if player.state != player.PlayerState.IDLE:
 		push_error("Reset combat should restore player state")
+		quit(1)
+		return
+	if boss.health != boss.max_health or boss.posture != 0.0 or boss.defeated_flag:
+		push_error("Reset combat should restore boss combat state")
+		quit(1)
+		return
+	if boss.global_position != boss.spawn_position:
+		push_error("Reset combat should restore boss position")
 		quit(1)
 		return
 

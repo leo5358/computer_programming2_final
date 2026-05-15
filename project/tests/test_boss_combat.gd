@@ -1,5 +1,18 @@
 extends SceneTree
 
+const REQUIRED_ANIMATIONS := [
+	"idle",
+	"walk",
+	"attack",
+	"attack2",
+	"thrust",
+	"chop",
+	"deflect1",
+	"deflect2",
+	"hurt",
+	"death",
+]
+
 func _initialize() -> void:
 	var scene: PackedScene = load("res://scenes/Boss.tscn")
 	if scene == null:
@@ -10,61 +23,119 @@ func _initialize() -> void:
 	var boss: Node = scene.instantiate()
 	get_root().add_child(boss)
 	await process_frame
-	if boss.get_node("AnimatedSprite2D").position.y >= -60.0:
-		pass
-	else:
-		push_error("Boss sprite should be lowered so the feet sit on the ground")
+
+	if not boss.is_in_group("boss"):
+		push_error("Boss should register itself in the boss group")
+		quit(1)
+		return
+	if boss.health != 140.0 or boss.posture != 0.0 or boss.defeated_flag:
+		push_error("Boss V0 should start with clean combat stats")
 		quit(1)
 		return
 
-	boss.current_boss_attack = boss.BossAttack.THRUST
-	boss._start_attack_cue()
-	var label: Label = boss.get_node("DebugResponseLabel")
-	if not label.visible or label.text != "DODGE":
-		push_error("Thrust cue should tell the player to dodge")
+	var sprite: AnimatedSprite2D = boss.get_node("AnimatedSprite2D")
+	if sprite.position != Vector2(0.0, -64.0):
+		push_error("Boss sprite origin should use a 128x128 cell with feet at the node origin")
 		quit(1)
 		return
-	var shape := boss.get_node("AttackArea/CollisionShape2D").shape as RectangleShape2D
-	if shape.size.x < 150.0 or shape.size.y > 50.0:
-		push_error("Thrust hitbox should be long and narrow")
-		quit(1)
-		return
-	if boss.attack_cue_time > 0.45:
-		push_error("Boss cue should fit inside the player's immediate parry window")
-		quit(1)
-		return
-	boss._connect_attack_on_hit_frame()
-
-	boss.current_boss_attack = boss.BossAttack.CHOP
-	boss._start_attack_cue()
-	if label.text != "PARRY":
-		push_error("Chop cue should tell the player to parry")
-		quit(1)
-		return
-	if shape.size.y < 90.0:
-		push_error("Chop hitbox should cover a taller arc")
-		quit(1)
-		return
-	var attack_texture: AtlasTexture = boss.sprite.sprite_frames.get_frame_texture("attack1", 0)
-	if attack_texture.region.position.x <= 0.0 or attack_texture.region.size.x >= 128.0:
-		push_error("Boss attack atlas region should be inset to avoid neighboring-frame bleed")
+	if sprite.sprite_frames == null:
+		push_error("Boss should build SpriteFrames from boss sprites")
 		quit(1)
 		return
 
-	boss.current_boss_attack = boss.BossAttack.ATTACK1
-	boss._start_attack_windup()
-	if boss.sprite.speed_scale >= 0.5:
-		push_error("Boss attack windup should slow the animation instead of delaying damage after a finished swing")
+	var expected_counts := {
+		"idle": 8,
+		"walk": 8,
+		"attack": 8,
+		"attack2": 16,
+		"thrust": 8,
+		"chop": 7,
+		"deflect1": 8,
+		"deflect2": 8,
+		"hurt": 8,
+		"death": 8,
+	}
+	var expected_speeds := {
+		"idle": 4.0,
+		"walk": 4.0,
+		"attack": 6.0,
+		"attack2": 5.0,
+		"thrust": 5.0,
+		"chop": 5.0,
+		"deflect1": 5.0,
+		"deflect2": 5.0,
+		"hurt": 5.0,
+		"death": 5.0,
+	}
+	for animation in REQUIRED_ANIMATIONS:
+		if not sprite.sprite_frames.has_animation(animation):
+			push_error("Boss missing animation: %s" % animation)
+			quit(1)
+			return
+		if sprite.sprite_frames.get_frame_count(animation) != int(expected_counts[animation]):
+			push_error("Boss animation frame count should match teammate settings: %s" % animation)
+			quit(1)
+			return
+		if not is_equal_approx(sprite.sprite_frames.get_animation_speed(animation), float(expected_speeds[animation])):
+			push_error("Boss animation speed should match teammate settings: %s" % animation)
+			quit(1)
+			return
+	var walk_texture: AtlasTexture = sprite.sprite_frames.get_frame_texture("walk", 0)
+	if walk_texture.region != Rect2(0.0, 0.0, 125.0, 128.0):
+		push_error("Boss walk atlas regions should match teammate settings")
 		quit(1)
 		return
-	if boss.attack_has_connected:
-		push_error("Boss attack should not connect before the configured hit frame")
+	var attack_texture: AtlasTexture = sprite.sprite_frames.get_frame_texture("attack", 4)
+	if attack_texture.region != Rect2(532.0, 0.0, 133.0, 128.0):
+		push_error("Boss attack atlas regions should match teammate settings")
+		quit(1)
+		return
+	var chop_texture: AtlasTexture = sprite.sprite_frames.get_frame_texture("chop", 5)
+	if chop_texture.region != Rect2(687.0, 0.0, 132.0, 128.0):
+		push_error("Boss chop atlas regions should match teammate settings")
+		quit(1)
+		return
+	var thrust_texture: AtlasTexture = sprite.sprite_frames.get_frame_texture("thrust", 4)
+	if thrust_texture.region != Rect2(0.0, 0.0, 144.0, 128.0):
+		push_error("Boss thrust atlas regions should include teammate thrust copy frames")
 		quit(1)
 		return
 
-	boss.deflect_chance = 1.0
-	if boss.receive_player_attack(10.0, 10.0) != false:
-		push_error("Boss deflect should not count as a confirmed player hit")
+	var before_position: Vector2 = boss.global_position
+	boss.play_boss_animation("walk")
+	var first_walk_offset_x := 0.0
+	boss.facing = 1.0
+	for frame in 8:
+		sprite.frame = frame
+		boss.align_sprite_to_ground()
+		if frame == 0:
+			first_walk_offset_x = sprite.offset.x
+		elif abs(sprite.offset.x - first_walk_offset_x) < 1.0:
+			push_error("Boss walk frames should use horizontal visual anchoring to prevent loop snapping")
+			quit(1)
+			return
+		if boss.global_position != before_position:
+			push_error("Changing Boss animation frames should not move the body")
+			quit(1)
+			return
+	var right_facing_offset_x := sprite.offset.x
+	boss.facing = -1.0
+	boss.align_sprite_to_ground()
+	if not is_equal_approx(sprite.offset.x, -right_facing_offset_x):
+		push_error("Boss walk anchoring should mirror with facing direction")
+		quit(1)
+		return
+
+	boss.play_boss_animation("chop")
+	sprite.frame = 4
+	boss.align_sprite_to_ground()
+	if sprite.offset.y < 20.0:
+		push_error("Boss chop frame with bottom padding should be lowered to keep the feet grounded")
+		quit(1)
+		return
+
+	if boss.can_be_perfect_dodged_by(null):
+		push_error("Boss V0 should not expose perfect dodge windows before attacks are rebuilt")
 		quit(1)
 		return
 
