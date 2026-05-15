@@ -350,8 +350,9 @@ func _apply_attack_hit() -> void:
 			hit_confirmed = true
 			continue
 		if body.has_method("receive_player_attack"):
-			body.receive_player_attack(damage, posture_damage)
-			hit_confirmed = true
+			var result: Variant = body.receive_player_attack(damage, posture_damage)
+			if result != false:
+				hit_confirmed = true
 	if hit_confirmed:
 		_play_random_attack_hit_sfx()
 		_trigger_attack_hit_feedback()
@@ -418,13 +419,15 @@ func _find_perfect_dodge_target() -> Node2D:
 			return boss
 	return null
 
-func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node = null) -> void:
+func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node = null, attack_type: int = CombatServerScript.AttackType.NORMAL) -> void:
 	if health <= 0.0:
 		return
-	if is_invulnerable:
+	if is_invulnerable and attack_type != CombatServerScript.AttackType.SWEEP:
 		return
 
-	if is_parrying or is_blocking:
+	var can_guard := attack_type != CombatServerScript.AttackType.THRUST
+	var can_block := attack_type != CombatServerScript.AttackType.SWEEP
+	if (is_parrying and can_guard) or (is_blocking and can_guard and can_block):
 		var perfect := is_parrying
 		posture = math.add_posture(posture, 5.0 if perfect else posture_damage * 2.0)
 		heartbeat = math.add_heartbeat(heartbeat, 4.0 if perfect else 5.0)

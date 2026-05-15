@@ -1,7 +1,6 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="1_player_scene"]
-[ext_resource type="PackedScene" path="res://scenes/Enemy.tscn" id="2_enemy_scene"]
 [ext_resource type="PackedScene" path="res://scenes/Boss.tscn" id="3_boss_scene"]
 [ext_resource type="Script" path="res://scripts/combat_ui.gd" id="4_ui_script"]
 [ext_resource type="Script" path="res://scripts/debug_overlay.gd" id="5_debug_script"]
@@ -29,9 +28,6 @@ position = Vector2(160, 360)
 
 [node name="TrainingDummy" parent="." instance=ExtResource("8_training_dummy")]
 position = Vector2(96, 408)
-
-[node name="TrainingEnemy" parent="." instance=ExtResource("2_enemy_scene")]
-position = Vector2(440, 360)
 
 [node name="Boss" parent="." instance=ExtResource("3_boss_scene")]
 position = Vector2(820, 360)

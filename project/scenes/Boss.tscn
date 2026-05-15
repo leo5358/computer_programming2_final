@@ -18,6 +18,10 @@ offset_right = 27.0
 offset_bottom = 0.0
 color = Color(0.48, 0.1, 0.64, 1)
 
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -56)
+texture_filter = 1
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -37)
 shape = SubResource("RectangleShape2D_body")
@@ -60,6 +64,16 @@ offset_right = 54.0
 offset_bottom = -104.0
 theme_override_font_sizes/font_size = 20
 text = "EXECUTE"
+horizontal_alignment = 1
+
+[node name="DebugResponseLabel" type="Label" parent="."]
+visible = false
+offset_left = -78.0
+offset_top = -164.0
+offset_right = 78.0
+offset_bottom = -136.0
+theme_override_font_sizes/font_size = 18
+text = "PARRY"
 horizontal_alignment = 1
 
 [node name="AttackArea" type="Area2D" parent="."]
