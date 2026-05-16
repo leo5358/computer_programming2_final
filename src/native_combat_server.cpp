@@ -13,6 +13,7 @@ void NativeCombatServer::_bind_methods() {
     ClassDB::bind_method(D_METHOD("update_combat", "delta"), &NativeCombatServer::update_combat);
     ClassDB::bind_method(D_METHOD("is_parry_successful"), &NativeCombatServer::is_parry_successful);
     ClassDB::bind_method(D_METHOD("force_bpm", "value"), &NativeCombatServer::force_bpm);
+    ClassDB::bind_method(D_METHOD("set_player_state", "state"), &NativeCombatServer::set_player_state);
     ClassDB::bind_method(D_METHOD("get_combat_update", "delta"), &NativeCombatServer::get_combat_update);
     ClassDB::bind_method(D_METHOD("get_player_hp"), &NativeCombatServer::get_player_hp);
     ClassDB::bind_method(D_METHOD("get_player_posture"), &NativeCombatServer::get_player_posture);
@@ -48,6 +49,10 @@ bool NativeCombatServer::is_parry_successful() const {
 
 void NativeCombatServer::force_bpm(double value) {
     combat_mgr_force_bpm((float)value);
+}
+
+void NativeCombatServer::set_player_state(int state) {
+    combat_mgr_set_player_state(state);
 }
 
 Dictionary NativeCombatServer::get_combat_update(double delta) {

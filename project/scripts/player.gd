@@ -424,8 +424,31 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 	if is_invulnerable:
 		return
 
-	if is_parrying or is_blocking:
-		var perfect := is_parrying
+	var attack_type = CombatServerScript.AttackType.NORMAL
+	if attacker != null and "current_attack_type" in attacker:
+		attack_type = attacker.current_attack_type
+	
+	print("[DEBUG] Player receiving attack of type: ", attack_type, " (State: ", state, ")")
+
+	var parried := false
+	var blocked := false
+
+	var c_parry_success := false
+	if combat_runtime != null and combat_runtime.combat != null:
+		c_parry_success = combat_runtime.combat.is_parry_successful()
+
+	if is_parrying:
+		# Thrust can be parried, but Sweep cannot. 
+		# Use C module's timing logic if available.
+		if attack_type != CombatServerScript.AttackType.SWEEP:
+			parried = c_parry_success if combat_runtime != null else true
+	elif is_blocking:
+		# Only Normal can be blocked
+		if attack_type == CombatServerScript.AttackType.NORMAL:
+			blocked = true
+
+	if parried or blocked:
+		var perfect := parried
 		posture = math.add_posture(posture, 5.0 if perfect else posture_damage * 2.0)
 		heartbeat = math.add_heartbeat(heartbeat, 4.0 if perfect else 5.0)
 		if attacker != null and attacker.has_method("receive_block_feedback"):
@@ -437,6 +460,10 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 			_play_sfx(block_sfx)
 			_trigger_block_feedback()
 	else:
+		# Special case for Sweep: if jumping, ignore damage
+		if attack_type == CombatServerScript.AttackType.SWEEP and state == PlayerState.JUMP:
+			return
+
 		health = math.apply_damage(health, damage)
 		posture = math.add_posture(posture, posture_damage * 1.35)
 		heartbeat = math.add_heartbeat(heartbeat, 20.0)
@@ -465,6 +492,8 @@ func _set_state(next_state: int) -> void:
 		return
 	previous_state = state
 	state = next_state
+	if combat_runtime != null and combat_runtime.has_method("set_player_state"):
+		combat_runtime.set_player_state(state)
 
 func _enter_stunned() -> void:
 	_set_state(PlayerState.STUNNED)

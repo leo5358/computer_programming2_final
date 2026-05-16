@@ -7,12 +7,19 @@ var amplitude := 0.0
 var shake_time := 0.0
 var base_offset := Vector2.ZERO
 var sample_index := 0
+var is_suppressed := false
 
 func _ready() -> void:
 	add_to_group("feedback_camera")
 	base_offset = offset
 
 func _process(delta: float) -> void:
+	if is_suppressed:
+		amplitude = 0.0
+		shake_time = 0.0
+		offset = base_offset
+		return
+
 	shake_time = max(0.0, shake_time - delta)
 	amplitude = move_toward(amplitude, 0.0, decay * delta)
 	if amplitude <= 0.01:

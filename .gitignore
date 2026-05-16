@@ -34,3 +34,7 @@ compile_commands.json
 .DS_Store
 .agents/
 docs/
+
+
+# Spec
+spec.md

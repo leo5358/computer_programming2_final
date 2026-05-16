@@ -27,32 +27,57 @@ static float clamp_float(float value, float minimum, float maximum) {
 }
 
 static void evaluate_parry(void) {
-    if (!input_buffer.valid || !current_attack.valid || current_attack.processed) {
+    if (!current_attack.valid || current_attack.processed) {
         return;
     }
-    if (input_buffer.input_type != INPUT_PARRY) {
+
+    // Handle Sweep Attacks (Jump to avoid)
+    if (current_attack.type == ATTACK_SWEEP) {
+        if (player.current_state == STATE_JUMP) {
+            last_parry_successful = true;
+            current_attack.processed = true;
+            // Evasion logic could add boss posture damage or just succeed
+            boss.posture = clamp_float(boss.posture + 5.0f, 0.0f, 100.0f);
+        }
+        return;
+    }
+
+    if (!input_buffer.valid) {
         return;
     }
 
     int64_t delta = (int64_t)input_buffer.timestamp_ms - (int64_t)current_attack.active_frame_ms;
     last_parry_delta_ms = (int)delta;
+    bool in_window = (delta >= -PARRY_EARLY_MS && delta <= PARRY_LATE_MS);
 
-    if (delta >= -PARRY_EARLY_MS && delta <= PARRY_LATE_MS) {
-        last_parry_successful = true;
-        player.current_state = STATE_PARRY;
-        player.is_parrying = true;
-        boss.posture = clamp_float(boss.posture + 20.0f, 0.0f, 100.0f);
-        player.posture = clamp_float(player.posture + 5.0f, 0.0f, 100.0f);
-    } else {
-        last_parry_successful = false;
-        player.current_state = STATE_BLOCK;
-        player.is_blocking = true;
-        player.posture = clamp_float(player.posture + 30.0f, 0.0f, 100.0f);
-        boss.posture = clamp_float(boss.posture + 5.0f, 0.0f, 100.0f);
-        player.bpm = clamp_float(player.bpm + 5.0f, BPM_MIN, BPM_MAX);
+    if (input_buffer.input_type == INPUT_PARRY) {
+        if (in_window) {
+            last_parry_successful = true;
+            player.current_state = STATE_PARRY;
+            player.is_parrying = true;
+            boss.posture = clamp_float(boss.posture + 20.0f, 0.0f, 100.0f);
+            player.posture = clamp_float(player.posture + 5.0f, 0.0f, 100.0f);
+            current_attack.processed = true;
+        } else if (current_attack.type == ATTACK_NORMAL) {
+            // Normal attack can still be blocked if timed poorly but button held
+            last_parry_successful = false;
+            player.current_state = STATE_BLOCK;
+            player.is_blocking = true;
+            player.posture = clamp_float(player.posture + 30.0f, 0.0f, 100.0f);
+            boss.posture = clamp_float(boss.posture + 5.0f, 0.0f, 100.0f);
+            player.bpm = clamp_float(player.bpm + 5.0f, BPM_MIN, BPM_MAX);
+            current_attack.processed = true;
+        }
+        // If it's a Thrust and timed poorly, it's not processed here, 
+        // leading to a hit in the caller (GDScript)
+    } else if (input_buffer.input_type == INPUT_DASH && current_attack.type == ATTACK_GRAB) {
+        if (in_window) {
+            last_parry_successful = true;
+            player.current_state = STATE_DASH;
+            boss.posture = clamp_float(boss.posture + 10.0f, 0.0f, 100.0f);
+            current_attack.processed = true;
+        }
     }
-
-    current_attack.processed = true;
 }
 
 void combat_mgr_reset_combat(void) {
@@ -139,6 +164,12 @@ bool combat_mgr_is_parry_successful(void) {
 
 void combat_mgr_force_bpm(float value) {
     player.bpm = clamp_float(value, BPM_MIN, BPM_MAX);
+}
+
+void combat_mgr_set_player_state(int state) {
+    player.current_state = (EntityState)state;
+    // When state changes, we might want to re-evaluate parry (e.g. jumping during a sweep)
+    evaluate_parry();
 }
 
 float combat_mgr_get_player_hp(void) { return player.hp; }

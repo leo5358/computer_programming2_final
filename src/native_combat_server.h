@@ -19,7 +19,10 @@ public:
     void update_combat(double delta);
     bool is_parry_successful() const;
     void force_bpm(double value);
+    void set_player_state(int state);
+
     Dictionary get_combat_update(double delta);
+
 
     double get_player_hp() const;
     double get_player_posture() const;

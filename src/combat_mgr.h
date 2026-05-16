@@ -14,6 +14,8 @@ typedef enum {
     STATE_ATTACK,
     STATE_PARRY,
     STATE_BLOCK,
+    STATE_DASH,
+    STATE_JUMP,
     STATE_HURT,
     STATE_STUNNED,
     STATE_EXECUTION
@@ -79,6 +81,7 @@ void combat_mgr_notify_attack_active(int attack_id, int attack_type, uint64_t ti
 void combat_mgr_update_combat(float delta);
 bool combat_mgr_is_parry_successful(void);
 void combat_mgr_force_bpm(float value);
+void combat_mgr_set_player_state(int state);
 
 float combat_mgr_get_player_hp(void);
 float combat_mgr_get_player_posture(void);

@@ -46,6 +46,7 @@ var active_timer := 0.0
 var is_winding_up := false
 var is_attack_cue_active := false
 var is_attack_active := false
+var current_attack_type: int = CombatServerScript.AttackType.NORMAL
 var combat_runtime: Node
 var current_attack_id := -1
 var posture_broken := false
@@ -73,6 +74,7 @@ var hit_freeze_timer := 0.0
 @onready var posture_break_spark: ColorRect = get_node_or_null("PostureBreakSpark") as ColorRect
 @onready var countdown_label: Label = get_node_or_null("CountdownLabel") as Label
 @onready var execute_label: Label = get_node_or_null("ExecuteLabel") as Label
+@onready var perilous_label: Label = _create_perilous_label()
 @onready var enemy_hurt_sfx: AudioStreamPlayer2D = get_node_or_null("EnemyHurtSfx") as AudioStreamPlayer2D
 @onready var posture_break_sfx: AudioStreamPlayer2D = get_node_or_null("PostureBreakSfx") as AudioStreamPlayer2D
 @onready var execution_sfx: AudioStreamPlayer2D = get_node_or_null("ExecutionSfx") as AudioStreamPlayer2D
@@ -150,11 +152,49 @@ func _update_attack_state(delta: float) -> void:
 			attack_visual.visible = false
 			attack_cooldown = attack_interval
 
+func _create_perilous_label() -> Label:
+	var label := Label.new()
+	label.text = "危"
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.visible = false
+	label.modulate = Color.RED
+	label.z_index = 10
+	label.set("theme_override_colors/font_outline_color", Color.BLACK)
+	label.set("theme_override_constants/outline_size", 10)
+	label.set("theme_override_font_sizes/font_size", 42)
+	add_child(label)
+	label.position = Vector2(-25, -130)
+	return label
+
 func _start_attack_windup() -> void:
 	is_winding_up = true
 	is_attack_cue_active = false
 	velocity.x = 0.0
 	windup_timer = attack_windup
+	
+	current_attack_type = CombatServerScript.AttackType.NORMAL
+	if is_in_group("boss") and randf() < 0.4:
+		current_attack_type = CombatServerScript.AttackType.THRUST if randf() < 0.5 else CombatServerScript.AttackType.SWEEP
+	
+	# Adjust attack visual shape based on type
+	if attack_visual != null:
+		match current_attack_type:
+			CombatServerScript.AttackType.THRUST:
+				attack_visual.size = Vector2(attack_range * 1.5, 20)
+				attack_visual.position.y = -10
+			CombatServerScript.AttackType.SWEEP:
+				attack_visual.size = Vector2(attack_range * 1.2, 40)
+				attack_visual.position.y = 10
+			_:
+				attack_visual.size = Vector2(attack_range, 80)
+				attack_visual.position.y = -40
+	
+	if perilous_label != null:
+		perilous_label.visible = current_attack_type != CombatServerScript.AttackType.NORMAL
+		if perilous_label.visible:
+			_set_camera_shake_suppressed(true)
+	
 	if countdown_label != null:
 		countdown_label.visible = true
 	_update_countdown_label()
@@ -175,6 +215,9 @@ func _release_attack() -> void:
 	is_attack_cue_active = false
 	if countdown_label != null:
 		countdown_label.visible = false
+	if perilous_label != null:
+		perilous_label.visible = false
+	_set_camera_shake_suppressed(false)
 	is_attack_active = true
 	active_timer = attack_active_time
 	velocity.x = 0.0
@@ -310,7 +353,7 @@ func _notify_attack_active() -> int:
 	if combat_runtime == null:
 		combat_runtime = get_tree().get_first_node_in_group("combat_runtime")
 	if combat_runtime != null and combat_runtime.has_method("notify_attack_active"):
-		return combat_runtime.notify_attack_active(CombatServerScript.AttackType.NORMAL, Time.get_ticks_msec())
+		return combat_runtime.notify_attack_active(current_attack_type, Time.get_ticks_msec())
 	return -1
 
 func reset_combat_state() -> void:
@@ -342,6 +385,8 @@ func reset_combat_state() -> void:
 		countdown_label.visible = false
 	if execute_label != null:
 		execute_label.visible = false
+	if perilous_label != null:
+		perilous_label.visible = false
 	set_collision_layer_value(1, true)
 	_update_visuals()
 	stats_changed.emit()
@@ -444,6 +489,9 @@ func _interrupt_attack_from_parry() -> void:
 	attack_visual.visible = false
 	if countdown_label != null:
 		countdown_label.visible = false
+	if perilous_label != null:
+		perilous_label.visible = false
+	_set_camera_shake_suppressed(false)
 
 func _trigger_posture_break_feedback() -> void:
 	posture_break_spark_timer = 0.28
@@ -487,6 +535,11 @@ func _shake_camera(amount: float, duration: float) -> void:
 	var camera := get_tree().get_first_node_in_group("feedback_camera")
 	if camera != null and camera.has_method("shake"):
 		camera.shake(amount, duration)
+
+func _set_camera_shake_suppressed(suppressed: bool) -> void:
+	var camera := get_tree().get_first_node_in_group("feedback_camera")
+	if camera != null:
+		camera.is_suppressed = suppressed
 
 func _load_optional_sfx() -> void:
 	_load_optional_stream(ENEMY_HURT_SFX_PATH, enemy_hurt_sfx)
