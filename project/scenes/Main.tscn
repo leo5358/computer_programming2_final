@@ -8,7 +8,8 @@
 [ext_resource type="Script" uid="uid://ccoja4vvhuf2t" path="res://scripts/combat_runtime.gd" id="6_runtime_script"]
 [ext_resource type="Script" uid="uid://cc62c0x1bg26r" path="res://scripts/camera_shake.gd" id="7_camera_shake"]
 [ext_resource type="PackedScene" path="res://scenes/TrainingDummy.tscn" id="8_training_dummy"]
-[ext_resource type="Script" uid="uid://css2d3vvbeqei" path="res://scripts/bgm_player.gd" id="9_bgm_script"]
+[ext_resource type="Script" path="res://scripts/bgm_player.gd" id="9_bgm_script"]
+[ext_resource type="Script" path="res://scripts/hurtbox_debug_overlay.gd" id="10_hurtbox_debug"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(7680, 48)
@@ -23,6 +24,9 @@ script = ExtResource("9_bgm_script")
 
 [node name="CombatRuntime" type="Node" parent="." unique_id=1278574041 groups=["combat_runtime"]]
 script = ExtResource("6_runtime_script")
+
+[node name="HurtboxDebugOverlay" type="Node" parent="."]
+script = ExtResource("10_hurtbox_debug")
 
 [node name="Player" parent="." unique_id=381382957 instance=ExtResource("1_player_scene")]
 position = Vector2(160, 360)

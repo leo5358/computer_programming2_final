@@ -418,17 +418,18 @@ func _find_perfect_dodge_target() -> Node2D:
 			return boss
 	return null
 
-func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node = null) -> void:
+func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node = null, attack_type: int = CombatServerScript.AttackType.NORMAL) -> void:
 	if health <= 0.0:
 		return
-	if is_invulnerable:
+	if is_invulnerable and attack_type != CombatServerScript.AttackType.SWEEP:
 		return
 
-	var attack_type = CombatServerScript.AttackType.NORMAL
+	# Determine attack type, fallback to attacker's current_attack_type if provided
+	var effective_attack_type = attack_type
 	if attacker != null and "current_attack_type" in attacker:
-		attack_type = attacker.current_attack_type
+		effective_attack_type = attacker.current_attack_type
 	
-	print("[DEBUG] Player receiving attack of type: ", attack_type, " (State: ", state, ")")
+	print("[DEBUG] Player receiving attack of type: ", effective_attack_type, " (State: ", state, ")")
 
 	var parried := false
 	var blocked := false
@@ -437,14 +438,17 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 	if combat_runtime != null and combat_runtime.combat != null:
 		c_parry_success = combat_runtime.combat.is_parry_successful()
 
+	# Logic for what can be parried/blocked
+	var can_guard := effective_attack_type != CombatServerScript.AttackType.THRUST
+	var can_block := effective_attack_type != CombatServerScript.AttackType.SWEEP
+
 	if is_parrying:
-		# Thrust can be parried, but Sweep cannot. 
-		# Use C module's timing logic if available.
-		if attack_type != CombatServerScript.AttackType.SWEEP:
+		# Thrust can be parried, but Sweep cannot.
+		if effective_attack_type != CombatServerScript.AttackType.SWEEP:
 			parried = c_parry_success if combat_runtime != null else true
 	elif is_blocking:
-		# Only Normal can be blocked
-		if attack_type == CombatServerScript.AttackType.NORMAL:
+		# Only Normal can be blocked (can_guard and can_block must be true)
+		if can_guard and can_block:
 			blocked = true
 
 	if parried or blocked:
