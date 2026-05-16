@@ -439,8 +439,8 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 		c_parry_success = combat_runtime.combat.is_parry_successful()
 
 	# Logic for what can be parried/blocked
-	var can_guard := effective_attack_type != CombatServerScript.AttackType.THRUST
-	var can_block := effective_attack_type != CombatServerScript.AttackType.SWEEP
+	var can_guard : bool = effective_attack_type != CombatServerScript.AttackType.THRUST
+	var can_block : bool = effective_attack_type != CombatServerScript.AttackType.SWEEP
 
 	if is_parrying:
 		# Thrust can be parried, but Sweep cannot.

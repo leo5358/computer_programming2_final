@@ -119,15 +119,11 @@ const ANIMATION_FRAME_SPECS := {
 		[JUMP_PATH, 766, 0, 126, 128],
 		[JUMP_PATH, 892, 0, 126, 128],
 	],
-	"hurt": [
+	"stunned": [
 		[HURT_PATH, 0, 0, 128, 128],
 		[HURT_PATH, 128, 0, 128, 128],
 		[HURT_PATH, 256, 0, 128, 128],
 		[HURT_PATH, 384, 0, 128, 128],
-		[HURT_PATH, 512, 0, 128, 128],
-		[HURT_PATH, 640, 0, 128, 128],
-		[HURT_PATH, 768, 0, 128, 128],
-		[HURT_PATH, 896, 0, 128, 128],
 	],
 }
 const FRAME_BOTTOM_GAPS := {
@@ -139,6 +135,7 @@ const FRAME_BOTTOM_GAPS := {
 	"deflect1": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
 	"deflect2": [7.0, 7.0, 7.0, 7.0, 7.0, 7.0, 7.0, 7.0],
 	"hurt": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+	"stunned": [0.0, 0.0, 0.0, 0.0],
 	"death": [10.0, 10.0, 10.0, 10.0, 9.0, 5.0, 5.0, 5.0],
 	"jump": [6.0, 6.0, 7.0, 19.0, 26.0, 21.0, 7.0, 6.0],
 }
@@ -171,11 +168,13 @@ var attack_step_timer := 0.0
 var feedback_timer := 0.0
 var deflect_toggle := false
 
+@onready var attack_area: Area2D = get_node_or_null("AttackArea") as Area2D
 @onready var attack_collision_shape: CollisionShape2D = get_node_or_null("AttackArea/CollisionShape2D") as CollisionShape2D
 
 func _ready() -> void:
 	# Initialize enemy base
 	super()
+	add_to_group("boss")
 	
 	# Override boss stats
 	display_name = "Boss"
@@ -202,7 +201,7 @@ func _ready() -> void:
 	if body_visual != null:
 		body_visual.visible = false
 		
-	_update_attack_hitbox()
+	_update_attack_hitbox_custom()
 	play_boss_animation("idle")
 
 func _physics_process(delta: float) -> void:
@@ -219,8 +218,12 @@ func _physics_process(delta: float) -> void:
 		_update_attack_state_custom(delta)
 	elif posture_broken:
 		velocity.x = 0.0
+		# Stunned state: no recovery, just wait for execution
 		play_boss_animation("stunned")
 	else:
+		# Recover posture over time if not broken
+		posture = max(0.0, posture - posture_recovery * delta)
+		
 		attack_cooldown = max(0.0, attack_cooldown - delta)
 		if _should_start_attack():
 			_start_normal_attack()
@@ -266,11 +269,6 @@ func _setup_sprite_frames() -> void:
 	var frames := SpriteFrames.new()
 	for animation in ANIMATION_FRAME_SPECS.keys():
 		_add_strip_animation_custom(frames, String(animation))
-	# Add inherited stun/death if missing
-	if not frames.has_animation("stunned"):
-		_add_sheet_animation(frames, "stunned", 4, 6, 8.0, true)
-	if not frames.has_animation("death_inherited"):
-		_add_sheet_animation(frames, "death_inherited", 5, 8, 8.0, false)
 	sprite.sprite_frames = frames
 
 func _add_strip_animation_custom(frames: SpriteFrames, animation: String) -> void:
@@ -318,12 +316,19 @@ func _horizontal_anchor_for_frame(animation: String, frame: int) -> float:
 
 # --- Combat Overrides ---
 func receive_player_attack(damage: float, posture_damage: float) -> void:
-	if defeated_flag:
+	if defeated_flag or posture_broken:
 		return
 	
 	_spawn_damage_number(damage)
 	health = max(0.0, health - damage)
-	posture = clamp(posture + posture_damage, 0.0, max_posture)
+	
+	# Posture damage scale: posture recovers slower as health drops (optional but common)
+	var health_ratio := health / max_health
+	var effective_posture_damage := posture_damage
+	if health_ratio < 0.5:
+		effective_posture_damage *= 1.2
+	
+	posture = math.add_posture(posture, effective_posture_damage)
 	
 	if posture >= max_posture:
 		_break_posture()
@@ -337,10 +342,13 @@ func receive_player_attack(damage: float, posture_damage: float) -> void:
 	stats_changed.emit()
 
 func receive_block_feedback(perfect: bool) -> void:
-	if defeated_flag:
+	if defeated_flag or posture_broken:
 		return
 	
-	posture = clamp(posture + (normal_attack_parry_posture_damage if perfect else normal_attack_block_posture_damage), 0.0, max_posture)
+	# If Player parries Boss, Boss takes large posture damage
+	# If Player blocks Boss, Boss takes small posture damage
+	var p_damage := normal_attack_parry_posture_damage if perfect else normal_attack_block_posture_damage
+	posture = math.add_posture(posture, p_damage)
 	
 	if posture >= max_posture:
 		_break_posture()
@@ -385,44 +393,44 @@ func _update_attack_state_custom(delta: float) -> void:
 	attack_timer -= delta
 	_update_attack_visual_custom(true, is_attack_active)
 	
-	if is_attack_winding_up and sprite != null and sprite.frame >= attack_hit_frame:
-		_connect_normal_attack_custom()
+	# Logic to transition from Windup to Active
+	var transition_to_active := false
+	if is_attack_winding_up:
+		if (sprite != null and sprite.frame >= attack_hit_frame) or attack_timer <= 0.0:
+			transition_to_active = true
 	
-	if is_attack_winding_up and attack_timer <= 0.0:
-		_connect_normal_attack_custom()
-		
-	if is_attack_winding_up and attack_has_connected:
+	if transition_to_active:
 		is_attack_winding_up = false
 		is_attack_active = true
 		attack_timer = attack_active_time
-	elif is_attack_active and attack_timer <= 0.0:
-		is_attack_active = false
-		is_attack_recovering = true
-		attack_timer = attack_recovery_time
+		# NOTIFY HERE: The exact moment the parry window should start
+		current_attack_id = _notify_attack_active()
+		if perilous_label != null:
+			perilous_label.visible = false
+		_set_camera_shake_suppressed(false)
+		
+	if is_attack_active:
+		_check_for_hit_connection()
+		if attack_timer <= 0.0:
+			is_attack_active = false
+			is_attack_recovering = true
+			attack_timer = attack_recovery_time
 	elif is_attack_recovering and attack_timer <= 0.0:
 		is_attack_recovering = false
 		attack_cooldown = attack_interval
 		_update_attack_visual_custom(false, false)
 		play_boss_animation("walk")
 
-func _connect_normal_attack_custom() -> void:
+func _check_for_hit_connection() -> void:
 	if attack_has_connected:
 		return
-	attack_has_connected = true
-	
-	# Notify C module
-	current_attack_id = _notify_attack_active()
-	
-	if perilous_label != null:
-		perilous_label.visible = false
-	_set_camera_shake_suppressed(false)
-	
 	if attack_area == null:
 		return
 	for body in attack_area.get_overlapping_bodies():
 		if body == self:
 			continue
 		if body.has_method("receive_enemy_attack"):
+			attack_has_connected = true
 			body.receive_enemy_attack(attack_damage, attack_posture_damage, self)
 			return
 

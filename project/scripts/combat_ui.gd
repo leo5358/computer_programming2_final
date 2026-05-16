@@ -26,6 +26,7 @@ func _process(_delta: float) -> void:
 		enemy_bar.modulate.a = 0.4 if enemy.defeated_flag else 1.0
 
 	if boss != null:
+		boss_bar.max_value = boss.max_posture
 		boss_bar.value = boss.posture
 		boss_bar.modulate.a = 0.4 if boss.defeated_flag else 1.0
 		if boss.defeated_flag:
