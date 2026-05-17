@@ -160,6 +160,11 @@ const WALK_ANCHOR_STRENGTH := 0.45
 @export var leash_range := 420.0
 @export var deflect_probability := 0.8
 
+# --- Attack Chain parameters ---
+@export var max_attack_chain := 3
+@export var chain_attack_interval := 0.45 # Interval between attacks in a chain
+var current_chain_count := 0
+
 # --- State flags ---
 var is_attack_winding_up := false
 var is_attack_recovering := false
@@ -168,6 +173,8 @@ var attack_timer := 0.0
 var attack_step_timer := 0.0
 var feedback_timer := 0.0
 var deflect_toggle := false
+
+@export var is_aggroed := false
 
 @onready var attack_area: Area2D = get_node_or_null("AttackArea") as Area2D
 @onready var attack_collision_shape: CollisionShape2D = get_node_or_null("AttackArea/CollisionShape2D") as CollisionShape2D
@@ -183,7 +190,7 @@ func _ready() -> void:
 	max_posture = 100.0
 	attack_damage = 18.0
 	attack_posture_damage = 28.0
-	attack_interval = 1.38
+	attack_interval = 1.0 # Reduced from 1.38 for more aggression
 	posture_recovery = 4.0
 	attack_range = 142.0
 	chase_speed = 86.0
@@ -391,10 +398,17 @@ func _start_normal_attack() -> void:
 	attack_timer = attack_windup_time
 	attack_step_timer = attack_step_time
 	velocity.x = 0.0
+	current_chain_count += 1
 	
-	# Perilous attack selection
+	# Perilous attack selection - logic for chain variety
 	current_attack_type = CombatServerScript.AttackType.NORMAL
-	if randf() < 0.4:
+	
+	# In a chain, the final hit has a higher chance to be a Perilous attack
+	var perilous_chance := 0.25
+	if current_chain_count >= max_attack_chain:
+		perilous_chance = 0.6
+		
+	if randf() < perilous_chance:
 		current_attack_type = CombatServerScript.AttackType.THRUST if randf() < 0.5 else CombatServerScript.AttackType.SWEEP
 	
 	if perilous_label != null:
@@ -403,7 +417,14 @@ func _start_normal_attack() -> void:
 			_set_camera_shake_suppressed(true)
 	
 	_update_attack_visual_custom(true, false)
-	play_boss_animation("thrust" if current_attack_type == CombatServerScript.AttackType.THRUST else "attack")
+	# Rhythmic animation choice
+	var anim := "attack"
+	if current_attack_type == CombatServerScript.AttackType.THRUST:
+		anim = "thrust"
+	elif current_attack_type == CombatServerScript.AttackType.NORMAL and current_chain_count % 2 == 0:
+		anim = "chop"
+		
+	play_boss_animation(anim)
 	if sprite != null:
 		sprite.flip_h = facing < 0.0
 
@@ -440,9 +461,22 @@ func _update_attack_state_custom(delta: float) -> void:
 			attack_timer = attack_recovery_time
 	elif is_attack_recovering and attack_timer <= 0.0:
 		is_attack_recovering = false
-		attack_cooldown = attack_interval
 		_update_attack_visual_custom(false, false)
-		play_boss_animation("walk")
+		
+		# Decide whether to continue the chain
+		var player := get_tree().get_first_node_in_group("player") as Node2D
+		var distance := 999.0
+		if player != null:
+			distance = abs(player.global_position.x - global_position.x)
+		
+		if current_chain_count < max_attack_chain and distance <= attack_start_distance:
+			# Continue chain: short cooldown
+			attack_cooldown = chain_attack_interval
+		else:
+			# End chain: full cooldown
+			attack_cooldown = attack_interval
+			current_chain_count = 0
+			play_boss_animation("walk")
 
 func _check_for_hit_connection() -> void:
 	if attack_has_connected:
@@ -504,6 +538,7 @@ func _interrupt_attack() -> void:
 	attack_timer = 0.0
 	attack_step_timer = 0.0
 	attack_cooldown = attack_interval
+	current_chain_count = 0
 	_update_attack_visual_custom(false, false)
 	if perilous_label != null:
 		perilous_label.visible = false
@@ -538,7 +573,7 @@ func _should_chase_player() -> bool:
 	if player == null:
 		return false
 	var distance: float = abs(player.global_position.x - global_position.x)
-	return distance <= detection_range and distance > attack_start_distance
+	return (is_aggroed or distance <= detection_range) and distance > attack_start_distance
 
 func _should_hold_player() -> bool:
 	var player := get_tree().get_first_node_in_group("player") as Node2D
