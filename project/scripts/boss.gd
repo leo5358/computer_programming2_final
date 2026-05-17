@@ -6,7 +6,7 @@ const ATTACK_PATH := "res://assets/sprites/boss/attack.png"
 const CHOP_PATH := "res://assets/sprites/boss/chop.png"
 const THRUST_PATH := "res://assets/sprites/boss/thrust.png"
 const THRUST_COPY_PATH := "res://assets/sprites/boss/thrust copy.png"
-const DEFLECT1_PATH := "res://assets/sprites/boss/defelct1.png"
+const DEFLECT1_PATH := "res://assets/sprites/boss/deflect1.png"
 const DEFLECT2_PATH := "res://assets/sprites/boss/deflect2.png"
 const HURT_PATH := "res://assets/sprites/boss/hurt.png"
 const DEATH_PATH := "res://assets/sprites/boss/death.png"
@@ -158,6 +158,7 @@ const WALK_ANCHOR_STRENGTH := 0.45
 @export var normal_attack_block_posture_damage := 14.0
 @export var deflect_feedback_time := 0.28
 @export var leash_range := 420.0
+@export var deflect_probability := 0.8
 
 # --- State flags ---
 var is_attack_winding_up := false
@@ -319,6 +320,12 @@ func receive_player_attack(damage: float, posture_damage: float) -> void:
 	if defeated_flag or posture_broken:
 		return
 	
+	# Chance to deflect instead of taking damage
+	# Boss won't deflect if it's currently winding up an attack (to allow counter-hits)
+	if not is_attack_winding_up and randf() < deflect_probability:
+		_trigger_deflect_response(posture_damage)
+		return
+	
 	_spawn_damage_number(damage)
 	health = max(0.0, health - damage)
 	
@@ -339,6 +346,22 @@ func receive_player_attack(damage: float, posture_damage: float) -> void:
 	else:
 		_trigger_hit_feedback()
 		play_boss_animation("hurt")
+	stats_changed.emit()
+
+func _trigger_deflect_response(incoming_posture_damage: float) -> void:
+	# Deflecting reduces posture damage taken
+	var reduced_posture_damage := incoming_posture_damage * 0.5
+	posture = math.add_posture(posture, reduced_posture_damage)
+	
+	deflect_toggle = not deflect_toggle
+	play_boss_animation("deflect1" if deflect_toggle else "deflect2")
+	feedback_timer = deflect_feedback_time
+	
+	# Trigger visual/audio feedback for a successful deflect
+	_trigger_parry_feedback(true)
+	
+	if posture >= max_posture:
+		_break_posture()
 	stats_changed.emit()
 
 func receive_block_feedback(perfect: bool) -> void:

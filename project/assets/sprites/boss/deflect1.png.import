@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cw402a67l3xcx"
-path="res://.godot/imported/defelct1.png-6b0364fc1bcd888356c940751afb1374.ctex"
+path="res://.godot/imported/deflect1.png-ea6bb4fc1389ad519d840d19021eec82.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/boss/defelct1.png"
-dest_files=["res://.godot/imported/defelct1.png-6b0364fc1bcd888356c940751afb1374.ctex"]
+source_file="res://assets/sprites/boss/deflect1.png"
+dest_files=["res://.godot/imported/deflect1.png-ea6bb4fc1389ad519d840d19021eec82.ctex"]
 
 [params]
 
