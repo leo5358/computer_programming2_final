@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dtioby52bbqs2"
-path="res://.godot/imported/death.png-3d9d62e7ba8659aca2d251ac79ae0dfe.ctex"
+uid="uid://bmg8vml4ud3sd"
+path="res://.godot/imported/crouch.png-32a037b6a89da51eda1856911cc068e9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/player/death.png"
-dest_files=["res://.godot/imported/death.png-3d9d62e7ba8659aca2d251ac79ae0dfe.ctex"]
+source_file="res://assets/sprites/player/crouch.png"
+dest_files=["res://.godot/imported/crouch.png-32a037b6a89da51eda1856911cc068e9.ctex"]
 
 [params]
 

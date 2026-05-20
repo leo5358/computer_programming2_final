@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://2vd3o6rcipak"
-path="res://.godot/imported/thrust copy.png-1818e6e74133f88710119335ea220659.ctex"
+uid="uid://dcowoh8rib0df"
+path="res://.godot/imported/dash.png-f18e1c3f2ec3d2fa2e4c0de09a29771a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/player/thrust copy.png"
-dest_files=["res://.godot/imported/thrust copy.png-1818e6e74133f88710119335ea220659.ctex"]
+source_file="res://assets/sprites/player/dash.png"
+dest_files=["res://.godot/imported/dash.png-f18e1c3f2ec3d2fa2e4c0de09a29771a.ctex"]
 
 [params]
 

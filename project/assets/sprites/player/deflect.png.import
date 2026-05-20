@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dxxbep8r15c66"
-path="res://.godot/imported/walk.png-97e68433d9a9d44b674b0acef9f7ba6f.ctex"
+uid="uid://r1pyejnd20nk"
+path="res://.godot/imported/deflect.png-eebdebb477fdf0bf9abf76390755a9a7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/player/walk.png"
-dest_files=["res://.godot/imported/walk.png-97e68433d9a9d44b674b0acef9f7ba6f.ctex"]
+source_file="res://assets/sprites/player/deflect.png"
+dest_files=["res://.godot/imported/deflect.png-eebdebb477fdf0bf9abf76390755a9a7.ctex"]
 
 [params]
 

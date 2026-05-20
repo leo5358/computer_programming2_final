@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://r1pyejnd20nk"
-path="res://.godot/imported/deflect.png-4c570d530a85053c9ff452271e8f4a4c.ctex"
+uid="uid://bt4ih436d0atk"
+path="res://.godot/imported/attack.png-297458346acc0dc550be95872f2d685c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/player/deflect.png"
-dest_files=["res://.godot/imported/deflect.png-4c570d530a85053c9ff452271e8f4a4c.ctex"]
+source_file="res://assets/sprites/player/attack.png"
+dest_files=["res://.godot/imported/attack.png-297458346acc0dc550be95872f2d685c.ctex"]
 
 [params]
 

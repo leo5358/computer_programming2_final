@@ -5,8 +5,8 @@
 [ext_resource type="Texture2D" uid="uid://cd6eipahs5eo1" path="res://assets/sprites/boss/jump.png" id="3_xbqj1"]
 [ext_resource type="Texture2D" uid="uid://baslwgtni7mp2" path="res://assets/sprites/boss/chop.png" id="4_odxan"]
 [ext_resource type="Texture2D" uid="uid://ctms2uqmn74rp" path="res://assets/sprites/boss/thrust.png" id="5_b8tfq"]
+[ext_resource type="Texture2D" uid="uid://cw402a67l3xcx" path="res://assets/sprites/boss/defelct1.png" id="6_lwl85"]
 [ext_resource type="Texture2D" uid="uid://bvjtpq04bw5i2" path="res://assets/sprites/boss/thrust copy.png" id="6_q5ekh"]
-[ext_resource type="Texture2D" path="res://assets/sprites/boss/deflect.png" id="7_lwl85"]
 [ext_resource type="Texture2D" uid="uid://c16jahn1h2f00" path="res://assets/sprites/boss/death.png" id="8_lwl85"]
 [ext_resource type="Texture2D" uid="uid://bhqtenguriay8" path="res://assets/sprites/boss/deflect2.png" id="8_sve4t"]
 [ext_resource type="Texture2D" uid="uid://drup4nrwmys12" path="res://assets/sprites/boss/hurt.png" id="10_sve4t"]
@@ -309,36 +309,36 @@ animations = [{
 }]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_yqqev"]
-atlas = ExtResource("7_lwl85")
+atlas = ExtResource("6_lwl85")
 region = Rect2(0, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ais2l"]
-atlas = ExtResource("7_lwl85")
+atlas = ExtResource("6_lwl85")
 region = Rect2(128, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_mb5gw"]
-atlas = ExtResource("7_lwl85")
+atlas = ExtResource("6_lwl85")
 region = Rect2(256, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_qajkg"]
-atlas = ExtResource("7_lwl85")
+atlas = ExtResource("6_lwl85")
 region = Rect2(384, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_yxwn0"]
-atlas = ExtResource("7_lwl85")
+atlas = ExtResource("6_lwl85")
 region = Rect2(512, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_v1uhk"]
-atlas = ExtResource("7_lwl85")
-region = Rect2(650, 0, 128, 128)
+atlas = ExtResource("6_lwl85")
+region = Rect2(640, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_jq76o"]
-atlas = ExtResource("7_lwl85")
-region = Rect2(778, 0, 128, 128)
+atlas = ExtResource("6_lwl85")
+region = Rect2(774, 0, 129, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_qhc15"]
-atlas = ExtResource("7_lwl85")
-region = Rect2(893, 0, 127, 128)
+atlas = ExtResource("6_lwl85")
+region = Rect2(896, 0, 128, 128)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_wtx2d"]
 animations = [{
@@ -655,7 +655,7 @@ frame_progress = 0.33099768
 [node name="deflect1" type="AnimatedSprite2D" parent="." unique_id=192451455]
 position = Vector2(290, 140)
 sprite_frames = SubResource("SpriteFrames_wtx2d")
-frame_progress = 0.24175109
+frame_progress = 0.2972845
 
 [node name="deflect2" type="AnimatedSprite2D" parent="." unique_id=1311113646]
 position = Vector2(150, -14)
