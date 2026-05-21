@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://kas70kcct2yd" path="res://assets/sprites/warrior/thrust2.png" id="7_v2in7"]
 [ext_resource type="Texture2D" uid="uid://cb3t47p6pix85" path="res://assets/sprites/warrior/attack.png" id="8_cnyv4"]
 [ext_resource type="Texture2D" uid="uid://dqc125g3ko4bj" path="res://assets/sprites/warrior/attack1.png" id="9_fgv6e"]
+[ext_resource type="Texture2D" uid="uid://dv45rpb6bytj3" path="res://assets/sprites/warrior/deflect.png" id="10_cnyv4"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pek2s"]
 atlas = ExtResource("1_fhav4")
@@ -390,34 +391,96 @@ animations = [{
 "speed": 5.0
 }]
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_sq2ja"]
+atlas = ExtResource("10_cnyv4")
+region = Rect2(9, 0, 94, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6cajs"]
+atlas = ExtResource("10_cnyv4")
+region = Rect2(102, 0, 92, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sydll"]
+atlas = ExtResource("10_cnyv4")
+region = Rect2(289, 0, 92, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oyfuq"]
+atlas = ExtResource("10_cnyv4")
+region = Rect2(376, 0, 92, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_doi7c"]
+atlas = ExtResource("10_cnyv4")
+region = Rect2(470, 0, 94, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r2583"]
+atlas = ExtResource("10_cnyv4")
+region = Rect2(564, 0, 94, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0bxix"]
+atlas = ExtResource("10_cnyv4")
+region = Rect2(658, 0, 94, 96)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_gai4l"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sq2ja")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6cajs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sydll")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oyfuq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_doi7c")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r2583")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0bxix")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
 [node name="warrior" type="CharacterBody2D" unique_id=876807408]
 
 [node name="walk" type="AnimatedSprite2D" parent="." unique_id=1495349780]
 position = Vector2(-230, -59)
 sprite_frames = SubResource("SpriteFrames_cnyv4")
-frame_progress = 0.9579893
+frame_progress = 0.102170154
 
 [node name="idle" type="AnimatedSprite2D" parent="." unique_id=1123891463]
 position = Vector2(-109, -60)
 sprite_frames = SubResource("SpriteFrames_pek2s")
-frame_progress = 0.58735067
+frame_progress = 0.7315318
 
 [node name="hurt" type="AnimatedSprite2D" parent="." unique_id=1472641212]
 position = Vector2(-1, -54)
 sprite_frames = SubResource("SpriteFrames_jrihe")
-frame_progress = 0.24274626
+frame_progress = 0.38693205
 
 [node name="death" type="AnimatedSprite2D" parent="." unique_id=133975366]
 position = Vector2(130, -53)
 sprite_frames = SubResource("SpriteFrames_uf0no")
-frame_progress = 0.6080185
+frame_progress = 0.7522035
 
 [node name="thrust" type="AnimatedSprite2D" parent="." unique_id=1206297294]
 position = Vector2(257, -51)
 sprite_frames = SubResource("SpriteFrames_nahyb")
-frame_progress = 0.9053727
+frame_progress = 0.049557038
 
 [node name="attack" type="AnimatedSprite2D" parent="." unique_id=1215814694]
 position = Vector2(379, -52)
 sprite_frames = SubResource("SpriteFrames_sq2ja")
-frame_progress = 0.9469087
+frame_progress = 0.09109156
+
+[node name="deflect" type="AnimatedSprite2D" parent="." unique_id=1768105868]
+position = Vector2(-334, -62)
+sprite_frames = SubResource("SpriteFrames_gai4l")
+frame_progress = 0.50512403
