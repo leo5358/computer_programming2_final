@@ -1,22 +1,21 @@
 extends SceneTree
 
 func _initialize() -> void:
-	var scene: PackedScene = load("res://scenes/Main.tscn")
-	if scene == null:
-		push_error("Main scene should load")
+	var boss_scene: PackedScene = load("res://scenes/Boss.tscn")
+	var player_scene: PackedScene = load("res://scenes/Player.tscn")
+	if boss_scene == null or player_scene == null:
+		push_error("Boss and Player scenes should load")
 		quit(1)
 		return
 
-	var main: Node = scene.instantiate()
+	var main := Node2D.new()
+	main.name = "BossAttackTimingTest"
 	get_root().add_child(main)
+	var boss = boss_scene.instantiate()
+	var player = player_scene.instantiate()
+	main.add_child(boss)
+	main.add_child(player)
 	await process_frame
-
-	var boss = main.get_node_or_null("Boss")
-	var player = main.get_node_or_null("Player")
-	if boss == null or player == null:
-		push_error("Main scene should contain boss and player")
-		quit(1)
-		return
 
 	if boss.get("attack_frame_durations") == null:
 		push_error("Boss attack should expose custom frame durations")
@@ -36,26 +35,26 @@ func _initialize() -> void:
 	boss._start_normal_attack("attack")
 	await physics_frame
 
-	if not is_equal_approx(boss.attack_animation_total_time, 0.84):
-		push_error("Boss attack profile custom frame durations should total 840ms")
+	if not is_equal_approx(boss.attack_animation_total_time, 1.11):
+		push_error("Boss attack profile custom frame durations should total 1110ms")
 		quit(1)
 		return
 
 	var expected_frames := {
-		0.099: 0,
-		0.100: 1,
-		0.239: 1,
-		0.241: 2,
-		0.459: 2,
-		0.461: 3,
-		0.504: 3,
-		0.506: 4,
-		0.539: 4,
-		0.541: 5,
-		0.609: 5,
-		0.611: 6,
-		0.709: 6,
-		0.711: 7,
+		0.119: 0,
+		0.120: 1,
+		0.269: 1,
+		0.271: 2,
+		0.569: 2,
+		0.571: 3,
+		0.649: 3,
+		0.651: 4,
+		0.709: 4,
+		0.711: 5,
+		0.809: 5,
+		0.811: 6,
+		0.949: 6,
+		0.951: 7,
 	}
 	for elapsed in expected_frames.keys():
 		boss.attack_elapsed = float(elapsed)
@@ -66,14 +65,14 @@ func _initialize() -> void:
 			return
 
 	if not boss.is_attack_parry_window_open():
-		boss.attack_elapsed = 0.360
+		boss.attack_elapsed = 0.620
 		if not boss.is_attack_parry_window_open():
-			push_error("Boss attack parry window should open at 360ms")
+			push_error("Boss attack parry window should open at the easy-mode gold cue timing")
 			quit(1)
 			return
-	boss.attack_elapsed = 0.541
+	boss.attack_elapsed = 0.881
 	if boss.is_attack_parry_window_open():
-		push_error("Boss attack parry window should close after the 540ms active hit window")
+		push_error("Boss attack parry window should close after the active hit window")
 		quit(1)
 		return
 
@@ -87,12 +86,12 @@ func _initialize() -> void:
 	boss.attack_cooldown = 99.0
 	boss._start_normal_attack("attack")
 	await physics_frame
-	boss.attack_elapsed = 0.375
+	boss.attack_elapsed = 0.619
 	player._start_parry()
 	player.parry_elapsed = 0.08
 	var player_health_before_parry: float = player.health
 	var boss_posture_before_parry: float = boss.posture
-	boss._update_attack_state(0.085)
+	boss._update_attack_state(0.161)
 	if player.health != player_health_before_parry:
 		push_error("Perfect parry should not damage player health")
 		quit(1)
@@ -113,6 +112,10 @@ func _initialize() -> void:
 		push_error("Perfect parry should shorten the player's remaining recovery")
 		quit(1)
 		return
+	if boss.feedback_timer < 0.44:
+		push_error("Perfect parry should leave the Boss in a readable parried recovery")
+		quit(1)
+		return
 
 	boss.reset_combat_state()
 	player.reset_combat_state()
@@ -124,7 +127,7 @@ func _initialize() -> void:
 	boss.attack_cooldown = 99.0
 	boss._start_normal_attack("attack")
 	await physics_frame
-	boss.attack_elapsed = 0.459
+	boss.attack_elapsed = 0.779
 	player._start_parry()
 	player.parry_elapsed = 0.34
 	var boss_posture_before_early_parry: float = boss.posture
@@ -146,7 +149,7 @@ func _initialize() -> void:
 	await physics_frame
 	var player_health_before_hit: float = player.health
 	var player_posture_before_hit: float = player.posture
-	boss.attack_elapsed = 0.459
+	boss.attack_elapsed = 0.779
 	boss._update_attack_state(0.002)
 	if player.health >= player_health_before_hit:
 		push_error("Raw Boss hit should damage player health")
@@ -170,12 +173,12 @@ func _initialize() -> void:
 		return
 	boss.hitstop_timer = 0.0
 	player.hitstop_timer = 0.0
-	boss._update_attack_state(0.19)
+	boss._update_attack_state(0.22)
 	if boss.current_animation != "attack" or boss.sprite.frame < 6:
 		push_error("Raw Boss hit should continue through the remaining attack frames")
 		quit(1)
 		return
-	boss._update_attack_state(0.30)
+	boss._update_attack_state(0.34)
 	if not boss.is_attack_recovering:
 		push_error("Boss should enter recovery only after the attack animation finishes")
 		quit(1)

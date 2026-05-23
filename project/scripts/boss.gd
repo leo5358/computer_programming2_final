@@ -34,10 +34,10 @@ const ANIMATION_SPEEDS := {
 }
 const ATTACK_PROFILES := {
 	"attack": {
-		"durations": [0.10, 0.14, 0.22, 0.045, 0.035, 0.07, 0.10, 0.13],
-		"cue_start": 0.36,
-		"hit_start": 0.46,
-		"hit_end": 0.54,
+		"durations": [0.12, 0.15, 0.30, 0.08, 0.06, 0.10, 0.14, 0.16],
+		"cue_start": 0.62,
+		"hit_start": 0.78,
+		"hit_end": 0.88,
 		"damage": 18.0,
 		"posture_damage": 28.0,
 		"attack_type": CombatServerScript.AttackType.NORMAL,
@@ -217,21 +217,29 @@ const WALK_ANCHOR_STRENGTH := 0.45
 @export var leash_range := 420.0
 @export var detection_range := 280.0
 @export var attack_range := 142.0
-@export var attack_start_distance := 84.0
+@export var attack_start_distance := 112.0
 @export var attack_hold_distance := 78.0
-@export var attack_step_distance := 18.0
+@export var close_spacing_distance := 58.0
+@export var spacing_retreat_speed := 72.0
+@export var gap_close_thrust_min_distance := 130.0
+@export var gap_close_thrust_max_distance := 190.0
+@export var attack_step_distance := 36.0
 @export var attack_step_time := 0.16
 @export var attack_damage := 18.0
 @export var attack_posture_damage := 28.0
 @export var attack_cooldown_duration := 1.38
+@export var combo_link_delay := 0.22
+@export var combo_max_count := 2
+@export var perfect_parry_cooldown := 1.05
+@export var guard_pressure_chop_threshold := 2
 @export var attack_windup_time := 0.92
 @export var attack_active_time := 0.22
 @export var attack_recovery_time := 0.58
 @export var attack_hit_frame := 4
-@export var attack_frame_durations: Array[float] = [0.14, 0.18, 0.38, 0.045, 0.035, 0.08, 0.12, 0.18]
-@export var attack_parry_window_start := 0.58
-@export var attack_hit_time := 0.70
-@export var attack_hit_window_end := 0.78
+@export var attack_frame_durations: Array[float] = [0.12, 0.15, 0.30, 0.08, 0.06, 0.10, 0.14, 0.16]
+@export var attack_parry_window_start := 0.62
+@export var attack_hit_time := 0.78
+@export var attack_hit_window_end := 0.88
 @export var perfect_parry_input_leeway := 0.16
 @export var raw_hitstop_time := 0.07
 @export var parry_clash_hitstop_time := 0.105
@@ -243,6 +251,11 @@ const WALK_ANCHOR_STRENGTH := 0.45
 @export var normal_attack_parry_posture_damage := 36.0
 @export var normal_attack_block_posture_damage := 14.0
 @export var deflect_feedback_time := 0.28
+@export var perfect_deflect_feedback_time := 0.50
+@export_range(0.0, 1.0, 0.05) var guard_chance := 0.8
+@export var guard_posture_damage := 6.0
+@export var guard_lockout_duration := 0.32
+@export var minimum_health_from_player_attack := 1.0
 
 var health := max_health
 var posture := 0.0
@@ -262,6 +275,9 @@ var attack_timer := 0.0
 var attack_elapsed := 0.0
 var attack_animation_total_time := 1.16
 var attack_profile_cursor := 0
+var attack_chain_count := 0
+var pending_combo_followup := false
+var guard_pressure_count := 0
 var current_attack_animation := "attack"
 var current_attack_type: int = CombatServerScript.AttackType.NORMAL
 var attack_step_timer := 0.0
@@ -272,6 +288,7 @@ var hit_recoil_timer := 0.0
 var hit_flash_timer := 0.0
 var feedback_timer := 0.0
 var deflect_toggle := false
+var guard_lockout_timer := 0.0
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var body_visual: ColorRect = get_node_or_null("Body") as ColorRect
@@ -309,6 +326,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if feedback_timer > 0.0:
 		feedback_timer = max(0.0, feedback_timer - delta)
+	guard_lockout_timer = max(0.0, guard_lockout_timer - delta)
 	_update_hit_feedback(delta)
 	if hitstop_timer > 0.0:
 		hitstop_timer = max(0.0, hitstop_timer - delta)
@@ -329,6 +347,8 @@ func _physics_process(delta: float) -> void:
 		attack_cooldown = max(0.0, attack_cooldown - delta)
 		if _should_start_attack():
 			_start_normal_attack()
+		elif _should_start_gap_close_thrust():
+			_start_normal_attack("thrust")
 		elif _should_chase_player():
 			_update_chase()
 		elif _should_hold_player():
@@ -353,6 +373,17 @@ func play_boss_animation(animation: String) -> void:
 		sprite.play(animation)
 	align_sprite_to_ground()
 
+func _force_play_boss_animation(animation: String) -> void:
+	if sprite == null or sprite.sprite_frames == null:
+		return
+	if not sprite.sprite_frames.has_animation(animation):
+		return
+	current_animation = animation
+	sprite.speed_scale = 1.0
+	sprite.play(animation)
+	sprite.frame = 0
+	align_sprite_to_ground()
+
 func align_sprite_to_ground() -> void:
 	if sprite == null:
 		return
@@ -361,19 +392,48 @@ func align_sprite_to_ground() -> void:
 		_bottom_gap_for_frame(current_animation, sprite.frame)
 	)
 
-func receive_player_attack(damage: float, posture_damage: float) -> bool:
+func receive_player_attack(damage: float, posture_damage: float) -> Variant:
 	if defeated_flag:
 		return false
+	if _should_guard_player_attack():
+		_guard_player_attack()
+		return {"guarded": true}
 	_spawn_damage_number(damage)
-	health = max(0.0, health - damage)
+	health = max(minimum_health_from_player_attack, health - damage)
 	posture = clamp(posture + max(posture_damage, posture_damage_taken), 0.0, max_posture)
-	if health <= 0.0:
-		_defeat()
-	else:
-		play_boss_animation("hurt")
-		_trigger_hit_feedback()
+	_force_play_boss_animation("hurt")
+	_trigger_hit_feedback()
 	stats_changed.emit()
 	return true
+
+func _should_guard_player_attack() -> bool:
+	if guard_chance <= 0.0:
+		return false
+	if guard_lockout_timer > 0.0:
+		return false
+	if defeated_flag:
+		return false
+	if feedback_timer > 0.0:
+		return false
+	if is_attack_active:
+		return false
+	return randf() <= guard_chance
+
+func _guard_player_attack() -> void:
+	posture = clamp(posture + guard_posture_damage, 0.0, max_posture)
+	_interrupt_attack()
+	deflect_toggle = not deflect_toggle
+	_force_play_boss_animation("deflect1" if deflect_toggle else "deflect2")
+	feedback_timer = deflect_feedback_time
+	guard_lockout_timer = guard_lockout_duration
+	hit_spark_timer = hit_spark_time
+	hit_recoil_timer = min(hit_recoil_time, 0.10)
+	hit_flash_timer = 0.08
+	velocity.x = -facing * hit_recoil_force * 0.45
+	if hit_spark != null:
+		hit_spark.position.x = 18.0 * facing
+		hit_spark.visible = true
+	stats_changed.emit()
 
 func receive_block_feedback(_perfect: bool) -> void:
 	if defeated_flag:
@@ -381,9 +441,14 @@ func receive_block_feedback(_perfect: bool) -> void:
 	var perfect := _perfect
 	posture = clamp(posture + (normal_attack_parry_posture_damage if perfect else normal_attack_block_posture_damage), 0.0, max_posture)
 	_interrupt_attack()
+	if perfect:
+		guard_pressure_count = 0
+		attack_cooldown = perfect_parry_cooldown
+	else:
+		guard_pressure_count += 1
 	deflect_toggle = not deflect_toggle
 	play_boss_animation("deflect1" if deflect_toggle else "deflect2")
-	feedback_timer = deflect_feedback_time
+	feedback_timer = perfect_deflect_feedback_time if perfect else deflect_feedback_time
 	if perfect:
 		_begin_local_hitstop(parry_clash_hitstop_time)
 	stats_changed.emit()
@@ -416,6 +481,10 @@ func reset_combat_state() -> void:
 	attack_has_connected = false
 	attack_timer = 0.0
 	attack_elapsed = 0.0
+	attack_profile_cursor = 0
+	attack_chain_count = 0
+	pending_combo_followup = false
+	guard_pressure_count = 0
 	current_attack_animation = "attack"
 	current_attack_type = CombatServerScript.AttackType.NORMAL
 	_apply_attack_profile("attack")
@@ -426,6 +495,7 @@ func reset_combat_state() -> void:
 	hit_recoil_timer = 0.0
 	hit_flash_timer = 0.0
 	feedback_timer = 0.0
+	guard_lockout_timer = 0.0
 	global_position = spawn_position
 	if execute_label != null:
 		execute_label.visible = false
@@ -463,6 +533,9 @@ func is_current_attack_perilous() -> bool:
 	return bool(profile.get("perilous", false))
 
 func _choose_attack_profile() -> String:
+	if guard_pressure_count >= guard_pressure_chop_threshold:
+		guard_pressure_count = 0
+		return "chop"
 	var profile_name := String(ATTACK_PROFILE_SEQUENCE[attack_profile_cursor % ATTACK_PROFILE_SEQUENCE.size()])
 	attack_profile_cursor += 1
 	return profile_name
@@ -568,10 +641,15 @@ func _update_engaged_hold() -> void:
 		return
 	var offset_x: float = player.global_position.x - global_position.x
 	is_chasing = false
-	velocity.x = 0.0
 	if absf(offset_x) > 8.0:
 		facing = sign(offset_x)
-	play_boss_animation("idle")
+	var distance := absf(offset_x)
+	if distance < close_spacing_distance:
+		velocity.x = -facing * spacing_retreat_speed
+		play_boss_animation("walk")
+	else:
+		velocity.x = 0.0
+		play_boss_animation("idle")
 	if sprite != null:
 		sprite.flip_h = facing < 0.0
 
@@ -604,10 +682,29 @@ func _should_start_attack() -> bool:
 		return false
 	if absf(offset.x) > 8.0:
 		facing = sign(offset.x)
-	return abs(offset.x) <= attack_start_distance
+	var distance := absf(offset.x)
+	return distance >= close_spacing_distance and distance <= attack_start_distance
 
-func _start_normal_attack(profile_name: String = "") -> void:
+func _should_start_gap_close_thrust() -> bool:
+	if attack_cooldown > 0.0:
+		return false
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player == null:
+		return false
+	var offset: Vector2 = player.global_position - global_position
+	if abs(offset.y) > 56.0:
+		return false
+	if abs(offset.x) > detection_range:
+		return false
+	if absf(offset.x) > 8.0:
+		facing = sign(offset.x)
+	var distance := absf(offset.x)
+	return distance >= gap_close_thrust_min_distance and distance <= gap_close_thrust_max_distance
+
+func _start_normal_attack(profile_name: String = "", combo_followup: bool = false) -> void:
 	_apply_attack_profile(_choose_attack_profile() if profile_name.is_empty() else profile_name)
+	attack_chain_count = attack_chain_count + 1 if combo_followup else 1
+	pending_combo_followup = false
 	is_attack_winding_up = true
 	is_attack_active = false
 	is_attack_recovering = false
@@ -638,7 +735,7 @@ func _update_attack_state(delta: float) -> void:
 		_sync_attack_animation_frame()
 		is_attack_active = attack_elapsed >= attack_hit_time and attack_elapsed <= attack_hit_window_end
 		_update_attack_visual(true, is_attack_active)
-		if attack_elapsed >= attack_hit_time:
+		if is_attack_active:
 			_connect_normal_attack()
 			if feedback_timer > 0.0:
 				return
@@ -646,7 +743,8 @@ func _update_attack_state(delta: float) -> void:
 			is_attack_winding_up = false
 			is_attack_active = false
 			is_attack_recovering = true
-			attack_timer = attack_recovery_time
+			pending_combo_followup = _should_queue_combo_followup()
+			attack_timer = combo_link_delay if pending_combo_followup else attack_recovery_time
 	elif is_attack_active and attack_timer <= 0.0:
 		is_attack_active = false
 		is_attack_recovering = true
@@ -654,10 +752,33 @@ func _update_attack_state(delta: float) -> void:
 	elif is_attack_recovering:
 		attack_timer -= delta
 		if attack_timer <= 0.0:
+			if pending_combo_followup:
+				_start_normal_attack("attack", true)
+				return
 			is_attack_recovering = false
+			attack_chain_count = 0
 			attack_cooldown = attack_cooldown_duration
 			_update_attack_visual(false, false)
 			play_boss_animation("walk")
+
+func _should_queue_combo_followup() -> bool:
+	if current_attack_animation != "attack":
+		return false
+	if attack_chain_count >= combo_max_count:
+		return false
+	if not _is_player_in_combo_range():
+		return false
+	return true
+
+func _is_player_in_combo_range() -> bool:
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player == null:
+		return false
+	var offset: Vector2 = player.global_position - global_position
+	if abs(offset.y) > 56.0:
+		return false
+	var distance := absf(offset.x)
+	return distance >= close_spacing_distance and distance <= attack_start_distance
 
 func _sync_attack_animation_frame() -> void:
 	if sprite == null or current_animation != current_attack_animation:
@@ -686,13 +807,13 @@ func can_be_perfect_parried_by(player: Node) -> bool:
 func _connect_normal_attack() -> void:
 	if attack_has_connected:
 		return
-	attack_has_connected = true
 	if attack_area == null:
 		return
 	for body in attack_area.get_overlapping_bodies():
 		if body == self:
 			continue
 		if body.has_method("receive_enemy_attack"):
+			attack_has_connected = true
 			body.receive_enemy_attack(attack_damage, attack_posture_damage, self, current_attack_type)
 			if feedback_timer > 0.0:
 				return
@@ -740,6 +861,8 @@ func _interrupt_attack() -> void:
 	is_attack_active = false
 	is_attack_recovering = false
 	attack_has_connected = false
+	attack_chain_count = 0
+	pending_combo_followup = false
 	attack_timer = 0.0
 	attack_elapsed = 0.0
 	attack_step_timer = 0.0
@@ -759,11 +882,14 @@ func _trigger_hit_feedback() -> void:
 	hit_spark_timer = hit_spark_time
 	hit_recoil_timer = hit_recoil_time
 	hit_flash_timer = hit_flash_time
-	velocity.x = -facing * hit_recoil_force
+	var recoil_velocity := Vector2(-facing * hit_recoil_force, velocity.y)
+	velocity = recoil_velocity
 	if hit_spark != null:
 		hit_spark.position.x = 18.0 * facing
 		hit_spark.visible = true
 	_begin_local_hitstop(hit_freeze_time)
+	stored_velocity = recoil_velocity
+	velocity = recoil_velocity
 	_shake_camera(9.0, 0.08)
 	_play_sfx(enemy_hurt_sfx)
 	_update_hit_feedback(0.0)

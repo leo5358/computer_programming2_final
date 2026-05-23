@@ -26,13 +26,18 @@ func _initialize() -> void:
 		push_error("Archer attack should use teammate tscn's 8 attack frames")
 		quit(1)
 		return
+	if frames.get_frame_count("walk") != 8:
+		push_error("Archer walk should use teammate tscn's 8 walk frames")
+		quit(1)
+		return
 
 	var idle_frame_1: AtlasTexture = frames.get_frame_texture("idle", 0) as AtlasTexture
+	var walk_frame_8: AtlasTexture = frames.get_frame_texture("walk", 7) as AtlasTexture
 	var attack_frame_1: AtlasTexture = frames.get_frame_texture("attack", 0) as AtlasTexture
 	var attack_frame_8: AtlasTexture = frames.get_frame_texture("attack", 7) as AtlasTexture
 	var hurt_frame_3: AtlasTexture = frames.get_frame_texture("hurt", 2) as AtlasTexture
 	var death_frame_5: AtlasTexture = frames.get_frame_texture("death", 4) as AtlasTexture
-	if idle_frame_1 == null or attack_frame_1 == null or attack_frame_8 == null or hurt_frame_3 == null or death_frame_5 == null:
+	if idle_frame_1 == null or walk_frame_8 == null or attack_frame_1 == null or attack_frame_8 == null or hurt_frame_3 == null or death_frame_5 == null:
 		push_error("Archer frames should be AtlasTextures")
 		quit(1)
 		return
@@ -46,6 +51,10 @@ func _initialize() -> void:
 		return
 	if attack_frame_8.region != Rect2(669.0, 0.0, 93.0, 96.0):
 		push_error("Archer attack frame 8 should match teammate tscn crop")
+		quit(1)
+		return
+	if walk_frame_8.region != Rect2(672.0, 0.0, 96.0, 96.0):
+		push_error("Archer walk frame 8 should match teammate tscn crop")
 		quit(1)
 		return
 	if hurt_frame_3.region != Rect2(182.0, 0.0, 91.0, 96.0):

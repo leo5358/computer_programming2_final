@@ -68,6 +68,9 @@ enum EnemyState {
 @export var normal_block_posture_damage := 10.0
 @export var parried_recovery_duration := 1.25
 @export var hit_recoil_force := 120.0
+@export var direct_hit_hurt_time := 0.28
+@export var direct_hit_recoil_force := 210.0
+@export var direct_hit_thrust_lockout_time := 0.65
 @export var parry_recoil_force := 155.0
 @export var dodge_posture_damage := 8.0
 @export_range(0.0, 1.0, 0.05) var guard_chance := 0.0
@@ -95,6 +98,7 @@ var hit_flash_timer := 0.0
 var hit_recoil_timer := 0.0
 var hit_spark_timer := 0.0
 var dodge_spark_timer := 0.0
+var direct_hit_thrust_lockout_timer := 0.0
 var deflect_timer := 0.0
 var guard_lockout_timer := 0.0
 var counter_after_deflect := false
@@ -206,12 +210,18 @@ func receive_player_attack(damage: float, posture_damage: float) -> Variant:
 	elif health <= 0.0:
 		_defeat()
 	else:
-		state = EnemyState.HURT
-		hit_flash_timer = 0.1
-		hit_spark_timer = 0.14
-		hit_recoil_timer = 0.14
-		velocity.x = -facing * hit_recoil_force
+		_start_direct_hurt_feedback()
 	return true
+
+func _start_direct_hurt_feedback() -> void:
+	state = EnemyState.HURT
+	_interrupt_attack()
+	hit_flash_timer = direct_hit_hurt_time * 0.75
+	hit_spark_timer = 0.16
+	hit_recoil_timer = direct_hit_hurt_time
+	direct_hit_thrust_lockout_timer = direct_hit_thrust_lockout_time
+	velocity.x = -facing * direct_hit_recoil_force
+	_force_play_animation("hurt")
 
 func receive_block_feedback(perfect: bool) -> void:
 	if defeated_flag:
@@ -283,6 +293,7 @@ func reset_combat_state() -> void:
 	hit_recoil_timer = 0.0
 	hit_spark_timer = 0.0
 	dodge_spark_timer = 0.0
+	direct_hit_thrust_lockout_timer = 0.0
 	deflect_timer = 0.0
 	guard_lockout_timer = 0.0
 	counter_after_deflect = false
@@ -307,6 +318,7 @@ func _update_awareness() -> void:
 
 func _update_movement_state(delta: float) -> void:
 	attack_cooldown = max(0.0, attack_cooldown - delta)
+	direct_hit_thrust_lockout_timer = max(0.0, direct_hit_thrust_lockout_timer - delta)
 	if state == EnemyState.HURT and hit_recoil_timer > 0.0:
 		return
 	if is_alerted and target != null:
@@ -393,6 +405,8 @@ func _start_deflect_counter() -> void:
 		velocity.x = facing * chase_speed
 
 func _can_start_thrust(distance: float) -> bool:
+	if direct_hit_thrust_lockout_timer > 0.0:
+		return false
 	var effective_range := thrust_range * (pressure_thrust_range_multiplier if pressure_timer > 0.0 else 1.0)
 	return thrust_range > attack_range and attack_cooldown <= 0.0 and distance > attack_range and distance <= effective_range
 
@@ -578,6 +592,17 @@ func _update_visuals() -> void:
 		next_animation = "walk"
 	if sprite.sprite_frames.has_animation(next_animation) and sprite.animation != next_animation:
 		sprite.play(next_animation)
+
+func _force_play_animation(animation: StringName) -> void:
+	if sprite == null or sprite.sprite_frames == null:
+		return
+	if not sprite.sprite_frames.has_animation(animation):
+		return
+	sprite.speed_scale = 1.0
+	sprite.stop()
+	sprite.frame = 0
+	sprite.frame_progress = 0.0
+	sprite.play(animation)
 
 func _sync_directional_nodes() -> void:
 	if attack_area != null:

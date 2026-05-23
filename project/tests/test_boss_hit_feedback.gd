@@ -18,6 +18,7 @@ func _initialize() -> void:
 			return
 
 	boss.facing = -1.0
+	boss.guard_chance = 0.0
 	boss.receive_player_attack(8.0, 12.0)
 	if boss.hit_spark_timer <= 0.0:
 		push_error("Boss should show hit spark after taking player attack")

@@ -48,6 +48,19 @@ func _initialize() -> void:
 		return
 
 	arrow.queue_free()
+	arrow = arrow_scene.instantiate() as CharacterBody2D
+	arrow.global_position = (player as Node2D).global_position + Vector2(92.0, -26.0)
+	get_root().add_child(arrow)
+	await process_frame
+	player.facing = 1.0
+	player._start_attack()
+	player._update_action_state(0.20)
+	if not arrow.destroyed:
+		push_error("Player should be able to cut arrows during the early projectile slash window")
+		quit(1)
+		return
+
+	arrow.queue_free()
 	player.queue_free()
 	await process_frame
 	quit(0)

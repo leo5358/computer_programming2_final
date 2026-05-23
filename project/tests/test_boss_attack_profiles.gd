@@ -1,22 +1,21 @@
 extends SceneTree
 
 func _initialize() -> void:
-	var scene: PackedScene = load("res://scenes/Main.tscn")
-	if scene == null:
-		push_error("Main scene should load")
+	var boss_scene: PackedScene = load("res://scenes/Boss.tscn")
+	var player_scene: PackedScene = load("res://scenes/Player.tscn")
+	if boss_scene == null or player_scene == null:
+		push_error("Boss and Player scenes should load")
 		quit(1)
 		return
 
-	var main: Node = scene.instantiate()
+	var main := Node2D.new()
+	main.name = "BossAttackProfilesTest"
 	get_root().add_child(main)
+	var boss = boss_scene.instantiate()
+	var player = player_scene.instantiate()
+	main.add_child(boss)
+	main.add_child(player)
 	await process_frame
-
-	var boss = main.get_node_or_null("Boss")
-	var player = main.get_node_or_null("Player")
-	if boss == null or player == null:
-		push_error("Main scene should contain boss and player")
-		quit(1)
-		return
 
 	for profile_name in ["attack", "chop", "thrust"]:
 		if not boss.has_attack_profile(profile_name):

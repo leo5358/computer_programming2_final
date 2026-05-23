@@ -80,5 +80,6 @@ func _ready() -> void:
 	guard_posture_damage = 3.0
 	deflect_duration = 0.28
 	guard_lockout_duration = 0.45
+	direct_hit_thrust_lockout_time = 0.72
 	is_perilous_attack = false
 	super()

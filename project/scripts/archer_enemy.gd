@@ -85,6 +85,9 @@ func _update_combat_movement() -> void:
 		state = EnemyState.HOLD
 		velocity.x = 0.0
 
+func can_receive_attack_soft_lock() -> bool:
+	return false
+
 func _connect_attack() -> void:
 	if attack_has_connected:
 		return

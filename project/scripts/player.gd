@@ -96,15 +96,19 @@ enum PlayerState {
 @export var attack_deflected_rebound := 260.0
 @export var attack_deflected_posture_damage := 10.0
 @export var attack_deflected_attack_lockout_time := 0.58
-@export var attack_step_impulse := 140.0
-@export var chop_step_impulse := 95.0
-@export var attack_soft_lock_impulse := 260.0
-@export var chop_soft_lock_impulse := 190.0
+@export var attack_step_impulse := 60.0
+@export var chop_step_impulse := 45.0
+@export var attack_soft_lock_impulse := 180.0
+@export var chop_soft_lock_impulse := 130.0
 @export var attack_lunge_time := 0.38
 @export var attack_soft_lock_min_distance := 58.0
-@export var attack_soft_lock_max_distance := 110.0
+@export var attack_soft_lock_max_distance := 82.0
 @export var attack_soft_lock_vertical_tolerance := 52.0
 @export var attack_buffer_min_recovery_elapsed := 0.0
+@export var projectile_slash_startup := 0.18
+@export var projectile_slash_forward_range := 128.0
+@export var projectile_slash_back_range := 16.0
+@export var projectile_slash_vertical_tolerance := 42.0
 @export var parry_window := 0.45
 @export var parry_success_recovery_time := 0.12
 @export var parry_flash_time := 0.14
@@ -155,6 +159,7 @@ var attack_buffer_timer := 0.0
 var attack_buffer_queued := false
 var attack_lockout_timer := 0.0
 var attack_has_hit := false
+var attack_has_cut_projectile := false
 var attack_combo_step := 0
 var current_attack_animation := "attack_a"
 var hurt_animation := "hurt"
@@ -297,6 +302,8 @@ func _update_action_state(delta: float) -> void:
 	if state == PlayerState.ATTACK:
 		action_timer -= delta
 		attack_elapsed += delta
+		if attack_elapsed >= projectile_slash_startup and not attack_has_cut_projectile:
+			attack_has_cut_projectile = _apply_projectile_slash()
 		var active := attack_elapsed >= attack_startup and attack_elapsed < attack_startup + attack_active_time
 		is_attacking = active
 		if active and not attack_has_hit:
@@ -305,6 +312,7 @@ func _update_action_state(delta: float) -> void:
 		if action_timer <= 0.0:
 			is_attacking = false
 			attack_has_hit = false
+			attack_has_cut_projectile = false
 			if attack_buffer_queued:
 				attack_buffer_queued = false
 				attack_buffer_timer = 0.0
@@ -364,6 +372,7 @@ func _start_attack() -> void:
 	attack_elapsed = 0.0
 	is_attacking = false
 	attack_has_hit = false
+	attack_has_cut_projectile = false
 
 func queue_attack_buffer() -> void:
 	if not _should_accept_attack_buffer():
@@ -399,6 +408,8 @@ func _find_attack_soft_lock_target() -> Node2D:
 	return null
 
 func _is_valid_attack_soft_lock_target(target: Node2D) -> bool:
+	if target.has_method("can_receive_attack_soft_lock") and not target.can_receive_attack_soft_lock():
+		return false
 	var offset := target.global_position - global_position
 	var forward_distance := offset.x * facing
 	if forward_distance < attack_soft_lock_min_distance:
@@ -432,7 +443,32 @@ func _apply_attack_hit() -> void:
 			_play_random_attack_hit_sfx()
 			_trigger_attack_hit_feedback()
 	else:
-		_play_random_attack_miss_sfx()
+		if not attack_has_cut_projectile:
+			_play_random_attack_miss_sfx()
+
+func _apply_projectile_slash() -> bool:
+	var hit_confirmed := false
+	var slash_center_y := global_position.y + attack_area.position.y
+	for projectile in get_tree().get_nodes_in_group("enemy_projectile"):
+		if not (projectile is Node2D):
+			continue
+		if not projectile.has_method("receive_player_attack"):
+			continue
+		var offset := (projectile as Node2D).global_position - global_position
+		var forward_distance := offset.x * facing
+		if forward_distance < -projectile_slash_back_range:
+			continue
+		if forward_distance > projectile_slash_forward_range:
+			continue
+		if abs((projectile as Node2D).global_position.y - slash_center_y) > projectile_slash_vertical_tolerance:
+			continue
+		var result: Variant = projectile.receive_player_attack(0.0, 0.0)
+		if not (result is bool and result == false):
+			hit_confirmed = true
+	if hit_confirmed:
+		_play_random_attack_hit_sfx()
+		_trigger_attack_hit_feedback()
+	return hit_confirmed
 
 func _start_parry() -> void:
 	_register_combat_input(CombatServerScript.InputType.PARRY)
@@ -1016,6 +1052,7 @@ func reset_combat_state() -> void:
 	attack_buffer_queued = false
 	attack_lockout_timer = 0.0
 	attack_has_hit = false
+	attack_has_cut_projectile = false
 	attack_combo_step = 0
 	current_attack_animation = "attack_a"
 	hurt_animation = "hurt"

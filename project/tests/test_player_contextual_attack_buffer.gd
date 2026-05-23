@@ -52,6 +52,35 @@ func _initialize() -> void:
 		await _cleanup(player, 1)
 		return
 
+	var archer_scene: PackedScene = load("res://scenes/ArcherEnemy.tscn")
+	if archer_scene == null:
+		push_error("ArcherEnemy scene should load")
+		near_enemy.queue_free()
+		await _cleanup(player, 1)
+		return
+	var archer: Node2D = archer_scene.instantiate()
+	archer.global_position = Vector2(238.0, 408.0)
+	get_root().add_child(archer)
+	await process_frame
+	player.queue_attack_buffer()
+	if player.attack_buffer_queued:
+		push_error("Player should not use attack buffering to stick to Archer")
+		archer.queue_free()
+		near_enemy.queue_free()
+		await _cleanup(player, 1)
+		return
+
+	player.attack_buffer_queued = false
+	player.attack_buffer_timer = 0.0
+	player._start_attack()
+	if player.velocity.x > 80.0:
+		push_error("Player attack should not soft-lock lunge toward Archer")
+		archer.queue_free()
+		near_enemy.queue_free()
+		await _cleanup(player, 1)
+		return
+
+	archer.queue_free()
 	near_enemy.queue_free()
 	await _cleanup(player, 0)
 
