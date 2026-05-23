@@ -1,0 +1,61 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/archer_enemy.gd" id="1_script"]
+
+[sub_resource type="RectangleShape2D" id="BodyShape"]
+size = Vector2(40, 68)
+
+[sub_resource type="RectangleShape2D" id="AttackShape"]
+size = Vector2(280, 40)
+
+[node name="ArcherEnemy" type="CharacterBody2D"]
+script = ExtResource("1_script")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+texture_filter = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -34)
+shape = SubResource("BodyShape")
+
+[node name="AttackVisual" type="ColorRect" parent="."]
+visible = false
+offset_left = -140.0
+offset_top = -42.0
+offset_right = 140.0
+offset_bottom = -2.0
+color = Color(1, 0.84, 0.08, 0.48)
+
+[node name="HitSpark" type="ColorRect" parent="."]
+visible = false
+offset_left = -32.0
+offset_top = -64.0
+offset_right = 32.0
+offset_bottom = -10.0
+color = Color(1, 0.95, 0.45, 0.78)
+
+[node name="ExecuteLabel" type="Label" parent="."]
+visible = false
+offset_left = -44.0
+offset_top = -108.0
+offset_right = 44.0
+offset_bottom = -82.0
+theme_override_font_sizes/font_size = 18
+text = "EXECUTE"
+horizontal_alignment = 1
+
+[node name="WarningLabel" type="Label" parent="."]
+visible = false
+offset_left = -26.0
+offset_top = -132.0
+offset_right = 26.0
+offset_bottom = -92.0
+theme_override_font_sizes/font_size = 36
+text = "危"
+horizontal_alignment = 1
+
+[node name="AttackArea" type="Area2D" parent="."]
+position = Vector2(150, -34)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackArea"]
+shape = SubResource("AttackShape")

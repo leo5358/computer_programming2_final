@@ -1,0 +1,33 @@
+{
+  "id": "heart-samurai-protagonist",
+  "display_name": "Heart Samurai",
+  "role": "protagonist",
+  "description": "A lean side-view wandering samurai with a weathered indigo haori, tied topknot, light lamellar shoulder armor, cloth waist sash, and a katana-like blade. He should read as disciplined, dangerous, and human-sized for a side-scrolling action game.",
+  "style_notes": "Dark fantasy 2D pixel-art for a side-scrolling action game. Clean silhouette, grounded stances, readable anticipation and recovery, limited muted palette, no mascot proportions, no decorative glow.",
+  "palette": [
+    "indigo",
+    "charcoal",
+    "steel",
+    "muted beige",
+    "desaturated crimson accent"
+  ],
+  "must_keep": [
+    "topknot silhouette",
+    "weathered indigo haori",
+    "katana-like blade",
+    "light shoulder armor",
+    "cloth waist sash",
+    "human adult samurai proportions",
+    "side-view readability"
+  ],
+  "must_avoid": [
+    "chibi proportions",
+    "cute mascot face",
+    "oversized anime hair",
+    "extra weapons",
+    "3D render look",
+    "soft bloom",
+    "background scenery"
+  ],
+  "references": []
+}

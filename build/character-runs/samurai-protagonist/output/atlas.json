@@ -1,0 +1,75 @@
+{
+  "image": "output/spritesheet.png",
+  "webp_image": "output/spritesheet.webp",
+  "cell_width": 96,
+  "cell_height": 96,
+  "columns": 12,
+  "rows": 9,
+  "width": 1152,
+  "height": 864,
+  "animations": [
+    {
+      "id": "idle",
+      "row": 0,
+      "frames": 4,
+      "fps": 6,
+      "loop": true
+    },
+    {
+      "id": "run-right",
+      "row": 1,
+      "frames": 8,
+      "fps": 12,
+      "loop": true
+    },
+    {
+      "id": "attack-light",
+      "row": 2,
+      "frames": 12,
+      "fps": 18,
+      "loop": false
+    },
+    {
+      "id": "parry",
+      "row": 3,
+      "frames": 6,
+      "fps": 14,
+      "loop": false
+    },
+    {
+      "id": "guard",
+      "row": 4,
+      "frames": 4,
+      "fps": 8,
+      "loop": true
+    },
+    {
+      "id": "dash",
+      "row": 5,
+      "frames": 6,
+      "fps": 14,
+      "loop": false
+    },
+    {
+      "id": "jump",
+      "row": 6,
+      "frames": 6,
+      "fps": 10,
+      "loop": false
+    },
+    {
+      "id": "hurt",
+      "row": 7,
+      "frames": 4,
+      "fps": 8,
+      "loop": false
+    },
+    {
+      "id": "death",
+      "row": 8,
+      "frames": 8,
+      "fps": 8,
+      "loop": false
+    }
+  ]
+}
