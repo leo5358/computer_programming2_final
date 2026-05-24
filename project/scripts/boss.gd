@@ -28,7 +28,7 @@ const ANIMATION_SPEEDS := {
 	"chop": 5.0,
 	"deflect1": 5.0,
 	"deflect2": 5.0,
-	"hurt": 5.0,
+	"hurt": 12.0,
 	"death": 5.0,
 	"jump": 5.0,
 }
@@ -54,10 +54,10 @@ const ATTACK_PROFILES := {
 		"perilous": false,
 	},
 	"thrust": {
-		"durations": [0.12, 0.16, 0.26, 0.04, 0.04, 0.07, 0.10, 0.14],
+		"durations": [0.18, 0.22, 0.26, 0.16, 0.07, 0.09, 0.18, 0.24],
 		"cue_start": 0.42,
-		"hit_start": 0.54,
-		"hit_end": 0.65,
+		"hit_start": 0.82,
+		"hit_end": 0.98,
 		"damage": 24.0,
 		"posture_damage": 36.0,
 		"attack_type": CombatServerScript.AttackType.THRUST,
@@ -209,7 +209,7 @@ const VISUAL_CENTER_X := 64.0
 const WALK_ANCHOR_STRENGTH := 0.45
 
 @export var max_health := 140.0
-@export var max_posture := 100.0
+@export var max_posture := 160.0
 @export var posture_damage_taken := 18.0
 @export var patrol_speed := 58.0
 @export var patrol_distance := 120.0
@@ -225,6 +225,11 @@ const WALK_ANCHOR_STRENGTH := 0.45
 @export var gap_close_thrust_max_distance := 190.0
 @export var attack_step_distance := 36.0
 @export var attack_step_time := 0.16
+@export var thrust_lunge_start := 0.76
+@export var thrust_lunge_end := 1.00
+@export var thrust_lunge_speed := 340.0
+@export var thrust_hitbox_size := Vector2(148.0, 54.0)
+@export var thrust_hitbox_offset := Vector2(76.0, -36.0)
 @export var attack_damage := 18.0
 @export var attack_posture_damage := 28.0
 @export var attack_cooldown_duration := 1.38
@@ -248,18 +253,24 @@ const WALK_ANCHOR_STRENGTH := 0.45
 @export var hit_flash_time := 0.10
 @export var hit_spark_time := 0.16
 @export var hit_freeze_time := 0.055
-@export var normal_attack_parry_posture_damage := 36.0
+@export var hurt_feedback_time := 0.66
+@export var normal_attack_parry_posture_damage := 28.0
 @export var normal_attack_block_posture_damage := 14.0
 @export var deflect_feedback_time := 0.28
 @export var perfect_deflect_feedback_time := 0.50
 @export_range(0.0, 1.0, 0.05) var guard_chance := 0.8
-@export var guard_posture_damage := 6.0
+@export var guard_posture_damage := 1.2
 @export var guard_lockout_duration := 0.32
+@export var deflect_counter_cooldown := 0.0
 @export var minimum_health_from_player_attack := 1.0
+@export var posture_recovery_pause := 1.6
+@export var posture_recovery_rate := 5.0
+@export var forced_counter_deflect_window := 0.95
 
 var health := max_health
 var posture := 0.0
 var defeated_flag := false
+var posture_broken := false
 var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
 var current_animation := "idle"
 var facing := 1.0
@@ -289,6 +300,11 @@ var hit_flash_timer := 0.0
 var feedback_timer := 0.0
 var deflect_toggle := false
 var guard_lockout_timer := 0.0
+var has_engaged_player := false
+var posture_recovery_pause_timer := 0.0
+var forced_counter_profile := ""
+var consecutive_guard_count := 0
+var forced_counter_timer := 0.0
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var body_visual: ColorRect = get_node_or_null("Body") as ColorRect
@@ -306,6 +322,7 @@ func _ready() -> void:
 	health = max_health
 	posture = 0.0
 	defeated_flag = false
+	posture_broken = false
 	_setup_sprite_frames()
 	if sprite != null:
 		sprite.position = Vector2(0.0, -64.0)
@@ -326,6 +343,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if feedback_timer > 0.0:
 		feedback_timer = max(0.0, feedback_timer - delta)
+	forced_counter_timer = max(0.0, forced_counter_timer - delta)
 	guard_lockout_timer = max(0.0, guard_lockout_timer - delta)
 	_update_hit_feedback(delta)
 	if hitstop_timer > 0.0:
@@ -337,6 +355,9 @@ func _physics_process(delta: float) -> void:
 		return
 	if defeated_flag:
 		velocity.x = 0.0
+	elif posture_broken:
+		velocity.x = 0.0
+		play_boss_animation(current_animation)
 	elif feedback_timer > 0.0:
 		velocity.x = 0.0
 	elif hit_recoil_timer > 0.0:
@@ -344,6 +365,7 @@ func _physics_process(delta: float) -> void:
 	elif is_attack_winding_up or is_attack_active or is_attack_recovering:
 		_update_attack_state(delta)
 	else:
+		_update_pressure_and_posture(delta)
 		attack_cooldown = max(0.0, attack_cooldown - delta)
 		if _should_start_attack():
 			_start_normal_attack()
@@ -393,8 +415,15 @@ func align_sprite_to_ground() -> void:
 	)
 
 func receive_player_attack(damage: float, posture_damage: float) -> Variant:
-	if defeated_flag:
+	if defeated_flag or posture_broken:
 		return false
+	has_engaged_player = true
+	_mark_combat_pressure()
+	if _can_chain_deflect_during_feedback():
+		_guard_player_attack()
+		return {"guarded": true}
+	if _is_forced_counter_protected():
+		return {"guarded": true}
 	if _should_guard_player_attack():
 		_guard_player_attack()
 		return {"guarded": true}
@@ -402,7 +431,10 @@ func receive_player_attack(damage: float, posture_damage: float) -> Variant:
 	health = max(minimum_health_from_player_attack, health - damage)
 	posture = clamp(posture + max(posture_damage, posture_damage_taken), 0.0, max_posture)
 	_force_play_boss_animation("hurt")
+	feedback_timer = max(feedback_timer, hurt_feedback_time)
 	_trigger_hit_feedback()
+	if posture >= max_posture:
+		_break_posture()
 	stats_changed.emit()
 	return true
 
@@ -415,17 +447,24 @@ func _should_guard_player_attack() -> bool:
 		return false
 	if feedback_timer > 0.0:
 		return false
+	if _is_forced_counter_protected():
+		return true
+	if is_attack_winding_up or is_attack_recovering:
+		return false
 	if is_attack_active:
 		return false
 	return randf() <= guard_chance
 
 func _guard_player_attack() -> void:
+	_mark_combat_pressure()
 	posture = clamp(posture + guard_posture_damage, 0.0, max_posture)
 	_interrupt_attack()
+	_queue_forced_counter()
 	deflect_toggle = not deflect_toggle
 	_force_play_boss_animation("deflect1" if deflect_toggle else "deflect2")
 	feedback_timer = deflect_feedback_time
 	guard_lockout_timer = guard_lockout_duration
+	attack_cooldown = deflect_counter_cooldown
 	hit_spark_timer = hit_spark_time
 	hit_recoil_timer = min(hit_recoil_time, 0.10)
 	hit_flash_timer = 0.08
@@ -433,11 +472,15 @@ func _guard_player_attack() -> void:
 	if hit_spark != null:
 		hit_spark.position.x = 18.0 * facing
 		hit_spark.visible = true
+	if posture >= max_posture:
+		_break_posture()
 	stats_changed.emit()
 
 func receive_block_feedback(_perfect: bool) -> void:
-	if defeated_flag:
+	if defeated_flag or posture_broken:
 		return
+	has_engaged_player = true
+	_mark_combat_pressure()
 	var perfect := _perfect
 	posture = clamp(posture + (normal_attack_parry_posture_damage if perfect else normal_attack_block_posture_damage), 0.0, max_posture)
 	_interrupt_attack()
@@ -451,6 +494,8 @@ func receive_block_feedback(_perfect: bool) -> void:
 	feedback_timer = perfect_deflect_feedback_time if perfect else deflect_feedback_time
 	if perfect:
 		_begin_local_hitstop(parry_clash_hitstop_time)
+	if posture >= max_posture:
+		_break_posture()
 	stats_changed.emit()
 
 func receive_dodge_feedback() -> void:
@@ -460,7 +505,7 @@ func can_be_perfect_dodged_by(_player: Node2D) -> bool:
 	return false
 
 func can_be_executed() -> bool:
-	return posture >= max_posture and not defeated_flag
+	return (posture_broken or posture >= max_posture) and not defeated_flag
 
 func execute() -> void:
 	if can_be_executed():
@@ -470,6 +515,7 @@ func reset_combat_state() -> void:
 	health = max_health
 	posture = 0.0
 	defeated_flag = false
+	posture_broken = false
 	velocity = Vector2.ZERO
 	patrol_direction = 1.0
 	facing = 1.0
@@ -496,6 +542,11 @@ func reset_combat_state() -> void:
 	hit_flash_timer = 0.0
 	feedback_timer = 0.0
 	guard_lockout_timer = 0.0
+	has_engaged_player = false
+	posture_recovery_pause_timer = 0.0
+	forced_counter_profile = ""
+	consecutive_guard_count = 0
+	forced_counter_timer = 0.0
 	global_position = spawn_position
 	if execute_label != null:
 		execute_label.visible = false
@@ -509,6 +560,40 @@ func reset_combat_state() -> void:
 		debug_response_label.visible = false
 	set_collision_layer_value(1, true)
 	play_boss_animation("walk")
+	stats_changed.emit()
+
+func _mark_combat_pressure() -> void:
+	posture_recovery_pause_timer = posture_recovery_pause
+
+func _update_pressure_and_posture(delta: float) -> void:
+	posture_recovery_pause_timer = max(0.0, posture_recovery_pause_timer - delta)
+	if defeated_flag or posture_broken:
+		return
+	if posture_recovery_pause_timer > 0.0 or posture <= 0.0:
+		return
+	var health_ratio: float = clamp(health / max(max_health, 0.001), 0.0, 1.0)
+	var recovery_rate := posture_recovery_rate * (0.35 + 0.65 * health_ratio)
+	posture = max(0.0, posture - recovery_rate * delta)
+	stats_changed.emit()
+
+func _break_posture() -> void:
+	if posture_broken or defeated_flag:
+		return
+	posture = max_posture
+	posture_broken = true
+	_interrupt_attack()
+	feedback_timer = max(feedback_timer, perfect_deflect_feedback_time)
+	velocity = Vector2.ZERO
+	if execute_label != null:
+		execute_label.visible = true
+	if attack_visual != null:
+		attack_visual.visible = false
+	if debug_response_label != null:
+		debug_response_label.visible = false
+	if hit_spark != null:
+		hit_spark.visible = true
+	hit_spark_timer = max(hit_spark_timer, hit_spark_time)
+	_force_play_boss_animation("deflect2" if deflect_toggle else "deflect1")
 	stats_changed.emit()
 
 func _setup_sprite_frames() -> void:
@@ -533,6 +618,11 @@ func is_current_attack_perilous() -> bool:
 	return bool(profile.get("perilous", false))
 
 func _choose_attack_profile() -> String:
+	if not forced_counter_profile.is_empty():
+		var profile := forced_counter_profile
+		forced_counter_profile = ""
+		forced_counter_timer = 0.0
+		return profile
 	if guard_pressure_count >= guard_pressure_chop_threshold:
 		guard_pressure_count = 0
 		return "chop"
@@ -686,6 +776,8 @@ func _should_start_attack() -> bool:
 	return distance >= close_spacing_distance and distance <= attack_start_distance
 
 func _should_start_gap_close_thrust() -> bool:
+	if not has_engaged_player:
+		return false
 	if attack_cooldown > 0.0:
 		return false
 	var player := get_tree().get_first_node_in_group("player") as Node2D
@@ -702,7 +794,13 @@ func _should_start_gap_close_thrust() -> bool:
 	return distance >= gap_close_thrust_min_distance and distance <= gap_close_thrust_max_distance
 
 func _start_normal_attack(profile_name: String = "", combo_followup: bool = false) -> void:
-	_apply_attack_profile(_choose_attack_profile() if profile_name.is_empty() else profile_name)
+	var selected_profile := _choose_attack_profile() if profile_name.is_empty() else profile_name
+	if profile_name == forced_counter_profile:
+		forced_counter_profile = ""
+		forced_counter_timer = 0.0
+	_apply_attack_profile(selected_profile)
+	if current_attack_animation == "attack" or current_attack_animation == "chop":
+		has_engaged_player = true
 	attack_chain_count = attack_chain_count + 1 if combo_followup else 1
 	pending_combo_followup = false
 	is_attack_winding_up = true
@@ -711,7 +809,7 @@ func _start_normal_attack(profile_name: String = "", combo_followup: bool = fals
 	attack_has_connected = false
 	attack_elapsed = 0.0
 	attack_timer = attack_animation_total_time
-	attack_step_timer = attack_step_time
+	attack_step_timer = 0.0 if current_attack_animation == "thrust" else attack_step_time
 	velocity.x = 0.0
 	_update_attack_visual(true, false)
 	play_boss_animation(current_attack_animation)
@@ -734,6 +832,8 @@ func _update_attack_state(delta: float) -> void:
 			play_boss_animation(current_attack_animation)
 		_sync_attack_animation_frame()
 		is_attack_active = attack_elapsed >= attack_hit_time and attack_elapsed <= attack_hit_window_end
+		if current_attack_animation == "thrust" and attack_elapsed >= thrust_lunge_start and attack_elapsed <= thrust_lunge_end:
+			velocity.x = facing * thrust_lunge_speed
 		_update_attack_visual(true, is_attack_active)
 		if is_attack_active:
 			_connect_normal_attack()
@@ -851,9 +951,13 @@ func _update_perilous_warning(show_warning: bool) -> void:
 func _update_attack_hitbox() -> void:
 	if attack_area == null or attack_collision_shape == null:
 		return
-	attack_area.position = Vector2(20.0 * facing, -36.0)
 	var rect_shape := attack_collision_shape.shape as RectangleShape2D
-	if rect_shape != null:
+	if current_attack_animation == "thrust":
+		attack_area.position = Vector2(thrust_hitbox_offset.x * facing, thrust_hitbox_offset.y)
+		if rect_shape != null:
+			rect_shape.size = thrust_hitbox_size
+	elif rect_shape != null:
+		attack_area.position = Vector2(20.0 * facing, -36.0)
 		rect_shape.size = Vector2(90.0, 80.0)
 
 func _interrupt_attack() -> void:
@@ -870,6 +974,24 @@ func _interrupt_attack() -> void:
 	_update_attack_visual(false, false)
 	if debug_response_label != null:
 		debug_response_label.visible = false
+
+func _queue_forced_counter() -> void:
+	consecutive_guard_count += 1
+	if consecutive_guard_count >= 3:
+		forced_counter_profile = "thrust"
+	elif consecutive_guard_count >= 2:
+		forced_counter_profile = "chop"
+	else:
+		forced_counter_profile = "attack"
+	forced_counter_timer = forced_counter_deflect_window
+
+func _is_forced_counter_protected() -> bool:
+	if not forced_counter_profile.is_empty() and forced_counter_timer > 0.0:
+		return true
+	return is_attack_winding_up and current_attack_animation in ["attack", "chop", "thrust"]
+
+func _can_chain_deflect_during_feedback() -> bool:
+	return not forced_counter_profile.is_empty() and not is_attack_winding_up and not is_attack_active
 
 func _begin_local_hitstop(duration: float) -> void:
 	hitstop_timer = max(hitstop_timer, duration)

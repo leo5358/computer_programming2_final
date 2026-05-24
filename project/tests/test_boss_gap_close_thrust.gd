@@ -26,8 +26,21 @@ func _initialize() -> void:
 	boss.attack_cooldown = 0.0
 	boss._physics_process(1.0 / 60.0)
 
+	if boss.is_attack_winding_up:
+		push_error("Boss first engagement should chase into normal attack range instead of opening with perilous thrust")
+		quit(1)
+		return
+	if boss.velocity.x * boss.facing <= 0.0:
+		push_error("Boss should chase toward the player before first engagement")
+		quit(1)
+		return
+
+	boss.has_engaged_player = true
+	boss.attack_cooldown = 0.0
+	boss._physics_process(1.0 / 60.0)
+
 	if not boss.is_attack_winding_up:
-		push_error("Boss should start a gap-close attack when the player is outside normal attack range")
+		push_error("Boss should start a gap-close attack after engagement when the player leaves normal attack range")
 		quit(1)
 		return
 	if boss.current_attack_animation != "thrust":

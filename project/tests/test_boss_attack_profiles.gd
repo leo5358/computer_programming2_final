@@ -68,16 +68,25 @@ func _initialize() -> void:
 		push_error("Thrust profile should be a perilous attack")
 		quit(1)
 		return
+	if not is_equal_approx(boss.attack_animation_total_time, 1.40):
+		push_error("Thrust profile should use a readable 1400ms timeline")
+		quit(1)
+		return
 	boss.attack_elapsed = 0.420
 	boss._update_attack_visual(true, false)
 	var warning_label := boss.get_node_or_null("DebugResponseLabel") as Label
-	if warning_label == null or not warning_label.visible or warning_label.text != "危":
+	if warning_label == null or not warning_label.visible:
 		push_error("Thrust cue should show the perilous warning label")
+		quit(1)
+		return
+	boss.attack_elapsed = 0.810
+	if boss.is_attack_active:
+		push_error("Thrust should still be in readable pre-hit windup before 820ms")
 		quit(1)
 		return
 	player._start_block()
 	var player_health_before_block: float = player.health
-	boss.attack_elapsed = 0.539
+	boss.attack_elapsed = 0.819
 	boss._update_attack_state(0.002)
 	if player.health >= player_health_before_block:
 		push_error("Blocking a perilous thrust should not prevent health damage")

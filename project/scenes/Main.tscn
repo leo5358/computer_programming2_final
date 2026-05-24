@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="1_player_scene"]
 [ext_resource type="Script" path="res://scripts/enemy_test_spawner.gd" id="2_spawner_script"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://scripts/bgm_player.gd" id="9_bgm_script"]
 [ext_resource type="Script" path="res://scripts/hurtbox_debug_overlay.gd" id="10_hurtbox_debug"]
 [ext_resource type="PackedScene" path="res://scenes/TrainingDummy.tscn" id="11_training_dummy"]
+[ext_resource type="Script" path="res://scripts/combat_autopilot.gd" id="12_autopilot"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(7680, 48)
@@ -24,6 +25,20 @@ script = ExtResource("9_bgm_script")
 
 [node name="CombatRuntime" type="Node" parent="." groups=["combat_runtime"]]
 script = ExtResource("6_runtime_script")
+
+[node name="CombatAutopilot" type="Node" parent="."]
+script = ExtResource("12_autopilot")
+
+[node name="AutopilotStatus" type="CanvasLayer" parent="CombatAutopilot"]
+
+[node name="StatusLabel" type="Label" parent="CombatAutopilot/AutopilotStatus"]
+visible = false
+offset_left = 16.0
+offset_top = 198.0
+offset_right = 190.0
+offset_bottom = 224.0
+theme_override_font_sizes/font_size = 18
+text = "AUTOPILOT ON"
 
 [node name="HurtboxDebugOverlay" type="Node" parent="."]
 script = ExtResource("10_hurtbox_debug")

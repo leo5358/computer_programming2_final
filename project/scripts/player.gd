@@ -204,6 +204,9 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	if state == PlayerState.DEAD:
+		hitstop_timer = 0.0
+		if sprite != null:
+			sprite.speed_scale = 1.0
 		if not is_on_floor():
 			velocity.y += gravity * delta
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
@@ -583,6 +586,8 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 		died.emit()
 
 func begin_local_hitstop(duration: float, resume_velocity: Vector2 = Vector2.INF) -> void:
+	if state == PlayerState.DEAD:
+		return
 	hitstop_timer = max(hitstop_timer, duration)
 	stored_velocity = velocity if resume_velocity == Vector2.INF else resume_velocity
 	velocity = Vector2.ZERO
@@ -975,9 +980,21 @@ func _enter_dead() -> void:
 	hitstop_timer = 0.0
 	velocity = Vector2.ZERO
 	sprite.speed_scale = 1.0
-	_play_sfx(death_sfx)
+	var bgm_player = get_tree().get_first_node_in_group("bgm_player")
+	if bgm_player != null and bgm_player.has_method("fade_out_bgm"):
+		bgm_player.fade_out_bgm(1.5)
+	_fade_in_sfx(death_sfx, 1.0)
 	_set_state(PlayerState.DEAD)
 	_update_visuals()
+
+func _fade_in_sfx(player: AudioStreamPlayer2D, duration: float) -> void:
+	if player == null:
+		return
+	player.volume_db = -80.0
+	if player.stream != null:
+		player.play()
+	var tween := create_tween()
+	tween.tween_property(player, "volume_db", 0.0, duration)
 
 func _load_optional_sfx() -> void:
 	attack_hit_streams = _load_optional_streams(ATTACK_HIT_SFX_PATHS)

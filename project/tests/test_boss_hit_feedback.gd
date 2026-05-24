@@ -47,6 +47,16 @@ func _initialize() -> void:
 		push_error("Boss sprite should visibly flash during hit feedback")
 		quit(1)
 		return
+	if boss.current_animation != "hurt":
+		push_error("Boss should keep playing hurt animation during hit feedback")
+		quit(1)
+		return
+
+	boss._physics_process(0.30)
+	if boss.current_animation != "hurt":
+		push_error("Boss hurt animation should not be interrupted immediately by combat AI")
+		quit(1)
+		return
 
 	boss.queue_free()
 	await process_frame
