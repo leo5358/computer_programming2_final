@@ -30,6 +30,9 @@ func force_bpm(value: float) -> void:
 	if player != null:
 		player.heartbeat = value
 
+func set_player_state(state: int) -> void:
+	combat.set_player_state(state)
+
 func reset_combat() -> void:
 	attack_id_counter = 0
 	combat.reset_combat()

@@ -1,5 +1,7 @@
 #include "register_types.h"
 #include "gd_example.h"
+#include "native_combat_math.h"
+#include "native_combat_server.h"
 #include <gdextension_interface.h>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
@@ -12,6 +14,8 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
     }
     // 註冊你的 C++ 類別
     ClassDB::register_class<GDExample>();
+    ClassDB::register_class<NativeCombatMath>();
+    ClassDB::register_class<NativeCombatServer>();
 }
 
 void uninitialize_example_module(ModuleInitializationLevel p_level) {

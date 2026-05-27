@@ -1,29 +1,27 @@
 #!/usr/bin/env python
 import os
-import sys
 
-env = Environment()
+# 1. Get the base environment from godot-cpp
+# This handles all platform-specific flags, compilers, and suffixes.
+env = SConscript("godot-cpp/SConstruct")
 
-# 設定標頭檔搜尋路徑
-env.Append(CPPPATH=["src", "godot-cpp/include", "godot-cpp/gen/include", "godot-cpp/gdextension"])
-env.Append(LIBPATH=["godot-cpp/bin"])
+# 2. Add our own include paths
+env.Append(CPPPATH=["src"])
 
-if sys.platform == "darwin":
-    # 這裡必須與你 ls 看到的名稱完全一致（去掉 lib 和 .a）
-    lib_name = "godot-cpp.macos.template_debug.universal"
-        
-    env.Append(LIBS=[lib_name])
-    env.Append(CPPFLAGS=["-std=c++17", "-fPIC"])
-    env.Append(LINKFLAGS=["-framework", "Cocoa"])
+# 3. Collect all C and C++ source files
+sources = Glob("src/*.cpp") + Glob("src/*.c")
 
-# 獲取原始碼
-sources = Glob("src/*.cpp")
+# 4. Define the output library path and name
+# Using env["suffix"] ensures names like: libgdexample.linux.template_debug.x86_64.so
+# Using env["SHLIBSUFFIX"] handles .so, .dylib, or .dll automatically.
+target_path = os.path.join("project", "bin", "libgdexample{}{}".format(env["suffix"], env["SHLIBSUFFIX"]))
 
-# 編譯目標
-# 注意：輸出的檔名建議與你的 .gdextension 檔案中定義的一致
 library = env.SharedLibrary(
-    "project/bin/libgdexample", 
+    target=target_path,
     source=sources,
 )
+
+# 5. Disable caching for the library to ensure clean rebuilds during development
+env.NoCache(library)
 
 Default(library)
