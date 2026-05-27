@@ -197,7 +197,7 @@ func receive_alert(_source: Node = null) -> void:
 func receive_player_attack(damage: float, posture_damage: float) -> Variant:
 	if defeated_flag:
 		return false
-	if _should_guard_player_attack():
+	if damage < health and _should_guard_player_attack():
 		_guard_player_attack()
 		return {"guarded": true}
 	_spawn_damage_number(damage)
@@ -491,7 +491,8 @@ func _update_attack(delta: float) -> void:
 	if attack_elapsed >= current_attack_total_time:
 		var whiffed := not attack_has_connected
 		_interrupt_attack()
-		attack_cooldown = attack_cooldown_duration * (whiff_cooldown_multiplier if whiffed else 1.0)
+		var use_short_whiff_cooldown := whiffed and attack_area == null
+		attack_cooldown = attack_cooldown_duration * (whiff_cooldown_multiplier if use_short_whiff_cooldown else 1.0)
 		state = EnemyState.HOLD
 
 func _connect_attack() -> void:

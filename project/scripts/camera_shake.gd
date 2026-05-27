@@ -20,8 +20,9 @@ func _process(delta: float) -> void:
 		offset = base_offset
 		return
 
-	shake_time = max(0.0, shake_time - delta)
-	amplitude = move_toward(amplitude, 0.0, decay * delta)
+	var step: float = max(delta, 1.0 / 60.0)
+	shake_time = max(0.0, shake_time - step)
+	amplitude = move_toward(amplitude, 0.0, decay * step)
 	if amplitude <= 0.01:
 		offset = base_offset
 		return

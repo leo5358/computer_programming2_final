@@ -97,8 +97,9 @@ enum PlayerState {
 @export var attack_deflected_posture_damage := 10.0
 @export var attack_deflected_attack_lockout_time := 0.58
 @export var attack_step_impulse := 60.0
+@export var empty_attack_step_impulse := 120.0
 @export var chop_step_impulse := 45.0
-@export var attack_soft_lock_impulse := 180.0
+@export var attack_soft_lock_impulse := 240.0
 @export var chop_soft_lock_impulse := 130.0
 @export var attack_lunge_time := 0.38
 @export var attack_soft_lock_min_distance := 58.0
@@ -259,8 +260,7 @@ func _update_inputs() -> void:
 func _update_movement(delta: float) -> void:
 	if state == PlayerState.ATTACK:
 		attack_lunge_timer -= delta
-		if attack_lunge_timer <= 0.0:
-			velocity.x = move_toward(velocity.x, 0.0, friction * delta)
+		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 		return
 
 	if state == PlayerState.HURT:
@@ -401,7 +401,9 @@ func _attack_step_impulse() -> float:
 	var has_soft_lock_target := _find_attack_soft_lock_target() != null
 	if current_attack_animation == "attack_chop":
 		return chop_soft_lock_impulse if has_soft_lock_target else chop_step_impulse
-	return attack_soft_lock_impulse if has_soft_lock_target else attack_step_impulse
+	if has_soft_lock_target:
+		return attack_soft_lock_impulse
+	return attack_step_impulse if _has_rejected_soft_lock_target() else empty_attack_step_impulse
 
 func _find_attack_soft_lock_target() -> Node2D:
 	for group_name in ["enemy", "boss"]:
@@ -411,6 +413,9 @@ func _find_attack_soft_lock_target() -> Node2D:
 	return null
 
 func _is_valid_attack_soft_lock_target(target: Node2D) -> bool:
+	var target_script: Script = target.get_script() as Script
+	if target_script != null and target_script.resource_path.ends_with("archer_enemy.gd"):
+		return false
 	if target.has_method("can_receive_attack_soft_lock") and not target.can_receive_attack_soft_lock():
 		return false
 	var offset := target.global_position - global_position
@@ -422,6 +427,17 @@ func _is_valid_attack_soft_lock_target(target: Node2D) -> bool:
 	if abs(offset.y) > attack_soft_lock_vertical_tolerance:
 		return false
 	return true
+
+func _has_rejected_soft_lock_target() -> bool:
+	for group_name in ["enemy", "boss"]:
+		for target in get_tree().get_nodes_in_group(group_name):
+			if not (target is Node2D):
+				continue
+			var offset := (target as Node2D).global_position - global_position
+			var forward_distance := offset.x * facing
+			if forward_distance >= attack_soft_lock_min_distance and forward_distance <= attack_soft_lock_max_distance and abs(offset.y) <= attack_soft_lock_vertical_tolerance:
+				return true
+	return false
 
 func _apply_attack_hit() -> void:
 	var damage: float = math.damage_with_adrenaline(base_attack_damage, heartbeat)

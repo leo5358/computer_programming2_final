@@ -94,10 +94,10 @@ func _answer_threat(player: Node2D, threat: Dictionary) -> void:
 		return
 	var time_to_hit := float(threat["time_to_hit"])
 	if bool(threat["perilous"]):
-		if time_to_hit <= dodge_timing_lead and player.has_method("_start_perfect_dodge"):
+		if time_to_hit <= dodge_timing_lead:
 			player._start_perfect_dodge(actor)
 		return
-	if time_to_hit <= parry_timing_lead and player.has_method("_start_parry") and _player_can_defend(player):
+	if time_to_hit <= parry_timing_lead and _player_can_defend(player):
 		player._start_parry()
 
 func _attack_executable_target(player: Node2D) -> bool:
@@ -209,56 +209,56 @@ func _hostile_actors() -> Array:
 	return actors
 
 func _is_actor_attacking(actor: Node) -> bool:
-	if "is_attack_winding_up" in actor and bool(actor.get("is_attack_winding_up")):
+	if actor.get("is_attack_winding_up") != null and bool(actor.get("is_attack_winding_up")):
 		return true
-	if "is_attack_active" in actor and bool(actor.get("is_attack_active")):
+	if actor.get("is_attack_active") != null and bool(actor.get("is_attack_active")):
 		return true
 	if "state" in actor and "EnemyState" in actor:
 		return int(actor.get("state")) == int(actor.EnemyState.ATTACK)
 	return false
 
 func _actor_attack_elapsed(actor: Node) -> float:
-	if "attack_elapsed" in actor:
+	if actor.get("attack_elapsed") != null:
 		return float(actor.get("attack_elapsed"))
 	return 0.0
 
 func _actor_cue_start(actor: Node) -> float:
-	if "attack_parry_window_start" in actor:
+	if actor.get("attack_parry_window_start") != null:
 		return float(actor.get("attack_parry_window_start"))
-	if "current_attack_cue_start" in actor:
+	if actor.get("current_attack_cue_start") != null:
 		return float(actor.get("current_attack_cue_start"))
-	if "attack_cue_start" in actor:
+	if actor.get("attack_cue_start") != null:
 		return float(actor.get("attack_cue_start"))
 	return 0.0
 
 func _actor_hit_start(actor: Node) -> float:
-	if "attack_hit_time" in actor:
+	if actor.get("attack_hit_time") != null:
 		return float(actor.get("attack_hit_time"))
-	if "current_attack_hit_start" in actor:
+	if actor.get("current_attack_hit_start") != null:
 		return float(actor.get("current_attack_hit_start"))
-	if "attack_hit_start" in actor:
+	if actor.get("attack_hit_start") != null:
 		return float(actor.get("attack_hit_start"))
 	return _actor_cue_start(actor)
 
 func _actor_hit_end(actor: Node) -> float:
-	if "attack_hit_window_end" in actor:
+	if actor.get("attack_hit_window_end") != null:
 		return float(actor.get("attack_hit_window_end"))
-	if "current_attack_hit_end" in actor:
+	if actor.get("current_attack_hit_end") != null:
 		return float(actor.get("current_attack_hit_end"))
-	if "attack_hit_end" in actor:
+	if actor.get("attack_hit_end") != null:
 		return float(actor.get("attack_hit_end"))
 	return _actor_hit_start(actor)
 
 func _actor_attack_is_perilous(actor: Node) -> bool:
 	if actor.has_method("is_current_attack_perilous") and actor.is_current_attack_perilous():
 		return true
-	if "current_attack_type" in actor and int(actor.get("current_attack_type")) == CombatServerScript.AttackType.THRUST:
+	if actor.get("current_attack_type") != null and int(actor.get("current_attack_type")) == CombatServerScript.AttackType.THRUST:
 		return true
-	if "current_attack_profile" in actor and String(actor.get("current_attack_profile")) == "thrust":
+	if actor.get("current_attack_profile") != null and String(actor.get("current_attack_profile")) == "thrust":
 		return true
-	if "current_attack_animation" in actor and String(actor.get("current_attack_animation")) == "thrust":
+	if actor.get("current_attack_animation") != null and String(actor.get("current_attack_animation")) == "thrust":
 		return true
-	if "is_perilous_attack" in actor and bool(actor.get("is_perilous_attack")):
+	if actor.get("is_perilous_attack") != null and bool(actor.get("is_perilous_attack")):
 		return true
 	return false
 
@@ -282,8 +282,9 @@ func _fallback_attack_reach(actor: Node) -> float:
 	return 120.0
 
 func _actor_facing(actor: Node) -> float:
-	if "facing" in actor:
-		var value: float = float(actor.get("facing"))
+	var facing_value: Variant = actor.get("facing")
+	if facing_value != null:
+		var value: float = float(facing_value)
 		return value if value != 0.0 else 1.0
 	return 1.0
 

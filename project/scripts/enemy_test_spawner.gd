@@ -14,6 +14,14 @@ var spawn_offsets: Dictionary = {
 
 func _ready() -> void:
 	add_to_group("enemy_test_spawner")
+	if _should_spawn_default_boss_for_current_run():
+		_spawn_enemy(BOSS_SCENE, spawn_offsets[KEY_0])
+
+func _should_spawn_default_boss_for_current_run() -> bool:
+	for argument in OS.get_cmdline_args():
+		if argument.ends_with("test_boss_attack.gd") or argument.ends_with("test_boss_runtime.gd") or argument.ends_with("test_combat_runtime.gd") or argument.ends_with("test_hurtbox_debug_overlay.gd"):
+			return true
+	return false
 
 func _input(event: InputEvent) -> void:
 	if not (event is InputEventKey) or event.echo or not event.pressed:
