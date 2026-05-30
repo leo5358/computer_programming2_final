@@ -24,8 +24,21 @@ const PLAYER_STRIP_PATHS := {
 	"dash": "res://assets/sprites/player/dash.png",
 	"jump": "res://assets/sprites/player/jump.png",
 	"climb": "res://assets/sprites/player/climb.png",
+	"mudra": "res://assets/sprites/player/mudra.png",
 	"hurt": "res://assets/sprites/player/hurt.png",
 	"death": "res://assets/sprites/player/death.png",
+}
+const DEFAULT_ITEM_COUNTS := {
+	"gourd": 10,
+	"kunai": 10,
+	"pill": 10,
+	"capsule": 10,
+	"ash_balls": 10,
+}
+const EAT_ITEM_IDS := {
+	"gourd": true,
+	"pill": true,
+	"capsule": true,
 }
 const PLAYER_STRIP_FRAME_REGIONS := {
 	"attack_a": [
@@ -70,6 +83,7 @@ enum PlayerState {
 	DASH,
 	JUMP,
 	WALL_CLIMB,
+	EAT,
 	HURT,
 	STUNNED,
 	DEAD,
@@ -81,6 +95,10 @@ enum PlayerState {
 @export var acceleration := 2000.0
 @export var friction := 3200.0
 @export var turn_brake := 4200.0
+@export var combat_lock_range_x := 260.0
+@export var combat_lock_range_y := 90.0
+@export var combat_backpedal_speed_multiplier := 0.55
+@export var combat_backpedal_run_multiplier := 0.45
 @export var dash_impulse := 560.0
 @export var jump_velocity := -430.0
 @export var coyote_time := 0.1
@@ -182,6 +200,14 @@ var stored_velocity := Vector2.ZERO
 var combat_runtime: Node
 var spawn_position := Vector2.ZERO
 var sprite_sheet_layout: Dictionary = {}
+var item_counts: Dictionary = DEFAULT_ITEM_COUNTS.duplicate()
+var item_hotkeys_down: Dictionary = {}
+var ai_move_axis := 0.0
+var ai_attack_requested := false
+var ai_parry_requested := false
+var ai_dodge_requested := false
+var ai_jump_requested := false
+var ai_dodge_target: Node2D = null
 var player_sheet: Texture2D = null
 var attack_hit_streams: Array[AudioStream] = []
 var chop_hit_stream: AudioStream = null
@@ -246,22 +272,35 @@ func _physics_process(delta: float) -> void:
 	stats_changed.emit()
 
 func _update_inputs() -> void:
-	if _can_start_attack() and Input.is_action_just_pressed("attack"):
+	if _try_use_item_hotkey():
+		_clear_ai_action_intents()
+		return
+
+	var attack_requested := Input.is_action_just_pressed("attack") or ai_attack_requested
+	var parry_requested := Input.is_action_just_pressed("block") or ai_parry_requested
+	var dodge_requested := Input.is_action_just_pressed("dash") or ai_dodge_requested
+	var jump_requested := Input.is_action_just_pressed("jump") or ai_jump_requested
+
+	if _can_start_attack() and attack_requested:
 		_start_attack()
-	elif _can_buffer_attack() and Input.is_action_just_pressed("attack"):
+	elif _can_buffer_attack() and attack_requested:
 		queue_attack_buffer()
 
-	if _can_start_defensive_action() and Input.is_action_just_pressed("block"):
+	if _can_start_defensive_action() and parry_requested:
 		_start_parry()
 
-	if _can_start_defensive_action() and Input.is_action_just_pressed("dash"):
-		_start_dash()
+	if _can_start_defensive_action() and dodge_requested:
+		if ai_dodge_requested and ai_dodge_target != null:
+			_start_perfect_dodge(ai_dodge_target)
+		else:
+			_start_dash()
 
-	if Input.is_action_just_pressed("jump") and coyote_timer > 0.0 and _can_jump():
+	if jump_requested and coyote_timer > 0.0 and _can_jump():
 		_register_combat_input(CombatServerScript.InputType.JUMP)
 		velocity.y = jump_velocity
 		coyote_timer = 0.0
 		_set_state(PlayerState.JUMP)
+	_clear_ai_action_intents()
 
 func _update_movement(delta: float) -> void:
 	if state == PlayerState.ATTACK:
@@ -273,7 +312,7 @@ func _update_movement(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0.0, hurt_slide_friction * delta)
 		return
 
-	if state in [PlayerState.PARRY, PlayerState.STUNNED]:
+	if state in [PlayerState.PARRY, PlayerState.EAT, PlayerState.STUNNED]:
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 		return
 
@@ -281,7 +320,7 @@ func _update_movement(delta: float) -> void:
 		velocity.x = dash_direction * (perfect_dodge_impulse if is_perfect_dodging else dash_impulse)
 		return
 
-	var direction := Input.get_axis("move_left", "move_right")
+	var direction := _read_move_axis()
 	is_running = direction != 0.0 and Input.is_key_pressed(KEY_SHIFT)
 
 	if _can_wall_interact() and _is_pressing_into_wall(direction):
@@ -304,14 +343,48 @@ func _update_movement(delta: float) -> void:
 			_set_state(PlayerState.IDLE)
 
 func _apply_horizontal_control(direction: float, delta: float) -> void:
+	var combat_target: Node2D = _find_combat_facing_target()
 	if direction != 0.0:
-		facing = sign(direction)
+		var movement_facing: float = sign(direction)
+		if combat_target != null:
+			var target_direction: float = sign(combat_target.global_position.x - global_position.x)
+			if target_direction != 0.0:
+				facing = target_direction
+		else:
+			facing = movement_facing
 		var accel := turn_brake if velocity.x != 0.0 and sign(velocity.x) != sign(direction) else acceleration
 		var target_speed := run_speed if is_running else walk_speed
+		if combat_target != null and sign(direction) != facing:
+			target_speed = run_speed * combat_backpedal_run_multiplier if is_running else walk_speed * combat_backpedal_speed_multiplier
 		velocity.x = move_toward(velocity.x, direction * target_speed, accel * delta)
 	else:
 		is_running = false
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
+
+func _find_combat_facing_target() -> Node2D:
+	var nearest: Node2D = null
+	var nearest_distance := INF
+	for group_name in ["enemy", "boss"]:
+		for target in get_tree().get_nodes_in_group(group_name):
+			if not (target is Node2D):
+				continue
+			if _combat_target_is_defeated(target):
+				continue
+			var offset: Vector2 = (target as Node2D).global_position - global_position
+			if abs(offset.x) > combat_lock_range_x or abs(offset.y) > combat_lock_range_y:
+				continue
+			var distance: float = abs(offset.x)
+			if distance < nearest_distance:
+				nearest = target as Node2D
+				nearest_distance = distance
+	return nearest
+
+func _combat_target_is_defeated(target: Node) -> bool:
+	if target.get("defeated_flag") != null and bool(target.get("defeated_flag")):
+		return true
+	if target.get("health") != null and float(target.get("health")) <= 0.0:
+		return true
+	return false
 
 func _can_wall_interact() -> bool:
 	return is_on_wall() and not is_on_floor() and _can_jump()
@@ -385,6 +458,11 @@ func _update_action_state(delta: float) -> void:
 			is_invulnerable = false
 			_set_state(PlayerState.IDLE)
 
+	elif state == PlayerState.EAT:
+		action_timer -= delta
+		if action_timer <= 0.0:
+			_set_state(PlayerState.IDLE)
+
 	elif state == PlayerState.STUNNED:
 		action_timer -= delta
 		if action_timer <= 0.0:
@@ -418,6 +496,104 @@ func _start_attack() -> void:
 	attack_has_hit = false
 	attack_has_cut_projectile = false
 
+func _try_use_item_hotkey() -> bool:
+	if _item_hotkey_just_pressed(KEY_3, "gourd"):
+		return use_item("gourd")
+	if _item_hotkey_just_pressed(KEY_4, "pill"):
+		return use_item("pill")
+	if _item_hotkey_just_pressed(KEY_5, "capsule"):
+		return use_item("capsule")
+	return false
+
+func _item_hotkey_just_pressed(key: Key, item_id: String) -> bool:
+	var pressed := Input.is_key_pressed(key)
+	var was_pressed := bool(item_hotkeys_down.get(item_id, false))
+	item_hotkeys_down[item_id] = pressed
+	return pressed and not was_pressed
+
+func _read_move_axis() -> float:
+	var keyboard_axis := Input.get_axis("move_left", "move_right")
+	if keyboard_axis != 0.0:
+		return keyboard_axis
+	return ai_move_axis
+
+func set_ai_move_axis(axis: float) -> void:
+	ai_move_axis = clamp(axis, -1.0, 1.0)
+
+func get_ai_move_axis() -> float:
+	return ai_move_axis
+
+func request_ai_attack() -> void:
+	ai_attack_requested = true
+
+func request_ai_parry() -> void:
+	ai_parry_requested = true
+
+func request_ai_dodge(target: Node2D = null) -> void:
+	ai_dodge_requested = true
+	ai_dodge_target = target
+
+func request_ai_jump() -> void:
+	ai_jump_requested = true
+
+func has_pending_ai_attack() -> bool:
+	return ai_attack_requested
+
+func has_pending_ai_parry() -> bool:
+	return ai_parry_requested
+
+func has_pending_ai_dodge() -> bool:
+	return ai_dodge_requested
+
+func clear_ai_intent() -> void:
+	ai_move_axis = 0.0
+	_clear_ai_action_intents()
+
+func _clear_ai_action_intents() -> void:
+	ai_attack_requested = false
+	ai_parry_requested = false
+	ai_dodge_requested = false
+	ai_jump_requested = false
+	ai_dodge_target = null
+
+func get_item_count(item_id: String) -> int:
+	return int(item_counts.get(item_id, 0))
+
+func get_item_counts() -> Dictionary:
+	return item_counts.duplicate()
+
+func use_item(item_id: String) -> bool:
+	if not EAT_ITEM_IDS.has(item_id):
+		return false
+	if not _can_start_action():
+		return false
+	var count := get_item_count(item_id)
+	if count <= 0:
+		return false
+	item_counts[item_id] = count - 1
+	is_blocking = false
+	is_attacking = false
+	is_parrying = false
+	is_dashing = false
+	is_running = false
+	is_perfect_dodging = false
+	attack_buffer_queued = false
+	attack_buffer_timer = 0.0
+	attack_has_hit = false
+	attack_has_cut_projectile = false
+	velocity = Vector2.ZERO
+	_set_state(PlayerState.EAT)
+	action_timer = _animation_duration("mudra")
+	_force_play_animation("mudra")
+	stats_changed.emit()
+	return true
+
+func is_action_locked() -> bool:
+	return state in [PlayerState.ATTACK, PlayerState.PARRY, PlayerState.DASH, PlayerState.EAT, PlayerState.HURT, PlayerState.STUNNED, PlayerState.DEAD]
+
+func get_current_animation() -> String:
+	return current_animation
+
 func queue_attack_buffer() -> void:
 	if not _should_accept_attack_buffer():
 		return
@@ -435,7 +611,7 @@ func _should_accept_attack_buffer() -> bool:
 	return true
 
 func _has_forward_movement_intent() -> bool:
-	var direction := Input.get_axis("move_left", "move_right")
+	var direction := _read_move_axis()
 	return direction != 0.0 and sign(direction) == facing
 
 func _attack_step_impulse() -> float:
@@ -690,7 +866,7 @@ func _can_buffer_attack() -> bool:
 	return state == PlayerState.ATTACK
 
 func _can_jump() -> bool:
-	return state not in [PlayerState.ATTACK, PlayerState.PARRY, PlayerState.DASH, PlayerState.HURT, PlayerState.STUNNED]
+	return state not in [PlayerState.ATTACK, PlayerState.PARRY, PlayerState.DASH, PlayerState.EAT, PlayerState.HURT, PlayerState.STUNNED]
 
 func _update_visuals() -> void:
 	parry_flash_timer = max(0.0, parry_flash_timer - get_physics_process_delta_time())
@@ -721,6 +897,7 @@ func _setup_sprite_frames() -> void:
 		_add_strip_animation(frames, "dash", 18.0, false)
 		_add_strip_animation(frames, "jump", 10.0, true)
 		_add_strip_animation(frames, "climb", 10.0, true)
+		_add_strip_animation(frames, "mudra", 10.0, false)
 		_add_strip_animation(frames, "hurt", 8.0, false)
 		_add_strip_animation(frames, "death", 7.0, false)
 	else:
@@ -739,6 +916,7 @@ func _setup_sprite_frames() -> void:
 		_add_layout_animation(frames, "dash")
 		_add_layout_animation(frames, "jump")
 		_add_layout_animation(frames, "climb", "jump")
+		_add_layout_animation(frames, "mudra", "idle")
 		_add_layout_animation(frames, "hurt")
 		_add_layout_animation(frames, "death")
 	sprite.sprite_frames = frames
@@ -923,6 +1101,8 @@ func _play_state_animation() -> void:
 			next_animation = "jump"
 		PlayerState.WALL_CLIMB:
 			next_animation = "climb"
+		PlayerState.EAT:
+			next_animation = "mudra"
 		PlayerState.HURT:
 			next_animation = hurt_animation
 		PlayerState.STUNNED:
@@ -944,6 +1124,15 @@ func _force_play_animation(animation: StringName) -> void:
 	sprite.frame = 0
 	sprite.frame_progress = 0.0
 	sprite.play(animation)
+
+func _animation_duration(animation: StringName) -> float:
+	if sprite == null or sprite.sprite_frames == null or not sprite.sprite_frames.has_animation(animation):
+		return 0.8
+	var fps := sprite.sprite_frames.get_animation_speed(animation)
+	if fps <= 0.0:
+		return 0.8
+	var frame_count := sprite.sprite_frames.get_frame_count(animation)
+	return max(0.1, float(frame_count) / fps)
 
 func _play_stunned_animation() -> void:
 	var recovery_started := action_timer <= stunned_time * 0.5
@@ -1136,6 +1325,9 @@ func reset_combat_state() -> void:
 	attack_combo_step = 0
 	current_attack_animation = "attack_a"
 	hurt_animation = "hurt"
+	item_counts = DEFAULT_ITEM_COUNTS.duplicate()
+	item_hotkeys_down.clear()
+	clear_ai_intent()
 	attack_lunge_timer = 0.0
 	parry_flash_timer = 0.0
 	block_flash_timer = 0.0

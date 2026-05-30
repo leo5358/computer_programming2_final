@@ -9,9 +9,11 @@ size = Vector2(54, 96)
 size = Vector2(124, 78)
 
 [node name="Boss" type="CharacterBody2D"]
+scale = Vector2(2, 2)
 script = ExtResource("1_boss_script")
 
 [node name="Body" type="ColorRect" parent="."]
+visible = false
 offset_left = -27.0
 offset_top = -74.0
 offset_right = 27.0

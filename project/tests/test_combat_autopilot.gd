@@ -44,11 +44,16 @@ func _initialize() -> void:
 	boss.attack_elapsed = boss.attack_parry_window_start + 0.02
 	autopilot._physics_process(0.016)
 	if player.state == player.PlayerState.PARRY:
-		push_error("Autopilot should wait until the parry input will still be fresh at hit time")
+		push_error("Autopilot should not directly enter parry before the timing window")
 		quit(1)
 		return
 	boss.attack_elapsed = boss.attack_hit_time - 0.05
 	autopilot._physics_process(0.016)
+	if not player.has_method("has_pending_ai_parry") or not player.has_pending_ai_parry():
+		push_error("Autopilot should request parry through Player AI intent")
+		quit(1)
+		return
+	player._update_inputs()
 	if player.state != player.PlayerState.PARRY:
 		push_error("Autopilot should parry normal attacks during the perfect window")
 		quit(1)
@@ -71,11 +76,16 @@ func _initialize() -> void:
 	boss.attack_elapsed = boss.attack_parry_window_start + 0.02
 	autopilot._physics_process(0.016)
 	if player.state == player.PlayerState.DASH:
-		push_error("Autopilot should not dodge thrust so early that invulnerability expires before hit")
+		push_error("Autopilot should not directly dash before the timing window")
 		quit(1)
 		return
 	boss.attack_elapsed = boss.attack_hit_time - 0.04
 	autopilot._physics_process(0.016)
+	if not player.has_method("has_pending_ai_dodge") or not player.has_pending_ai_dodge():
+		push_error("Autopilot should request dodge through Player AI intent")
+		quit(1)
+		return
+	player._update_inputs()
 	if player.state != player.PlayerState.DASH or not player.is_perfect_dodging:
 		push_error("Autopilot should perfect-dodge perilous thrust attacks")
 		quit(1)
@@ -96,6 +106,11 @@ func _initialize() -> void:
 	warrior.posture_broken = true
 	var defeated_before: bool = warrior.defeated_flag
 	autopilot._physics_process(0.016)
+	if not player.has_method("has_pending_ai_attack") or not player.has_pending_ai_attack():
+		push_error("Autopilot should request execute attack through Player AI intent")
+		quit(1)
+		return
+	player._update_inputs()
 	if defeated_before == warrior.defeated_flag:
 		push_error("Autopilot should attack executable enemies to trigger execute")
 		quit(1)
@@ -109,8 +124,8 @@ func _initialize() -> void:
 	player.global_position = Vector2(280.0, 360.0)
 	player.velocity = Vector2.ZERO
 	autopilot._physics_process(0.016)
-	if player.velocity.x <= 0.0:
-		push_error("Autopilot should move the player toward the best attack range when no defense is needed")
+	if not player.has_method("get_ai_move_axis") or player.get_ai_move_axis() <= 0.0:
+		push_error("Autopilot should request movement through Player AI intent when no defense is needed")
 		quit(1)
 		return
 

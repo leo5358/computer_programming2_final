@@ -43,6 +43,7 @@ func _physics_process(delta: float) -> void:
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	if player == null or _player_is_dead(player):
 		return
+	_clear_player_intent(player)
 	var threat := _find_best_threat(player)
 	if not threat.is_empty():
 		_answer_threat(player, threat)
@@ -95,10 +96,12 @@ func _answer_threat(player: Node2D, threat: Dictionary) -> void:
 	var time_to_hit := float(threat["time_to_hit"])
 	if bool(threat["perilous"]):
 		if time_to_hit <= dodge_timing_lead:
-			player._start_perfect_dodge(actor)
+			if player.has_method("request_ai_dodge"):
+				player.request_ai_dodge(actor)
 		return
 	if time_to_hit <= parry_timing_lead and _player_can_defend(player):
-		player._start_parry()
+		if player.has_method("request_ai_parry"):
+			player.request_ai_parry()
 
 func _attack_executable_target(player: Node2D) -> bool:
 	for actor in _hostile_actors():
@@ -111,8 +114,8 @@ func _attack_executable_target(player: Node2D) -> bool:
 		if abs((actor as Node2D).global_position.x - player.global_position.x) > attack_opportunity_range:
 			continue
 		_face_target(player, actor as Node2D)
-		if player.has_method("_start_attack"):
-			player._start_attack()
+		if player.has_method("request_ai_attack"):
+			player.request_ai_attack()
 		if actor.has_method("execute"):
 			actor.execute()
 		return true
@@ -126,8 +129,8 @@ func _cut_projectile(player: Node2D) -> bool:
 		if abs(offset.y) > 48.0 or abs(offset.x) > projectile_cut_range:
 			continue
 		_face_target(player, projectile as Node2D)
-		if player.has_method("_start_attack"):
-			player._start_attack()
+		if player.has_method("request_ai_attack"):
+			player.request_ai_attack()
 			return true
 	return false
 
@@ -138,8 +141,8 @@ func _attack_nearest_opening(player: Node2D) -> bool:
 	_face_target(player, target)
 	if player.has_method("_can_start_attack") and not player._can_start_attack():
 		return false
-	if player.has_method("_start_attack"):
-		player._start_attack()
+	if player.has_method("request_ai_attack"):
+		player.request_ai_attack()
 		_set_action_cooldown()
 		return true
 	return false
@@ -157,11 +160,11 @@ func _move_to_best_position(player: Node2D) -> void:
 	var distance: float = abs(offset.x)
 	if distance > preferred_attack_range + range_tolerance:
 		_face_target(player, target)
-		player.velocity.x = sign(offset.x) * approach_speed
+		_set_player_move_axis(player, sign(offset.x))
 	elif distance < preferred_attack_range - range_tolerance:
-		player.velocity.x = -sign(offset.x) * approach_speed * 0.65
+		_set_player_move_axis(player, -sign(offset.x))
 	else:
-		player.velocity.x = move_toward(player.velocity.x, 0.0, approach_speed * get_physics_process_delta_time())
+		_set_player_move_axis(player, 0.0)
 
 func _nearest_living_target(player: Node2D) -> Node2D:
 	var nearest: Node2D
@@ -182,8 +185,8 @@ func _try_jump_toward_target(player: Node2D, target: Node2D) -> void:
 		return
 	if player.has_method("_can_jump") and not player._can_jump():
 		return
-	if "jump_velocity" in player:
-		player.velocity.y = float(player.get("jump_velocity"))
+	if player.has_method("request_ai_jump"):
+		player.request_ai_jump()
 
 func _nearest_attackable_target(player: Node2D) -> Node2D:
 	var nearest: Node2D
@@ -319,6 +322,14 @@ func _face_target(player: Node2D, target: Node2D) -> void:
 	var attack_area := player.get_node_or_null("AttackArea") as Area2D
 	if attack_area != null:
 		attack_area.position.x = 34.0 * direction
+
+func _clear_player_intent(player: Node2D) -> void:
+	if player.has_method("clear_ai_intent"):
+		player.clear_ai_intent()
+
+func _set_player_move_axis(player: Node2D, axis: float) -> void:
+	if player.has_method("set_ai_move_axis"):
+		player.set_ai_move_axis(axis)
 
 func _set_action_cooldown() -> void:
 	action_cooldown = action_cooldown_time

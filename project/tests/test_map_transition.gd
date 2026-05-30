@@ -72,6 +72,38 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+	main._spawn_enemy(main.WARRIOR_SCENE, Vector2(460, 360))
+	main._spawn_enemy(main.BOSS_SCENE, Vector2(820, 360))
+	await process_frame
+	if not main.has_method("_debug_warp_to_boss_interior"):
+		push_error("Main scene should expose debug boss interior warp")
+		quit(1)
+		return
+
+	await main._debug_warp_to_boss_interior()
+
+	if main.get("current_map_id") != "boss_interior":
+		push_error("Debug boss warp should switch directly to boss interior")
+		quit(1)
+		return
+	if get_nodes_in_group("minor_enemy").size() != 0:
+		push_error("Debug boss warp should clear old minor enemies")
+		quit(1)
+		return
+	if get_nodes_in_group("boss").size() != 1:
+		push_error("Debug boss warp should spawn exactly one Boss")
+		quit(1)
+		return
+	var boss: Node2D = get_nodes_in_group("boss")[0] as Node2D
+	if boss.global_position.x <= player.global_position.x:
+		push_error("Debug boss warp should place Boss on the right side of the arena")
+		quit(1)
+		return
+	if player.global_position.distance_to(Vector2(220, 595)) > 1.0:
+		push_error("Debug boss warp should place player at boss interior entrance")
+		quit(1)
+		return
+
 	main.queue_free()
 	await process_frame
 	quit(0)

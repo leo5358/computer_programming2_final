@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://bvonw3llxkogt"]
+[gd_scene format=3 uid="uid://bvonw3llxkogt"]
 
 [ext_resource type="Texture2D" uid="uid://cstparsm3o7q2" path="res://assets/start_page/background.png" id="1_mpx6a"]
 [ext_resource type="Texture2D" uid="uid://egcdmst6hyh2" path="res://assets/start_page/title_logo.png" id="2_ftwj8"]
@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://bhra26ny3ssex" path="res://assets/start_page/menu_selector_glow.png" id="7_4r0lf"]
 [ext_resource type="Texture2D" path="res://assets/start_page/mist.png" id="8_2f82o"]
 [ext_resource type="Script" path="res://scripts/start_page.gd" id="9_rd1x7"]
+[ext_resource type="AudioStream" path="res://assets/audio/StartPage.mp3" id="10_start_bgm"]
 
 [node name="Node2D" type="Node2D" unique_id=627760668]
 position = Vector2(16, -11)
@@ -117,3 +118,22 @@ texture = ExtResource("5_6osuo")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=261563022]
 position = Vector2(624.71094, 372.00003)
+
+[node name="StartPageBgm" type="AudioStreamPlayer" parent="." unique_id=1727140328]
+process_mode = 3
+stream = ExtResource("10_start_bgm")
+volume_db = -10.0
+autoplay = true
+
+[node name="FadeLayer" type="CanvasLayer" parent="." unique_id=141535557]
+layer = 30
+
+[node name="FadeRect" type="ColorRect" parent="FadeLayer" unique_id=485922283]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0)

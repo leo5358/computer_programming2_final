@@ -133,6 +133,7 @@ position = Vector2(1024, 548)
 texture = ExtResource("1_floor")
 
 [node name="PreviewPlayerIdle" type="Sprite2D" parent="Arena" unique_id=662468582]
+visible = false
 position = Vector2(729.00006, 533)
 scale = Vector2(1.75, 1.75)
 texture = ExtResource("11_player")

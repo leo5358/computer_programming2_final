@@ -116,14 +116,30 @@ func _initialize() -> void:
 	for frame in 14:
 		await physics_frame
 
+	if boss.get("is_attack_winding_up"):
+		push_error("Boss should pause under pressure before starting an in-range attack")
+		quit(1)
+		return
+	if float(boss.get("attack_pressure_timer")) <= 0.0:
+		push_error("Boss should expose pressure pause while preparing an in-range attack")
+		quit(1)
+		return
+
+	for frame in 60:
+		await physics_frame
+		if boss.get("is_attack_winding_up"):
+			break
+
 	if not boss.get("is_attack_winding_up"):
-		push_error("Boss should start attack windup when player is inside attack range")
+		push_error("Boss should start attack windup after the pressure pause")
 		quit(1)
 		return
 	if boss.current_animation != "attack":
 		push_error("Boss should play attack animation during normal attack windup")
 		quit(1)
 		return
+	for frame in 14:
+		await physics_frame
 	if absf(boss.velocity.x) > 0.01:
 		push_error("Boss should finish the short windup step quickly, then stop during attack windup")
 		quit(1)

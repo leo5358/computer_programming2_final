@@ -250,6 +250,7 @@ const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 @export var forced_counter_deflect_window_boss := 0.95
 @export var minimum_health_from_player_attack_boss := 1.0
 @export var attack_recovery_time_boss := 0.58
+@export var attack_pressure_commit_time_boss := 0.45
 
 # --- Boss State ---
 var current_animation_boss := "idle"
@@ -272,6 +273,19 @@ var has_engaged_player_boss := false
 var forced_counter_profile_boss := ""
 var consecutive_guard_count_boss := 0
 var forced_counter_timer_boss := 0.0
+var attack_pressure_timer_boss := 0.0
+
+var attack_pressure_timer: float:
+	get:
+		return attack_pressure_timer_boss
+	set(value):
+		attack_pressure_timer_boss = value
+
+var attack_pressure_commit_time: float:
+	get:
+		return attack_pressure_commit_time_boss
+	set(value):
+		attack_pressure_commit_time_boss = value
 
 var feedback_timer: float:
 	get:
@@ -423,6 +437,9 @@ var minimum_health_from_player_attack: float:
 
 func _ready() -> void:
 	super()
+	var fallback_body := get_node_or_null("Body") as CanvasItem
+	if fallback_body != null:
+		fallback_body.visible = false
 	
 	add_to_group("boss")
 	remove_from_group("minor_enemy")
@@ -491,7 +508,9 @@ func _physics_process(delta: float) -> void:
 	else:
 		_update_pressure_and_posture(delta)
 		attack_cooldown = max(0.0, attack_cooldown - delta)
-		if _should_start_attack_boss_internal():
+		if _update_attack_pressure_boss_internal(delta):
+			pass
+		elif _should_start_attack_boss_internal():
 			_start_normal_attack_boss_internal()
 		elif _should_start_gap_close_thrust_boss_internal():
 			_start_normal_attack_boss_internal("thrust")
@@ -580,8 +599,11 @@ func align_sprite_to_ground_boss() -> void:
 	)
 
 func receive_player_attack(damage: float, posture_damage: float) -> Variant:
-	if defeated_flag or posture_broken:
+	if defeated_flag:
 		return false
+	if posture_broken:
+		execute()
+		return true
 	has_engaged_player_boss = true
 	_mark_combat_pressure()
 	
@@ -679,6 +701,7 @@ func reset_combat_state() -> void:
 	facing = 1.0
 	is_chasing_boss = false
 	attack_cooldown = 0.65
+	attack_pressure_timer_boss = 0.0
 	is_attack_winding_up_boss = false
 	is_attack_active_boss = false
 	is_attack_recovering_boss = false
@@ -918,6 +941,21 @@ func _should_start_attack_boss_internal() -> bool:
 	var distance := absf(offset.x)
 	var max_start_distance := 112.0 if not forced_counter_profile_boss.is_empty() else attack_start_distance_boss
 	return distance >= close_spacing_distance_boss and distance <= max_start_distance
+
+func _update_attack_pressure_boss_internal(delta: float) -> bool:
+	if attack_pressure_timer_boss > 0.0:
+		attack_pressure_timer_boss = max(0.0, attack_pressure_timer_boss - delta)
+		velocity.x = 0.0
+		_update_engaged_hold_boss_internal()
+		if attack_pressure_timer_boss <= 0.0 and _should_start_attack_boss_internal():
+			_start_normal_attack_boss_internal()
+		return true
+	if forced_counter_profile_boss.is_empty() and _should_start_attack_boss_internal():
+		attack_pressure_timer_boss = attack_pressure_commit_time_boss
+		velocity.x = 0.0
+		_update_engaged_hold_boss_internal()
+		return true
+	return false
 
 func _should_start_gap_close_thrust_boss_internal() -> bool:
 	if not has_engaged_player_boss:
