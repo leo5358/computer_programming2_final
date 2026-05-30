@@ -1,0 +1,119 @@
+[gd_scene load_steps=10 format=3 uid="uid://bvonw3llxkogt"]
+
+[ext_resource type="Texture2D" uid="uid://cstparsm3o7q2" path="res://assets/start_page/background.png" id="1_mpx6a"]
+[ext_resource type="Texture2D" uid="uid://egcdmst6hyh2" path="res://assets/start_page/title_logo.png" id="2_ftwj8"]
+[ext_resource type="Texture2D" uid="uid://cvnk6rdaynay1" path="res://assets/start_page/menu_continue.png" id="3_5c7c7"]
+[ext_resource type="Texture2D" uid="uid://txfcd6ymq32w" path="res://assets/start_page/menu_new_game.png" id="4_qau4g"]
+[ext_resource type="Texture2D" uid="uid://cm34m560gy6dy" path="res://assets/start_page/menu_quit.png" id="5_6osuo"]
+[ext_resource type="Texture2D" uid="uid://cnq845nrurp6f" path="res://assets/start_page/menu_selector.png" id="6_25iwx"]
+[ext_resource type="Texture2D" uid="uid://bhra26ny3ssex" path="res://assets/start_page/menu_selector_glow.png" id="7_4r0lf"]
+[ext_resource type="Texture2D" path="res://assets/start_page/mist.png" id="8_2f82o"]
+[ext_resource type="Script" path="res://scripts/start_page.gd" id="9_rd1x7"]
+
+[node name="Node2D" type="Node2D" unique_id=627760668]
+position = Vector2(16, -11)
+script = ExtResource("9_rd1x7")
+
+[node name="background" type="Sprite2D" parent="." unique_id=1789823894]
+position = Vector2(625, 373.00003)
+scale = Vector2(0.76514345, 0.76514345)
+texture = ExtResource("1_mpx6a")
+metadata/_edit_lock_ = true
+
+[node name="mist" type="Sprite2D" parent="." unique_id=113200012]
+modulate = Color(1, 1, 1, 0.82)
+position = Vector2(625, 418.52)
+scale = Vector2(0.76514345, 0.76514345)
+texture = ExtResource("8_2f82o")
+
+[node name="menu_band" type="ColorRect" parent="." unique_id=113200000]
+offset_left = -8.0
+offset_top = 90.0
+offset_right = 1265.0
+offset_bottom = 648.0
+mouse_filter = 2
+color = Color(0.0352941, 0.0470588, 0.0666667, 0.109804)
+metadata/_edit_use_anchors_ = true
+metadata/_edit_lock_ = true
+
+[node name="title_glow" type="Sprite2D" parent="." unique_id=1788760195]
+modulate = Color(0.788235, 0.827451, 0.87451, 0.156863)
+position = Vector2(640, 182)
+scale = Vector2(0.312, 0.312)
+texture = ExtResource("2_ftwj8")
+
+[node name="title_shadow" type="Sprite2D" parent="." unique_id=1788760196]
+modulate = Color(0.0470588, 0.0627451, 0.0862745, 0.447059)
+position = Vector2(644, 186)
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("2_ftwj8")
+
+[node name="title" type="Sprite2D" parent="." unique_id=1788760197]
+position = Vector2(625, 181)
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("2_ftwj8")
+
+[node name="menu_selector" type="Sprite2D" parent="." unique_id=113200004]
+position = Vector2(631.71094, 367.00003)
+scale = Vector2(0.202777, 0.26744193)
+texture = ExtResource("6_25iwx")
+
+[node name="menu_selector_glow" type="Sprite2D" parent="." unique_id=113200011]
+modulate = Color(1, 1, 1, 0.9)
+position = Vector2(636.3534, 366.50003)
+scale = Vector2(0.202777, 0.26744193)
+texture = ExtResource("7_4r0lf")
+
+[node name="menu_continue_glow" type="Sprite2D" parent="." unique_id=113200005]
+modulate = Color(0.788235, 0.827451, 0.87451, 0.137255)
+position = Vector2(630.35095, 365.6)
+scale = Vector2(0.206, 0.206)
+texture = ExtResource("3_5c7c7")
+
+[node name="menu_continue_shadow" type="Sprite2D" parent="." unique_id=113200006]
+modulate = Color(0.0431373, 0.0588235, 0.0823529, 0.427451)
+position = Vector2(633.35095, 367.6)
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("3_5c7c7")
+
+[node name="menu_continue" type="Sprite2D" parent="." unique_id=113200001]
+position = Vector2(630.35095, 363.6)
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("3_5c7c7")
+
+[node name="menu_new_game_glow" type="Sprite2D" parent="." unique_id=113200007]
+modulate = Color(0.788235, 0.827451, 0.87451, 0.137255)
+position = Vector2(630.4009, 489.43002)
+scale = Vector2(0.186, 0.186)
+texture = ExtResource("4_qau4g")
+
+[node name="menu_new_game_shadow" type="Sprite2D" parent="." unique_id=113200008]
+modulate = Color(0.0431373, 0.0588235, 0.0823529, 0.427451)
+position = Vector2(633.4009, 491.43002)
+scale = Vector2(0.18, 0.18)
+texture = ExtResource("4_qau4g")
+
+[node name="menu_new_game" type="Sprite2D" parent="." unique_id=113200002]
+position = Vector2(630.4009, 487.43002)
+scale = Vector2(0.18, 0.18)
+texture = ExtResource("4_qau4g")
+
+[node name="menu_quit_glow" type="Sprite2D" parent="." unique_id=113200009]
+modulate = Color(0.788235, 0.827451, 0.87451, 0.137255)
+position = Vector2(633.3699, 590.24)
+scale = Vector2(0.186, 0.186)
+texture = ExtResource("5_6osuo")
+
+[node name="menu_quit_shadow" type="Sprite2D" parent="." unique_id=113200010]
+modulate = Color(0.0431373, 0.0588235, 0.0823529, 0.427451)
+position = Vector2(636.3699, 592.24)
+scale = Vector2(0.18, 0.18)
+texture = ExtResource("5_6osuo")
+
+[node name="menu_quit" type="Sprite2D" parent="." unique_id=113200003]
+position = Vector2(633.3699, 588.24)
+scale = Vector2(0.18, 0.18)
+texture = ExtResource("5_6osuo")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=261563022]
+position = Vector2(624.71094, 372.00003)
