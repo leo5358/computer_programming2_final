@@ -79,7 +79,7 @@ libxrandr-dev libxi-dev libgl-dev libasound2-dev libpulse-dev
 | **Attack** | `J` | Basic offensive strike |
 | **Parry / Block** | `K` | Press for Parry, Hold for Block |
 | **Dash / Dodge** | `L` | Short invulnerability window |
-| **Jump** | `Space` | Avoid sweep attacks |
+| **Jump / Wall Climb** | `Space` | Jump; hold while pushing into a wall to climb |
 | **Toggle Debug** | `F1` | Show/Hide internal combat data |
 | **Force BPM** | `F2` | Set BPM to 200 (Adrenaline test) |
 | **Reset Combat** | `F5` / `R` | Instantly reset the boss encounter |

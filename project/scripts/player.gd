@@ -23,6 +23,7 @@ const PLAYER_STRIP_PATHS := {
 	"block": "res://assets/sprites/player/deflect.png",
 	"dash": "res://assets/sprites/player/dash.png",
 	"jump": "res://assets/sprites/player/jump.png",
+	"climb": "res://assets/sprites/player/climb.png",
 	"hurt": "res://assets/sprites/player/hurt.png",
 	"death": "res://assets/sprites/player/death.png",
 }
@@ -68,6 +69,7 @@ enum PlayerState {
 	BLOCK,
 	DASH,
 	JUMP,
+	WALL_CLIMB,
 	HURT,
 	STUNNED,
 	DEAD,
@@ -82,6 +84,9 @@ enum PlayerState {
 @export var dash_impulse := 560.0
 @export var jump_velocity := -430.0
 @export var coyote_time := 0.1
+@export var wall_climb_speed := 130.0
+@export var wall_slide_speed := 80.0
+@export var wall_stick_speed := 35.0
 @export var max_health := 100.0
 @export var max_posture := 100.0
 @export var base_attack_damage := 16.0
@@ -155,6 +160,7 @@ var coyote_timer := 0.0
 var action_timer := 0.0
 var dash_timer := 0.0
 var dash_direction := 1.0
+var wall_climb_direction := 0.0
 var attack_elapsed := 0.0
 var attack_buffer_timer := 0.0
 var attack_buffer_queued := false
@@ -277,11 +283,19 @@ func _update_movement(delta: float) -> void:
 
 	var direction := Input.get_axis("move_left", "move_right")
 	is_running = direction != 0.0 and Input.is_key_pressed(KEY_SHIFT)
+
+	if _can_wall_interact() and _is_pressing_into_wall(direction):
+		_apply_wall_climb(direction)
+		attack_area.position.x = 34.0 * facing
+		return
+	elif state == PlayerState.WALL_CLIMB:
+		_set_state(PlayerState.JUMP)
+
 	_apply_horizontal_control(direction, delta)
 
 	attack_area.position.x = 34.0 * facing
 
-	if state in [PlayerState.IDLE, PlayerState.MOVE, PlayerState.JUMP]:
+	if state in [PlayerState.IDLE, PlayerState.MOVE, PlayerState.JUMP, PlayerState.WALL_CLIMB]:
 		if not is_on_floor():
 			_set_state(PlayerState.JUMP)
 		elif abs(velocity.x) > 4.0:
@@ -298,6 +312,33 @@ func _apply_horizontal_control(direction: float, delta: float) -> void:
 	else:
 		is_running = false
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
+
+func _can_wall_interact() -> bool:
+	return is_on_wall() and not is_on_floor() and _can_jump()
+
+func _is_pressing_into_wall(direction: float) -> bool:
+	var wall_direction := _wall_direction()
+	return direction != 0.0 and wall_direction != 0.0 and sign(direction) == wall_direction
+
+func _wall_direction() -> float:
+	var normal := get_wall_normal()
+	if normal.x == 0.0:
+		return 0.0
+	return -sign(normal.x)
+
+func _apply_wall_climb(direction: float) -> void:
+	wall_climb_direction = _wall_direction()
+	if wall_climb_direction == 0.0:
+		wall_climb_direction = sign(direction)
+	facing = wall_climb_direction
+	is_running = false
+	coyote_timer = 0.0
+	velocity.x = wall_climb_direction * wall_stick_speed
+	if Input.is_action_pressed("jump"):
+		velocity.y = -wall_climb_speed
+	else:
+		velocity.y = min(velocity.y, wall_slide_speed)
+	_set_state(PlayerState.WALL_CLIMB)
 
 func _update_action_state(delta: float) -> void:
 	attack_buffer_timer = max(0.0, attack_buffer_timer - delta)
@@ -627,6 +668,7 @@ func _enter_stunned() -> void:
 	is_running = false
 	is_perfect_dodging = false
 	is_invulnerable = true
+	wall_climb_direction = 0.0
 	hitstop_timer = 0.0
 	stored_velocity = Vector2.ZERO
 	velocity = Vector2.ZERO
@@ -634,7 +676,7 @@ func _enter_stunned() -> void:
 	current_animation = ""
 
 func _can_start_action() -> bool:
-	return state in [PlayerState.IDLE, PlayerState.MOVE, PlayerState.JUMP, PlayerState.BLOCK]
+	return state in [PlayerState.IDLE, PlayerState.MOVE, PlayerState.JUMP, PlayerState.WALL_CLIMB, PlayerState.BLOCK]
 
 func _can_start_attack() -> bool:
 	return _can_start_action() and attack_lockout_timer <= 0.0
@@ -678,6 +720,7 @@ func _setup_sprite_frames() -> void:
 		_add_strip_animation(frames, "block", 8.0, true)
 		_add_strip_animation(frames, "dash", 18.0, false)
 		_add_strip_animation(frames, "jump", 10.0, true)
+		_add_strip_animation(frames, "climb", 10.0, true)
 		_add_strip_animation(frames, "hurt", 8.0, false)
 		_add_strip_animation(frames, "death", 7.0, false)
 	else:
@@ -695,6 +738,7 @@ func _setup_sprite_frames() -> void:
 		_add_layout_animation(frames, "block")
 		_add_layout_animation(frames, "dash")
 		_add_layout_animation(frames, "jump")
+		_add_layout_animation(frames, "climb", "jump")
 		_add_layout_animation(frames, "hurt")
 		_add_layout_animation(frames, "death")
 	sprite.sprite_frames = frames
@@ -877,6 +921,8 @@ func _play_state_animation() -> void:
 			next_animation = "dash"
 		PlayerState.JUMP:
 			next_animation = "jump"
+		PlayerState.WALL_CLIMB:
+			next_animation = "climb"
 		PlayerState.HURT:
 			next_animation = hurt_animation
 		PlayerState.STUNNED:
@@ -1080,6 +1126,7 @@ func reset_combat_state() -> void:
 	action_timer = 0.0
 	dash_timer = 0.0
 	dash_direction = 1.0
+	wall_climb_direction = 0.0
 	attack_elapsed = 0.0
 	attack_buffer_timer = 0.0
 	attack_buffer_queued = false

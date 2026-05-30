@@ -78,6 +78,10 @@ func _initialize() -> void:
 		push_error("Player should use the 8-frame deflect strip for parry")
 		quit(1)
 		return
+	if sprite.sprite_frames.get_frame_count("climb") != 8:
+		push_error("Player should use the 8-frame climb strip from assets/sprites/player")
+		quit(1)
+		return
 	var run_first_frame := sprite.sprite_frames.get_frame_texture("run", 0) as AtlasTexture
 	if run_first_frame == null or run_first_frame.region != Rect2(0, 0, 96, 96):
 		push_error("Current player strip art should keep the full 96px frame to avoid clipping")
@@ -181,6 +185,29 @@ func _initialize() -> void:
 	player._apply_horizontal_control(-1.0, 0.1)
 	if player.velocity.x >= 0.0:
 		push_error("Player should brake into opposite direction when reversing input")
+		quit(1)
+		return
+
+	Input.action_press("jump")
+	player._apply_wall_climb(1.0)
+	Input.action_release("jump")
+	if player.state != player.PlayerState.WALL_CLIMB:
+		push_error("Player should enter wall climb state while climbing a wall")
+		quit(1)
+		return
+	if player.velocity.y >= 0.0:
+		push_error("Holding jump during wall climb should move the player upward")
+		quit(1)
+		return
+	player._update_visuals()
+	if player.current_animation != "climb":
+		push_error("Wall climb state should play climb animation")
+		quit(1)
+		return
+	player.velocity.y = 500.0
+	player._apply_wall_climb(1.0)
+	if player.velocity.y > player.wall_slide_speed:
+		push_error("Wall contact without jump should cap downward slide speed")
 		quit(1)
 		return
 

@@ -86,7 +86,7 @@ layout_mode = 2
 
 [node name="Message" type="Label" parent="CombatUI/Panel/VBox" unique_id=2141977713]
 layout_mode = 2
-text = "A/D move  Space jump  J attack  K block/parry  L dash/dodge"
+text = "A/D move  Space jump/climb  J attack  K block/parry  L dash/dodge"
 
 [node name="HealthLabel" type="Label" parent="CombatUI/Panel/VBox" unique_id=1969146803]
 layout_mode = 2

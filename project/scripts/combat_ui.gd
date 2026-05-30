@@ -20,7 +20,7 @@ func _process(_delta: float) -> void:
 			if player.health <= 0.0:
 				message.text = "You died. Restart the scene to try again."
 			else:
-				message.text = "A/D move  Space jump  J attack  K block/parry  L dash/dodge"
+				message.text = "A/D move  Space jump/climb  J attack  K block/parry  L dash/dodge"
 
 	if enemy != null and enemy_bar != null:
 		enemy_bar.value = enemy.posture
