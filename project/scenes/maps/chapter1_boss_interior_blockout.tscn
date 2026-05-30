@@ -1,0 +1,304 @@
+[gd_scene format=3 uid="uid://jpwpha7yl6rk"]
+
+[ext_resource type="Texture2D" uid="uid://goggp8bpw4ty" path="res://assets/maps/chapter1/boss_interior/floor/chapter1_boss_floor_main_v01.png" id="1_floor"]
+[ext_resource type="Texture2D" uid="uid://dtxgo8p0yhjog" path="res://assets/maps/chapter1/boss_interior/altar/chapter1_boss_altar_frame_v01.png" id="2_altar"]
+[ext_resource type="Texture2D" uid="uid://q3a8v5vyxmii" path="res://assets/maps/chapter1/boss_interior/backgrounds/chapter1_boss_back_wall_v01.png" id="3_backwall"]
+[ext_resource type="Texture2D" uid="uid://y6cjjib2p83g" path="res://assets/maps/chapter1/boss_interior/props/chapter1_boss_column_v01.png" id="4_column"]
+[ext_resource type="Texture2D" uid="uid://dr454v2e6uo31" path="res://assets/maps/chapter1/boss_interior/props/chapter1_boss_banner_v01.png" id="5_banner"]
+[ext_resource type="Texture2D" uid="uid://cfv3ui74cp1h5" path="res://assets/maps/chapter1/boss_interior/props/chapter1_boss_torch_v01.png" id="6_torch"]
+[ext_resource type="Texture2D" uid="uid://cg0poxgv21rgc" path="res://assets/maps/chapter1/boss_interior/altar/chapter1_boss_dais_front_v01.png" id="7_daisfront"]
+[ext_resource type="Texture2D" uid="uid://cs824ep4bt18q" path="res://assets/maps/chapter1/boss_interior/props/chapter1_boss_offering_stand_v01.png" id="8_offering"]
+[ext_resource type="Texture2D" uid="uid://biftibqqce1dm" path="res://assets/maps/chapter1/boss_interior/props/chapter1_boss_heart_drum_idol_v01.png" id="9_idol"]
+[ext_resource type="Texture2D" uid="uid://yr53j6ej8gwk" path="res://assets/maps/chapter1/boss_interior/props/chapter1_boss_ritual_brazier_v01.png" id="10_brazier"]
+[ext_resource type="Texture2D" uid="uid://bcl50ixmk4jjq" path="res://assets/maps/chapter1/boss_interior/preview/player_idle_preview_frame0.png" id="11_player"]
+
+[node name="root" type="Node2D" unique_id=858961773]
+
+[node name="Background" type="Node2D" parent="." unique_id=1338821269]
+
+[node name="NightInteriorWash" type="Polygon2D" parent="Background" unique_id=666990151]
+color = Color(0.0666667, 0.0509804, 0.0823529, 1)
+polygon = PackedVector2Array(-128, -64, 2304, -64, 2304, 1088, -128, 1088)
+
+[node name="RearWall" type="Polygon2D" parent="Background" unique_id=619486063]
+color = Color(0.141176, 0.101961, 0.129412, 1)
+polygon = PackedVector2Array(0, 80, 2048, 80, 2048, 560, 0, 560)
+
+[node name="CeilingShadow" type="Polygon2D" parent="Background" unique_id=1441278268]
+color = Color(0.0509804, 0.0352941, 0.0470588, 0.86)
+polygon = PackedVector2Array(0, 0, 2048, 0, 2048, 176, 0, 176)
+
+[node name="PreviewBackWallAsset" type="Sprite2D" parent="Background" unique_id=468061058]
+position = Vector2(1024, 360)
+texture = ExtResource("3_backwall")
+
+[node name="Midground" type="Node2D" parent="." unique_id=62823008]
+
+[node name="BackCurtainLeft" type="Polygon2D" parent="Midground" unique_id=1767562090]
+visible = false
+color = Color(0.278431, 0.0862745, 0.117647, 0.75)
+polygon = PackedVector2Array(512, 112, 704, 112, 672, 416, 544, 416)
+
+[node name="BackCurtainRight" type="Polygon2D" parent="Midground" unique_id=849333301]
+visible = false
+color = Color(0.278431, 0.0862745, 0.117647, 0.75)
+polygon = PackedVector2Array(1344, 112, 1536, 112, 1504, 416, 1376, 416)
+
+[node name="PreviewAltarAsset" type="Sprite2D" parent="Midground" unique_id=1358732104]
+position = Vector2(1024, 230)
+scale = Vector2(0.68, 0.68)
+texture = ExtResource("2_altar")
+
+[node name="PreviewBannerLeft" type="Sprite2D" parent="Midground" unique_id=1911425691]
+position = Vector2(612, 300)
+scale = Vector2(0.32, 0.32)
+texture = ExtResource("5_banner")
+
+[node name="PreviewBannerRight" type="Sprite2D" parent="Midground" unique_id=1412961585]
+position = Vector2(1436, 300)
+scale = Vector2(-0.32, 0.32)
+texture = ExtResource("5_banner")
+
+[node name="PreviewDaisFrontAsset" type="Sprite2D" parent="Midground" unique_id=1357688888]
+position = Vector2(1024, 352)
+scale = Vector2(0.19, 0.19)
+texture = ExtResource("7_daisfront")
+
+[node name="PreviewOfferingStand" type="Sprite2D" parent="Midground" unique_id=2058395642]
+position = Vector2(1024, 286)
+scale = Vector2(0.11, 0.11)
+texture = ExtResource("8_offering")
+
+[node name="PreviewOfferingStandLeft" type="Sprite2D" parent="Midground" unique_id=2011867478]
+position = Vector2(910, 308)
+scale = Vector2(0.085, 0.085)
+texture = ExtResource("8_offering")
+
+[node name="PreviewOfferingStandRight" type="Sprite2D" parent="Midground" unique_id=809869061]
+position = Vector2(1138, 308)
+scale = Vector2(0.085, 0.085)
+texture = ExtResource("8_offering")
+
+[node name="PreviewBrazierLeft" type="Sprite2D" parent="Midground" unique_id=1054956125]
+position = Vector2(844, 330)
+scale = Vector2(0.09, 0.09)
+texture = ExtResource("10_brazier")
+
+[node name="PreviewBrazierRight" type="Sprite2D" parent="Midground" unique_id=1287797713]
+position = Vector2(1204, 330)
+scale = Vector2(-0.09, 0.09)
+texture = ExtResource("10_brazier")
+
+[node name="Arena" type="Node2D" parent="." unique_id=394404065]
+
+[node name="MainFloor" type="Polygon2D" parent="Arena" unique_id=830979641]
+color = Color(0.376471, 0.223529, 0.188235, 0.96)
+polygon = PackedVector2Array(0, 448, 2048, 448, 2048, 720, 0, 720)
+
+[node name="ArenaSurface" type="Line2D" parent="Arena" unique_id=1558953927]
+points = PackedVector2Array(96, 440, 1952, 440)
+width = 18.0
+default_color = Color(0.956863, 0.85098, 0.721569, 0.95)
+
+[node name="RaisedDais" type="Polygon2D" parent="Arena" unique_id=167951297]
+visible = false
+color = Color(0.521569, 0.25098, 0.247059, 0.16)
+polygon = PackedVector2Array(736, 300, 1312, 300, 1312, 412, 736, 412)
+
+[node name="DaisSurface" type="Line2D" parent="Arena" unique_id=795091080]
+visible = false
+points = PackedVector2Array(784, 294, 1264, 294)
+default_color = Color(1, 0.843137, 0.823529, 0.18)
+
+[node name="LeftEntryWalk" type="Line2D" parent="Arena" unique_id=1511239997]
+visible = false
+points = PackedVector2Array(64, 440, 352, 440)
+default_color = Color(0.968627, 0.901961, 0.65098, 0.26)
+
+[node name="BossZoneGuide" type="Line2D" parent="Arena" unique_id=1623861372]
+visible = false
+points = PackedVector2Array(768, 440, 1280, 440)
+width = 12.0
+default_color = Color(1, 0.643137, 0.701961, 0.24)
+
+[node name="PreviewFloorAsset" type="Sprite2D" parent="Arena" unique_id=1499246906]
+position = Vector2(1024, 548)
+texture = ExtResource("1_floor")
+
+[node name="PreviewPlayerIdle" type="Sprite2D" parent="Arena" unique_id=662468582]
+position = Vector2(729.00006, 533)
+scale = Vector2(1.75, 1.75)
+texture = ExtResource("11_player")
+
+[node name="Props" type="Node2D" parent="." unique_id=197603655]
+
+[node name="LeftWallColumnA" type="Polygon2D" parent="Props" unique_id=322497029]
+visible = false
+color = Color(0.239216, 0.176471, 0.172549, 0.95)
+polygon = PackedVector2Array(192, 112, 256, 112, 256, 560, 192, 560)
+
+[node name="LeftWallColumnB" type="Polygon2D" parent="Props" unique_id=759382852]
+visible = false
+color = Color(0.239216, 0.176471, 0.172549, 0.95)
+polygon = PackedVector2Array(448, 112, 512, 112, 512, 560, 448, 560)
+
+[node name="RightWallColumnA" type="Polygon2D" parent="Props" unique_id=1732250365]
+visible = false
+color = Color(0.239216, 0.176471, 0.172549, 0.95)
+polygon = PackedVector2Array(1536, 112, 1600, 112, 1600, 560, 1536, 560)
+
+[node name="RightWallColumnB" type="Polygon2D" parent="Props" unique_id=1120615910]
+visible = false
+color = Color(0.239216, 0.176471, 0.172549, 0.95)
+polygon = PackedVector2Array(1792, 112, 1856, 112, 1856, 560, 1792, 560)
+
+[node name="LeftEntryDoor" type="Polygon2D" parent="Props" unique_id=474484295]
+visible = false
+color = Color(0.0862745, 0.0588235, 0.0745098, 0.95)
+polygon = PackedVector2Array(0, 208, 144, 208, 144, 448, 0, 448)
+
+[node name="DoorLightSpill" type="Polygon2D" parent="Props" unique_id=1501755109]
+visible = false
+color = Color(0.941176, 0.827451, 0.611765, 0.16)
+polygon = PackedVector2Array(112, 352, 336, 352, 336, 448, 112, 448)
+
+[node name="AltarFrame" type="Polygon2D" parent="Props" unique_id=2064587202]
+visible = false
+color = Color(0.556863, 0.478431, 0.317647, 0.85)
+polygon = PackedVector2Array(832, 96, 1216, 96, 1280, 160, 1280, 320, 768, 320, 768, 160)
+
+[node name="AltarVoid" type="Polygon2D" parent="Props" unique_id=165373009]
+visible = false
+color = Color(0.0705882, 0.0470588, 0.0588235, 0.76)
+polygon = PackedVector2Array(928, 144, 1120, 144, 1120, 320, 928, 320)
+
+[node name="IdolShadow" type="Polygon2D" parent="Props" unique_id=196354856]
+visible = false
+color = Color(0.0352941, 0.0235294, 0.0313725, 0.32)
+polygon = PackedVector2Array(940, 166, 1108, 166, 1132, 312, 916, 312)
+
+[node name="PreviewHeartDrumIdol" type="Sprite2D" parent="Props" unique_id=1097746320]
+position = Vector2(1024, 274)
+scale = Vector2(0.18, 0.18)
+texture = ExtResource("9_idol")
+
+[node name="RitualPillarLeft" type="Polygon2D" parent="Props" unique_id=734866106]
+visible = false
+color = Color(0.384314, 0.25098, 0.223529, 0.92)
+polygon = PackedVector2Array(704, 192, 768, 192, 768, 448, 704, 448)
+
+[node name="RitualPillarRight" type="Polygon2D" parent="Props" unique_id=1759836970]
+visible = false
+color = Color(0.384314, 0.25098, 0.223529, 0.92)
+polygon = PackedVector2Array(1280, 192, 1344, 192, 1344, 448, 1280, 448)
+
+[node name="TorchLeft" type="Polygon2D" parent="Props" unique_id=1683103921]
+visible = false
+color = Color(0.972549, 0.713725, 0.364706, 0.95)
+polygon = PackedVector2Array(620, 224, 640, 192, 660, 224, 648, 248, 632, 248)
+
+[node name="TorchRight" type="Polygon2D" parent="Props" unique_id=344609617]
+visible = false
+color = Color(0.972549, 0.713725, 0.364706, 0.95)
+polygon = PackedVector2Array(1388, 224, 1408, 192, 1428, 224, 1416, 248, 1400, 248)
+
+[node name="PreviewColumnLeftA" type="Sprite2D" parent="Props" unique_id=752631081]
+position = Vector2(232, 342)
+scale = Vector2(0.29, 0.29)
+texture = ExtResource("4_column")
+
+[node name="PreviewColumnLeftB" type="Sprite2D" parent="Props" unique_id=1550106656]
+position = Vector2(488, 342)
+scale = Vector2(0.29, 0.29)
+texture = ExtResource("4_column")
+
+[node name="PreviewColumnRightA" type="Sprite2D" parent="Props" unique_id=1240303996]
+position = Vector2(1568, 342)
+scale = Vector2(0.29, 0.29)
+texture = ExtResource("4_column")
+
+[node name="PreviewColumnRightB" type="Sprite2D" parent="Props" unique_id=1559991009]
+position = Vector2(1824, 342)
+scale = Vector2(0.29, 0.29)
+texture = ExtResource("4_column")
+
+[node name="PreviewTorchLeft" type="Sprite2D" parent="Props" unique_id=1377670460]
+position = Vector2(648, 430)
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("6_torch")
+
+[node name="PreviewTorchRight" type="Sprite2D" parent="Props" unique_id=1587981164]
+position = Vector2(1400, 430)
+scale = Vector2(-0.2, 0.2)
+texture = ExtResource("6_torch")
+
+[node name="BossAnchor" type="Line2D" parent="Props" unique_id=186265731]
+visible = false
+points = PackedVector2Array(1016, 392, 1040, 368, 1064, 392, 1040, 416, 1016, 392)
+width = 8.0
+default_color = Color(1, 0.545098, 0.635294, 0.42)
+
+[node name="PlayerEntryAnchor" type="Line2D" parent="Props" unique_id=1290552658]
+visible = false
+points = PackedVector2Array(248, 392, 272, 368, 296, 392, 272, 416, 248, 392)
+width = 8.0
+default_color = Color(0.968627, 0.905882, 0.568627, 0.42)
+
+[node name="Foreground" type="Node2D" parent="." unique_id=1401232146]
+
+[node name="FloorForegroundBand" type="Polygon2D" parent="Foreground" unique_id=429756213]
+color = Color(0.129412, 0.0823529, 0.0823529, 0.2)
+polygon = PackedVector2Array(-64, 528, 2112, 528, 2112, 720, -64, 720)
+
+[node name="LabelRoom" type="Label" parent="Foreground" unique_id=1386032106]
+visible = false
+offset_left = 72.0
+offset_top = 52.0
+offset_right = 472.0
+offset_bottom = 92.0
+theme_override_colors/font_color = Color(0.92549, 0.937255, 1, 0.18)
+text = "Chapter1_BossInterior / Boss 房 blockout"
+
+[node name="LabelEntry" type="Label" parent="Foreground" unique_id=1602539482]
+visible = false
+offset_left = 104.0
+offset_top = 312.0
+offset_right = 344.0
+offset_bottom = 352.0
+theme_override_colors/font_color = Color(1, 0.92549, 0.713725, 0.2)
+text = "玩家入場"
+
+[node name="LabelArena" type="Label" parent="Foreground" unique_id=1513908957]
+visible = false
+offset_left = 824.0
+offset_top = 468.0
+offset_right = 1184.0
+offset_bottom = 508.0
+theme_override_colors/font_color = Color(1, 0.835294, 0.866667, 0.2)
+text = "主要打鬥區 / 同一水平面"
+
+[node name="LabelDais" type="Label" parent="Foreground" unique_id=1795390766]
+visible = false
+offset_left = 840.0
+offset_top = 236.0
+offset_right = 1260.0
+offset_bottom = 276.0
+theme_override_colors/font_color = Color(1, 0.854902, 0.772549, 0.22)
+text = "後方祭壇 / 神像壓迫"
+
+[node name="Legend" type="Label" parent="Foreground" unique_id=1194182740]
+visible = false
+offset_left = 72.0
+offset_top = 92.0
+offset_right = 640.0
+offset_bottom = 132.0
+theme_override_colors/font_color = Color(0.909804, 0.921569, 0.960784, 0.14)
+text = "黃記號=玩家入場  粉記號=Boss錨點  玩家與Boss都站在同一水平地面"
+
+[node name="Camera" type="Camera2D" parent="." unique_id=1859567514]
+position = Vector2(1024, 360)
+zoom = Vector2(0.85, 0.85)
+limit_left = 0
+limit_top = 0
+limit_right = 2048
+limit_bottom = 720

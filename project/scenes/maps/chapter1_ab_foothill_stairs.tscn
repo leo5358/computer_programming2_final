@@ -1,0 +1,3355 @@
+[gd_scene format=4 uid="uid://b1lufco7xhjkb"]
+
+[ext_resource type="Texture2D" uid="uid://j2hpcr14ary6" path="res://assets/maps/chapter1/backgrounds/mountains_0.png" id="1_s8urn"]
+[ext_resource type="Texture2D" uid="uid://cgu54cfmdbpys" path="res://assets/maps/chapter1/backgrounds/moon.png" id="2_oejvn"]
+[ext_resource type="Texture2D" uid="uid://b6g0c5pvpa4lr" path="res://assets/maps/chapter1/backgrounds/mountains_1.png" id="3_8wws1"]
+[ext_resource type="Texture2D" uid="uid://bpbols0yvkxjv" path="res://assets/maps/chapter1/backgrounds/forest_bamboo_0.png" id="3_b08u7"]
+[ext_resource type="Texture2D" uid="uid://bfqk6slxehlm6" path="res://assets/maps/chapter1/backgrounds/forest_bamboo_1.png" id="4_8wws1"]
+[ext_resource type="Texture2D" uid="uid://ghejt4smbbgr" path="res://assets/maps/chapter1/ground/dirt1.png" id="4_s8urn"]
+[ext_resource type="Texture2D" uid="uid://bboa26jj3k53k" path="res://assets/maps/chapter1/backgrounds/mountains_2.png" id="4_ttw41"]
+[ext_resource type="Texture2D" uid="uid://cc2k6ar8swmjj" path="res://assets/maps/chapter1/ground/dirt3.png" id="5_oejvn"]
+[ext_resource type="Texture2D" uid="uid://b2ulahufm7pbt" path="res://assets/maps/chapter1/ground/dirt2.png" id="6_b08u7"]
+[ext_resource type="Texture2D" uid="uid://cpk7q527c0hkl" path="res://assets/maps/chapter1/ground/stone1.png" id="6_stone1"]
+[ext_resource type="Texture2D" uid="uid://7nv7km5vvtri" path="res://assets/maps/chapter1/backgrounds/forest_bamboo_2.png" id="7_8wws1"]
+[ext_resource type="Texture2D" uid="uid://co8fm718tr7st" path="res://assets/maps/chapter1/ground/stone2.png" id="7_stone2"]
+[ext_resource type="Texture2D" uid="uid://jt1tvi0x36h0" path="res://assets/maps/chapter1/ground/stone3.png" id="8_stone3"]
+[ext_resource type="Texture2D" uid="uid://bd0doumae26f0" path="res://assets/maps/chapter1/ground/platform_stone_1.png" id="11_ttw41"]
+[ext_resource type="Texture2D" uid="uid://bapgai228tc7k" path="res://assets/maps/chapter1/ground/platform_stone_0.png" id="12_w680h"]
+[ext_resource type="Texture2D" uid="uid://dmkudq5miy2xi" path="res://assets/maps/chapter1/ground/stone_dirt_0.png" id="16_0fdgw"]
+[ext_resource type="Texture2D" uid="uid://b5cs28umpvcvu" path="res://assets/maps/chapter1/ground/stone_dirt_1.png" id="17_54btx"]
+[ext_resource type="Texture2D" uid="uid://d0muclyi2ktpe" path="res://assets/maps/chapter1/props/cedar_pillar_0.png" id="18_54btx"]
+[ext_resource type="Texture2D" uid="uid://ch7veoxmrmc1w" path="res://assets/maps/chapter1/landmarks/torii_ruin_left.png" id="19_d3f2h"]
+[ext_resource type="Texture2D" uid="uid://dfotvjc52cl3w" path="res://assets/maps/chapter1/ground/moss1.png" id="19_ih6mn"]
+[ext_resource type="Texture2D" uid="uid://d3t0yo7i3uekm" path="res://assets/maps/chapter1/ground/moss0.png" id="20_6f4q3"]
+[ext_resource type="Texture2D" uid="uid://d3r1oacdybr2g" path="res://assets/maps/chapter1/landmarks/torii_ruin_right.png" id="20_gma5f"]
+[ext_resource type="Texture2D" uid="uid://dijyqb4ahd2kd" path="res://assets/maps/chapter1/landmarks/torii_ruin_center.png" id="21_gma5f"]
+[ext_resource type="Texture2D" uid="uid://d1hwooufxg8wc" path="res://assets/maps/chapter1/ground/moss2.png" id="21_xgk6w"]
+[ext_resource type="Texture2D" uid="uid://dfsknljfid3y3" path="res://assets/maps/chapter1/ground/gravel0.png" id="22_6f4q3"]
+[ext_resource type="Texture2D" uid="uid://b2rl85nygnjrq" path="res://assets/maps/chapter1/ground/grass0.png" id="22_fvie2"]
+[ext_resource type="Texture2D" uid="uid://445gqouv2b63" path="res://assets/maps/chapter1/structures/gate_red_latched_ajar.png" id="22_g47yy"]
+[ext_resource type="Texture2D" uid="uid://cvjicbbfce3q8" path="res://assets/maps/chapter1/structures/gate_roof_eave.png" id="23_1ukie"]
+[ext_resource type="Texture2D" uid="uid://bbpinyg61xrfn" path="res://assets/maps/chapter1/ground/grass1.png" id="23_nxaye"]
+[ext_resource type="Texture2D" uid="uid://xjaq3dlsdnv2" path="res://assets/maps/chapter1/ground/grass2.png" id="24_yxbs5"]
+[ext_resource type="Texture2D" uid="uid://dil3o18gldu58" path="res://assets/maps/chapter1/ground/gravel1.png" id="26_2f84k"]
+[ext_resource type="Texture2D" uid="uid://u353tdvkfph1" path="res://assets/maps/chapter1/ground/gravel2.png" id="27_lqjsx"]
+[ext_resource type="Texture2D" uid="uid://dp4ool7c17xme" path="res://assets/maps/chapter1/props/lantern.png" id="33_lqjsx"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ih6mn"]
+texture = ExtResource("20_6f4q3")
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+5:1/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6f4q3"]
+texture = ExtResource("19_ih6mn")
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+4:1/0 = 0
+5:1/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_xgk6w"]
+texture = ExtResource("21_xgk6w")
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+4:1/0 = 0
+5:1/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_fvie2"]
+sources/0 = SubResource("TileSetAtlasSource_ih6mn")
+sources/1 = SubResource("TileSetAtlasSource_6f4q3")
+sources/2 = SubResource("TileSetAtlasSource_xgk6w")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2f84k"]
+texture = ExtResource("22_fvie2")
+0:2/0 = 0
+1:2/0 = 0
+2:2/0 = 0
+3:2/0 = 0
+0:3/0 = 0
+1:3/0 = 0
+2:3/0 = 0
+3:3/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lqjsx"]
+texture = ExtResource("23_nxaye")
+0:2/0 = 0
+1:2/0 = 0
+2:2/0 = 0
+3:2/0 = 0
+0:3/0 = 0
+1:3/0 = 0
+2:3/0 = 0
+3:3/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lg323"]
+texture = ExtResource("24_yxbs5")
+0:2/0 = 0
+1:2/0 = 0
+2:2/0 = 0
+3:2/0 = 0
+0:3/0 = 0
+1:3/0 = 0
+2:3/0 = 0
+3:3/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_34l5q"]
+sources/0 = SubResource("TileSetAtlasSource_2f84k")
+sources/1 = SubResource("TileSetAtlasSource_lqjsx")
+sources/2 = SubResource("TileSetAtlasSource_lg323")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_34l5q"]
+texture = ExtResource("22_6f4q3")
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+1:1/0 = 0
+3:1/0 = 0
+5:1/0 = 0
+1:2/0 = 0
+4:2/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4uquc"]
+texture = ExtResource("26_2f84k")
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+4:1/0 = 0
+5:1/0 = 0
+0:2/0 = 0
+1:2/0 = 0
+2:2/0 = 0
+3:2/0 = 0
+4:2/0 = 0
+5:2/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3kxwj"]
+texture = ExtResource("27_lqjsx")
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+4:1/0 = 0
+5:1/0 = 0
+0:2/0 = 0
+1:2/0 = 0
+2:2/0 = 0
+3:2/0 = 0
+4:2/0 = 0
+5:2/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_vqpcg"]
+sources/0 = SubResource("TileSetAtlasSource_34l5q")
+sources/1 = SubResource("TileSetAtlasSource_4uquc")
+sources/2 = SubResource("TileSetAtlasSource_3kxwj")
+
+[node name="root" type="Node2D" unique_id=1535246761]
+
+[node name="BackgroundFar" type="Node2D" parent="." unique_id=257268548]
+
+[node name="NightSky" type="Polygon2D" parent="BackgroundFar" unique_id=1500016580]
+position = Vector2(143.87881, -628.2941)
+scale = Vector2(1.8662406, 1.4117649)
+color = Color(0.0431373, 0.054902, 0.101961, 1)
+polygon = PackedVector2Array(-128, -128, 8320, -128, 8320, 408.188, 8320, 960, -128, 960)
+metadata/_edit_lock_ = true
+
+[node name="Mountain_01" type="Sprite2D" parent="BackgroundFar" unique_id=632025973]
+modulate = Color(0.9, 0.95, 1, 0.95)
+position = Vector2(886.99994, -839.00006)
+scale = Vector2(2.1069791, 2.1069791)
+texture = ExtResource("1_s8urn")
+metadata/_edit_lock_ = true
+
+[node name="Mountain_02" type="Sprite2D" parent="BackgroundFar" unique_id=1315886047]
+modulate = Color(0.9, 0.95, 1, 0.95)
+position = Vector2(4687, -681)
+scale = Vector2(1.62, 1.62)
+texture = ExtResource("1_s8urn")
+metadata/_edit_lock_ = true
+
+[node name="Mountain_03" type="Sprite2D" parent="BackgroundFar" unique_id=983266967]
+modulate = Color(0.9, 0.95, 1, 0.95)
+position = Vector2(7990.88, -682.99994)
+scale = Vector2(1.62, 1.62)
+texture = ExtResource("4_ttw41")
+metadata/_edit_lock_ = true
+
+[node name="Mountain_04" type="Sprite2D" parent="BackgroundFar" unique_id=996348614]
+modulate = Color(0.9, 0.95, 1, 0.95)
+position = Vector2(11299.76, -910.92004)
+scale = Vector2(1.62, 1.62)
+texture = ExtResource("3_8wws1")
+metadata/_edit_lock_ = true
+
+[node name="Mountain_05" type="Sprite2D" parent="BackgroundFar" unique_id=26382017]
+modulate = Color(0.9, 0.95, 1, 0.95)
+position = Vector2(13637.44, -905.9201)
+scale = Vector2(1.9810153, 1.6199999)
+texture = ExtResource("4_ttw41")
+metadata/_edit_lock_ = true
+
+[node name="Moon" type="Sprite2D" parent="BackgroundFar" unique_id=1401375021]
+position = Vector2(-617, -1345)
+scale = Vector2(1.3481445, 1.3481445)
+texture = ExtResource("2_oejvn")
+metadata/_edit_lock_ = true
+
+[node name="BackgroundMid" type="Node2D" parent="." unique_id=44251899]
+
+[node name="Forest_01" type="Sprite2D" parent="BackgroundMid" unique_id=1382710304]
+modulate = Color(0.9, 0.96, 1, 0.78)
+position = Vector2(1138.27, -47.92041)
+scale = Vector2(1.62, 1.62)
+texture = ExtResource("3_b08u7")
+metadata/_edit_lock_ = true
+
+[node name="Forest_02" type="Sprite2D" parent="BackgroundMid" unique_id=1347442053]
+modulate = Color(0.9, 0.96, 1, 0.78)
+position = Vector2(4423, 107)
+scale = Vector2(1.62, 1.62)
+texture = ExtResource("4_8wws1")
+metadata/_edit_lock_ = true
+
+[node name="Forest_03" type="Sprite2D" parent="BackgroundMid" unique_id=362122982]
+modulate = Color(0.9, 0.96, 1, 0.78)
+position = Vector2(7747, -94.46)
+scale = Vector2(1.62, 1.8425522)
+texture = ExtResource("4_8wws1")
+metadata/_edit_lock_ = true
+
+[node name="Forest_04" type="Sprite2D" parent="BackgroundMid" unique_id=1138729314]
+modulate = Color(0.9, 0.96, 1, 0.78)
+position = Vector2(11066.865, 24.20494)
+scale = Vector2(1.6150315, 2.2370696)
+texture = ExtResource("3_b08u7")
+metadata/_edit_lock_ = true
+
+[node name="Forest_05" type="Sprite2D" parent="BackgroundMid" unique_id=2039245065]
+modulate = Color(0.9, 0.96, 1, 0.78)
+position = Vector2(14204.499, -300.91992)
+scale = Vector2(1.4243166, 1.62)
+texture = ExtResource("7_8wws1")
+metadata/_edit_lock_ = true
+
+[node name="Gameplay" type="Node2D" parent="." unique_id=980497440]
+
+[node name="cedar_pillar" type="Node2D" parent="Gameplay" unique_id=2082438372]
+
+[node name="cp_0" type="Sprite2D" parent="Gameplay/cedar_pillar" unique_id=1647339623]
+position = Vector2(8192, 491)
+scale = Vector2(0.10974055, 0.22135413)
+texture = ExtResource("18_54btx")
+
+[node name="cp_1" type="Sprite2D" parent="Gameplay/cedar_pillar" unique_id=1355495196]
+position = Vector2(7881, 528)
+scale = Vector2(0.10974055, 0.22135413)
+texture = ExtResource("18_54btx")
+
+[node name="cp_2" type="Sprite2D" parent="Gameplay/cedar_pillar" unique_id=1012016075]
+position = Vector2(8646, 493.99997)
+scale = Vector2(0.10974055, 0.22135413)
+texture = ExtResource("18_54btx")
+
+[node name="TerrainA" type="Node2D" parent="Gameplay" unique_id=552535487]
+
+[node name="dirt1" type="Node2D" parent="Gameplay/TerrainA" unique_id=1146554340]
+
+[node name="1_1" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=2097412844]
+position = Vector2(51, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_2" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=455506770]
+position = Vector2(147, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_3" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1564778971]
+position = Vector2(243, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_4" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=438214346]
+position = Vector2(339, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_5" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=895036299]
+position = Vector2(403, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_6" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1879721246]
+position = Vector2(499, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_7" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1792525233]
+position = Vector2(595, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_8" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=121825598]
+position = Vector2(691, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_9" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=273768832]
+position = Vector2(787, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_10" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1046352450]
+position = Vector2(883, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_11" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1509299015]
+position = Vector2(979, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_12" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012012]
+position = Vector2(1075, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_13" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012013]
+position = Vector2(1171, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_14" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012014]
+position = Vector2(1267, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_15" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012015]
+position = Vector2(1363, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_16" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012016]
+position = Vector2(1459, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_17" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012017]
+position = Vector2(1555, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_18" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012018]
+position = Vector2(1651, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_19" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012019]
+position = Vector2(1747, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_20" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012020]
+position = Vector2(1843, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_21" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012021]
+position = Vector2(1939, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_22" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012022]
+position = Vector2(2035, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_23" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012023]
+position = Vector2(2131, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_24" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012024]
+position = Vector2(2227, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_25" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012025]
+position = Vector2(2323, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_26" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012026]
+position = Vector2(2419, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_27" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012027]
+position = Vector2(2515, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_28" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012028]
+position = Vector2(2611, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_29" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012029]
+position = Vector2(2707, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_30" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012030]
+position = Vector2(2803, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_31" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012031]
+position = Vector2(2899, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_32" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012032]
+position = Vector2(2995, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_33" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012033]
+position = Vector2(3091, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_34" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012034]
+position = Vector2(3187, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_35" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012035]
+position = Vector2(3283, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_36" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1600012036]
+position = Vector2(3379, 616)
+texture = ExtResource("4_s8urn")
+
+[node name="1_37" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1977759944]
+position = Vector2(1752, 523)
+texture = ExtResource("4_s8urn")
+
+[node name="1_38" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=194945884]
+position = Vector2(1848, 523)
+texture = ExtResource("4_s8urn")
+
+[node name="1_39" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=2010648796]
+position = Vector2(1944, 523)
+texture = ExtResource("4_s8urn")
+
+[node name="1_40" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1475924340]
+position = Vector2(2040, 523)
+texture = ExtResource("4_s8urn")
+
+[node name="1_41" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1481220159]
+position = Vector2(2136, 523)
+texture = ExtResource("4_s8urn")
+
+[node name="1_42" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=614850518]
+position = Vector2(2232, 523)
+texture = ExtResource("4_s8urn")
+
+[node name="1_43" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1090597509]
+position = Vector2(2328, 523)
+texture = ExtResource("4_s8urn")
+
+[node name="1_44" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=219904115]
+position = Vector2(2424, 523)
+texture = ExtResource("4_s8urn")
+
+[node name="1_45" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1416623046]
+position = Vector2(2520, 523)
+texture = ExtResource("4_s8urn")
+
+[node name="1_46" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1058754462]
+position = Vector2(2612, 525)
+texture = ExtResource("4_s8urn")
+
+[node name="1_47" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1444602557]
+position = Vector2(2708, 525)
+texture = ExtResource("4_s8urn")
+
+[node name="1_48" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=346082008]
+position = Vector2(2802, 522)
+texture = ExtResource("4_s8urn")
+
+[node name="1_49" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=875679438]
+position = Vector2(2898, 522)
+texture = ExtResource("4_s8urn")
+
+[node name="1_50" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=115687783]
+position = Vector2(2994, 522)
+texture = ExtResource("4_s8urn")
+
+[node name="1_51" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1866304028]
+position = Vector2(3090, 522)
+texture = ExtResource("4_s8urn")
+
+[node name="1_52" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1812506817]
+position = Vector2(3186, 522)
+texture = ExtResource("4_s8urn")
+
+[node name="1_53" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1815623889]
+position = Vector2(3282, 522)
+texture = ExtResource("4_s8urn")
+
+[node name="1_54" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1614017758]
+position = Vector2(3378, 522)
+texture = ExtResource("4_s8urn")
+
+[node name="1_55" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=120476300]
+position = Vector2(2898, 522)
+texture = ExtResource("4_s8urn")
+
+[node name="1_56" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=2057998930]
+position = Vector2(2994, 522)
+texture = ExtResource("4_s8urn")
+
+[node name="1_57" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1136685388]
+position = Vector2(3090, 522)
+texture = ExtResource("4_s8urn")
+
+[node name="1_58" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=889967311]
+position = Vector2(3186, 522)
+texture = ExtResource("4_s8urn")
+
+[node name="1_59" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=2068503452]
+position = Vector2(3282, 522)
+texture = ExtResource("4_s8urn")
+
+[node name="1_60" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1525340468]
+position = Vector2(3378, 522)
+texture = ExtResource("4_s8urn")
+
+[node name="1_61" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1436026197]
+position = Vector2(2802, 426)
+texture = ExtResource("4_s8urn")
+
+[node name="1_62" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=483539345]
+position = Vector2(2898, 426)
+texture = ExtResource("4_s8urn")
+
+[node name="1_63" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1879552434]
+position = Vector2(2994, 426)
+texture = ExtResource("4_s8urn")
+
+[node name="1_64" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1120844584]
+position = Vector2(3090, 426)
+texture = ExtResource("4_s8urn")
+
+[node name="1_65" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=57275712]
+position = Vector2(3186, 426)
+texture = ExtResource("4_s8urn")
+
+[node name="1_66" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1231445954]
+position = Vector2(3282, 426)
+texture = ExtResource("4_s8urn")
+
+[node name="1_67" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=358773440]
+position = Vector2(3378, 427)
+texture = ExtResource("4_s8urn")
+
+[node name="1_68" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1921185371]
+position = Vector2(2803, 331)
+texture = ExtResource("4_s8urn")
+
+[node name="1_69" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=918230727]
+position = Vector2(2899, 331)
+texture = ExtResource("4_s8urn")
+
+[node name="1_70" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1761140240]
+position = Vector2(2995, 331)
+texture = ExtResource("4_s8urn")
+
+[node name="1_71" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=547774345]
+position = Vector2(3091, 331)
+texture = ExtResource("4_s8urn")
+
+[node name="1_72" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1244907476]
+position = Vector2(3187, 331)
+texture = ExtResource("4_s8urn")
+
+[node name="1_73" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=676360382]
+position = Vector2(3283, 331)
+texture = ExtResource("4_s8urn")
+
+[node name="1_74" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=149474235]
+position = Vector2(3379, 332)
+texture = ExtResource("4_s8urn")
+
+[node name="1_75" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=85076261]
+position = Vector2(4245, 632)
+texture = ExtResource("4_s8urn")
+
+[node name="1_76" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=182543334]
+position = Vector2(4341, 632)
+texture = ExtResource("4_s8urn")
+
+[node name="1_77" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=428985606]
+position = Vector2(4437, 632)
+texture = ExtResource("4_s8urn")
+
+[node name="1_78" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=209603929]
+position = Vector2(4533, 632)
+texture = ExtResource("4_s8urn")
+
+[node name="1_79" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1160656173]
+position = Vector2(4629, 632)
+texture = ExtResource("4_s8urn")
+
+[node name="1_80" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1182347077]
+position = Vector2(4725, 632)
+texture = ExtResource("4_s8urn")
+
+[node name="1_81" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=603767233]
+position = Vector2(4821, 632)
+texture = ExtResource("4_s8urn")
+
+[node name="1_82" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=611544779]
+position = Vector2(4244, 538)
+texture = ExtResource("4_s8urn")
+
+[node name="1_83" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=52962579]
+position = Vector2(4340, 538)
+texture = ExtResource("4_s8urn")
+
+[node name="1_84" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1887934233]
+position = Vector2(4436, 538)
+texture = ExtResource("4_s8urn")
+
+[node name="1_85" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1701542736]
+position = Vector2(4532, 538)
+texture = ExtResource("4_s8urn")
+
+[node name="1_86" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=828698747]
+position = Vector2(4628, 538)
+texture = ExtResource("4_s8urn")
+
+[node name="1_87" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1097609805]
+position = Vector2(4724, 538)
+texture = ExtResource("4_s8urn")
+
+[node name="1_88" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=2120139046]
+position = Vector2(4820, 538)
+texture = ExtResource("4_s8urn")
+
+[node name="1_89" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=383831518]
+position = Vector2(4245, 442)
+texture = ExtResource("4_s8urn")
+
+[node name="1_90" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1149579100]
+position = Vector2(4341, 442)
+texture = ExtResource("4_s8urn")
+
+[node name="1_91" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=341856696]
+position = Vector2(4437, 442)
+texture = ExtResource("4_s8urn")
+
+[node name="1_92" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1289888805]
+position = Vector2(4915, 635)
+texture = ExtResource("4_s8urn")
+
+[node name="1_93" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1300547218]
+position = Vector2(5011, 635)
+texture = ExtResource("4_s8urn")
+
+[node name="1_94" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=2094639656]
+position = Vector2(5107, 635)
+texture = ExtResource("4_s8urn")
+
+[node name="1_95" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1368105618]
+position = Vector2(12784, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_96" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1285516153]
+position = Vector2(12880, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_97" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1245664670]
+position = Vector2(12976, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_98" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=368093030]
+position = Vector2(13072, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_99" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=751485068]
+position = Vector2(13168, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_100" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1951465643]
+position = Vector2(13264, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_101" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1138472404]
+position = Vector2(13360, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_102" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=703117646]
+position = Vector2(12880, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_103" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=836616646]
+position = Vector2(12976, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_104" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1961617896]
+position = Vector2(13072, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_105" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1159705352]
+position = Vector2(13168, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_106" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=317838772]
+position = Vector2(13264, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_107" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1097109310]
+position = Vector2(13360, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_108" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=657880844]
+position = Vector2(12784, 406)
+texture = ExtResource("4_s8urn")
+
+[node name="1_109" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1182840865]
+position = Vector2(12880, 406)
+texture = ExtResource("4_s8urn")
+
+[node name="1_110" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=821778634]
+position = Vector2(12976, 406)
+texture = ExtResource("4_s8urn")
+
+[node name="1_111" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1417683728]
+position = Vector2(13072, 406)
+texture = ExtResource("4_s8urn")
+
+[node name="1_112" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=150425658]
+position = Vector2(13168, 406)
+texture = ExtResource("4_s8urn")
+
+[node name="1_113" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1301275645]
+position = Vector2(13264, 406)
+texture = ExtResource("4_s8urn")
+
+[node name="1_114" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=767135128]
+position = Vector2(13360, 407)
+texture = ExtResource("4_s8urn")
+
+[node name="1_115" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1160365870]
+position = Vector2(12785, 311)
+texture = ExtResource("4_s8urn")
+
+[node name="1_116" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=10891717]
+position = Vector2(12881, 311)
+texture = ExtResource("4_s8urn")
+
+[node name="1_117" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=444185079]
+position = Vector2(12977, 311)
+texture = ExtResource("4_s8urn")
+
+[node name="1_118" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=425233155]
+position = Vector2(13073, 311)
+texture = ExtResource("4_s8urn")
+
+[node name="1_119" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1730682225]
+position = Vector2(13169, 311)
+texture = ExtResource("4_s8urn")
+
+[node name="1_120" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1791683103]
+position = Vector2(13265, 311)
+texture = ExtResource("4_s8urn")
+
+[node name="1_121" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=439121101]
+position = Vector2(13361, 312)
+texture = ExtResource("4_s8urn")
+
+[node name="1_122" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1177258124]
+position = Vector2(13457, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_123" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=327952939]
+position = Vector2(13553, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_124" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1091428473]
+position = Vector2(13649, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_125" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1080851510]
+position = Vector2(13745, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_126" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=437712557]
+position = Vector2(13841, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_127" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=846012612]
+position = Vector2(13937, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_128" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=972596923]
+position = Vector2(14033, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_129" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=585958714]
+position = Vector2(13553, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_130" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1234286922]
+position = Vector2(13649, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_131" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=440922816]
+position = Vector2(13745, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_132" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1877238476]
+position = Vector2(13841, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_133" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=876980964]
+position = Vector2(13937, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_134" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1150321537]
+position = Vector2(14033, 502)
+texture = ExtResource("4_s8urn")
+
+[node name="1_135" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=342514281]
+position = Vector2(13457, 406)
+texture = ExtResource("4_s8urn")
+
+[node name="1_136" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1719652447]
+position = Vector2(13553, 406)
+texture = ExtResource("4_s8urn")
+
+[node name="1_137" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=757206823]
+position = Vector2(13649, 406)
+texture = ExtResource("4_s8urn")
+
+[node name="1_138" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1232244647]
+position = Vector2(13745, 406)
+texture = ExtResource("4_s8urn")
+
+[node name="1_139" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=967915683]
+position = Vector2(13841, 406)
+texture = ExtResource("4_s8urn")
+
+[node name="1_140" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=764267335]
+position = Vector2(13937, 406)
+texture = ExtResource("4_s8urn")
+
+[node name="1_141" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1310029131]
+position = Vector2(14033, 407)
+texture = ExtResource("4_s8urn")
+
+[node name="1_142" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1798173509]
+position = Vector2(13458, 311)
+texture = ExtResource("4_s8urn")
+
+[node name="1_143" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1400295376]
+position = Vector2(13554, 311)
+texture = ExtResource("4_s8urn")
+
+[node name="1_144" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1689692021]
+position = Vector2(13650, 311)
+texture = ExtResource("4_s8urn")
+
+[node name="1_145" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=104510119]
+position = Vector2(13746, 311)
+texture = ExtResource("4_s8urn")
+
+[node name="1_146" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=667888053]
+position = Vector2(13842, 311)
+texture = ExtResource("4_s8urn")
+
+[node name="1_147" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=399194888]
+position = Vector2(13938, 311)
+texture = ExtResource("4_s8urn")
+
+[node name="1_148" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=683431746]
+position = Vector2(14034, 312)
+texture = ExtResource("4_s8urn")
+
+[node name="1_149" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1363174128]
+position = Vector2(14128, 503)
+texture = ExtResource("4_s8urn")
+
+[node name="1_150" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=810595000]
+position = Vector2(14224, 503)
+texture = ExtResource("4_s8urn")
+
+[node name="1_151" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1167512291]
+position = Vector2(14320, 503)
+texture = ExtResource("4_s8urn")
+
+[node name="1_152" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=273043078]
+position = Vector2(14416, 503)
+texture = ExtResource("4_s8urn")
+
+[node name="1_153" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1831826728]
+position = Vector2(14512, 503)
+texture = ExtResource("4_s8urn")
+
+[node name="1_154" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=232709603]
+position = Vector2(14608, 503)
+texture = ExtResource("4_s8urn")
+
+[node name="1_155" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1885622784]
+position = Vector2(14704, 503)
+texture = ExtResource("4_s8urn")
+
+[node name="1_156" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1242754072]
+position = Vector2(14224, 503)
+texture = ExtResource("4_s8urn")
+
+[node name="1_157" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1701299348]
+position = Vector2(14320, 503)
+texture = ExtResource("4_s8urn")
+
+[node name="1_158" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=118485493]
+position = Vector2(14416, 503)
+texture = ExtResource("4_s8urn")
+
+[node name="1_159" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=337057022]
+position = Vector2(14512, 503)
+texture = ExtResource("4_s8urn")
+
+[node name="1_160" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1961211484]
+position = Vector2(14608, 503)
+texture = ExtResource("4_s8urn")
+
+[node name="1_161" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=89551312]
+position = Vector2(14704, 503)
+texture = ExtResource("4_s8urn")
+
+[node name="1_162" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=2068369341]
+position = Vector2(14128, 407)
+texture = ExtResource("4_s8urn")
+
+[node name="1_163" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=592160901]
+position = Vector2(14224, 407)
+texture = ExtResource("4_s8urn")
+
+[node name="1_164" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=127009251]
+position = Vector2(14320, 407)
+texture = ExtResource("4_s8urn")
+
+[node name="1_165" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1400868160]
+position = Vector2(14416, 407)
+texture = ExtResource("4_s8urn")
+
+[node name="1_166" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1844908585]
+position = Vector2(14512, 407)
+texture = ExtResource("4_s8urn")
+
+[node name="1_167" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=965534839]
+position = Vector2(14608, 407)
+texture = ExtResource("4_s8urn")
+
+[node name="1_168" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=127015173]
+position = Vector2(14704, 408)
+texture = ExtResource("4_s8urn")
+
+[node name="1_169" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1061989028]
+position = Vector2(14129, 312)
+texture = ExtResource("4_s8urn")
+
+[node name="1_170" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1711571726]
+position = Vector2(14225, 312)
+texture = ExtResource("4_s8urn")
+
+[node name="1_171" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=938739302]
+position = Vector2(14321, 312)
+texture = ExtResource("4_s8urn")
+
+[node name="1_172" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=2135717211]
+position = Vector2(14417, 312)
+texture = ExtResource("4_s8urn")
+
+[node name="1_173" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=516737806]
+position = Vector2(14513, 312)
+texture = ExtResource("4_s8urn")
+
+[node name="1_174" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=312427186]
+position = Vector2(14609, 312)
+texture = ExtResource("4_s8urn")
+
+[node name="1_175" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1052098181]
+position = Vector2(14705, 313)
+texture = ExtResource("4_s8urn")
+
+[node name="1_176" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=120379698]
+position = Vector2(14798, 504)
+texture = ExtResource("4_s8urn")
+
+[node name="1_177" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1130204196]
+position = Vector2(14798, 504)
+texture = ExtResource("4_s8urn")
+
+[node name="1_178" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1713435574]
+position = Vector2(14798, 409)
+texture = ExtResource("4_s8urn")
+
+[node name="1_179" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=437025751]
+position = Vector2(14799, 314)
+texture = ExtResource("4_s8urn")
+
+[node name="1_180" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1185414663]
+position = Vector2(14893, 505)
+texture = ExtResource("4_s8urn")
+
+[node name="1_181" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=67977769]
+position = Vector2(14989, 505)
+texture = ExtResource("4_s8urn")
+
+[node name="1_182" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=406067640]
+position = Vector2(15085, 505)
+texture = ExtResource("4_s8urn")
+
+[node name="1_183" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=2063514768]
+position = Vector2(15181, 505)
+texture = ExtResource("4_s8urn")
+
+[node name="1_184" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=145224893]
+position = Vector2(15277, 505)
+texture = ExtResource("4_s8urn")
+
+[node name="1_185" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1302647578]
+position = Vector2(15373, 505)
+texture = ExtResource("4_s8urn")
+
+[node name="1_186" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=152358923]
+position = Vector2(15469, 505)
+texture = ExtResource("4_s8urn")
+
+[node name="1_187" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1340358488]
+position = Vector2(14989, 505)
+texture = ExtResource("4_s8urn")
+
+[node name="1_188" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=189507945]
+position = Vector2(15085, 505)
+texture = ExtResource("4_s8urn")
+
+[node name="1_189" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=124933179]
+position = Vector2(15181, 505)
+texture = ExtResource("4_s8urn")
+
+[node name="1_190" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=257967424]
+position = Vector2(15277, 505)
+texture = ExtResource("4_s8urn")
+
+[node name="1_191" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=835749759]
+position = Vector2(15373, 505)
+texture = ExtResource("4_s8urn")
+
+[node name="1_192" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1158071435]
+position = Vector2(15469, 505)
+texture = ExtResource("4_s8urn")
+
+[node name="1_193" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1224226166]
+position = Vector2(14893, 409)
+texture = ExtResource("4_s8urn")
+
+[node name="1_194" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=692606797]
+position = Vector2(14989, 409)
+texture = ExtResource("4_s8urn")
+
+[node name="1_195" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1183482868]
+position = Vector2(15085, 409)
+texture = ExtResource("4_s8urn")
+
+[node name="1_196" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=358505914]
+position = Vector2(15181, 409)
+texture = ExtResource("4_s8urn")
+
+[node name="1_197" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=2063309051]
+position = Vector2(15277, 409)
+texture = ExtResource("4_s8urn")
+
+[node name="1_198" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=579110784]
+position = Vector2(15373, 409)
+texture = ExtResource("4_s8urn")
+
+[node name="1_199" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1883424324]
+position = Vector2(15469, 410)
+texture = ExtResource("4_s8urn")
+
+[node name="1_200" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=70281593]
+position = Vector2(14894, 314)
+texture = ExtResource("4_s8urn")
+
+[node name="1_201" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1112631317]
+position = Vector2(14990, 314)
+texture = ExtResource("4_s8urn")
+
+[node name="1_202" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1535759828]
+position = Vector2(15086, 314)
+texture = ExtResource("4_s8urn")
+
+[node name="1_203" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=49975606]
+position = Vector2(15182, 314)
+texture = ExtResource("4_s8urn")
+
+[node name="1_204" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1639586351]
+position = Vector2(15278, 314)
+texture = ExtResource("4_s8urn")
+
+[node name="1_205" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=874504684]
+position = Vector2(15374, 314)
+texture = ExtResource("4_s8urn")
+
+[node name="1_206" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=2027181892]
+position = Vector2(15470, 315)
+texture = ExtResource("4_s8urn")
+
+[node name="1_207" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1338264611]
+position = Vector2(13085, 215)
+texture = ExtResource("4_s8urn")
+
+[node name="1_208" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1367324335]
+position = Vector2(13181, 215)
+texture = ExtResource("4_s8urn")
+
+[node name="1_209" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=910972813]
+position = Vector2(13277, 215)
+texture = ExtResource("4_s8urn")
+
+[node name="1_210" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1445424904]
+position = Vector2(13373, 216)
+texture = ExtResource("4_s8urn")
+
+[node name="1_211" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=2137416177]
+position = Vector2(13470, 215)
+texture = ExtResource("4_s8urn")
+
+[node name="1_212" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1377914794]
+position = Vector2(13566, 215)
+texture = ExtResource("4_s8urn")
+
+[node name="1_213" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=717293693]
+position = Vector2(13662, 215)
+texture = ExtResource("4_s8urn")
+
+[node name="1_214" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1190500480]
+position = Vector2(13758, 215)
+texture = ExtResource("4_s8urn")
+
+[node name="1_215" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=583390272]
+position = Vector2(13854, 215)
+texture = ExtResource("4_s8urn")
+
+[node name="1_216" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1172863283]
+position = Vector2(13950, 215)
+texture = ExtResource("4_s8urn")
+
+[node name="1_217" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=477698039]
+position = Vector2(14046, 216)
+texture = ExtResource("4_s8urn")
+
+[node name="1_218" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1278365637]
+position = Vector2(14141, 216)
+texture = ExtResource("4_s8urn")
+
+[node name="1_219" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=2065061370]
+position = Vector2(14237, 216)
+texture = ExtResource("4_s8urn")
+
+[node name="1_220" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1220810295]
+position = Vector2(14333, 216)
+texture = ExtResource("4_s8urn")
+
+[node name="1_221" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=687169057]
+position = Vector2(14429, 216)
+texture = ExtResource("4_s8urn")
+
+[node name="1_222" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1394175305]
+position = Vector2(14525, 216)
+texture = ExtResource("4_s8urn")
+
+[node name="1_223" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=152745971]
+position = Vector2(14621, 216)
+texture = ExtResource("4_s8urn")
+
+[node name="1_224" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=2109616112]
+position = Vector2(14717, 217)
+texture = ExtResource("4_s8urn")
+
+[node name="1_225" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=59598519]
+position = Vector2(14811, 218)
+texture = ExtResource("4_s8urn")
+
+[node name="1_226" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=816483138]
+position = Vector2(14906, 218)
+texture = ExtResource("4_s8urn")
+
+[node name="1_227" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=634716722]
+position = Vector2(15002, 218)
+texture = ExtResource("4_s8urn")
+
+[node name="1_228" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=2107916166]
+position = Vector2(15098, 218)
+texture = ExtResource("4_s8urn")
+
+[node name="1_229" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=514652327]
+position = Vector2(15194, 218)
+texture = ExtResource("4_s8urn")
+
+[node name="1_230" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=2022988408]
+position = Vector2(15290, 218)
+texture = ExtResource("4_s8urn")
+
+[node name="1_231" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=1891719840]
+position = Vector2(15386, 218)
+texture = ExtResource("4_s8urn")
+
+[node name="1_232" type="Sprite2D" parent="Gameplay/TerrainA/dirt1" unique_id=136296501]
+position = Vector2(15469, 219)
+texture = ExtResource("4_s8urn")
+
+[node name="dirt2" type="Node2D" parent="Gameplay/TerrainA" unique_id=28096597]
+
+[node name="2_1" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=726173333]
+position = Vector2(51, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_2" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012002]
+position = Vector2(147, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_3" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012003]
+position = Vector2(243, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_4" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012004]
+position = Vector2(339, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_5" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012005]
+position = Vector2(435, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_6" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012006]
+position = Vector2(531, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_7" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012007]
+position = Vector2(627, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_8" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012008]
+position = Vector2(723, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_9" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012009]
+position = Vector2(819, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_10" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012010]
+position = Vector2(915, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_11" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012011]
+position = Vector2(1011, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_12" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012012]
+position = Vector2(1107, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_13" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012013]
+position = Vector2(1203, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_14" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012014]
+position = Vector2(1299, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_15" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012015]
+position = Vector2(1395, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_16" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012016]
+position = Vector2(1491, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_17" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012017]
+position = Vector2(1587, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_18" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012018]
+position = Vector2(1683, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_19" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012019]
+position = Vector2(1779, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_20" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012020]
+position = Vector2(1875, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_21" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012021]
+position = Vector2(1971, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_22" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012022]
+position = Vector2(2067, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_23" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012023]
+position = Vector2(2163, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_24" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012024]
+position = Vector2(2259, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_25" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012025]
+position = Vector2(2355, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_26" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012026]
+position = Vector2(2451, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_27" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012027]
+position = Vector2(2547, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_28" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012028]
+position = Vector2(2643, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_29" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012029]
+position = Vector2(2739, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_30" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012030]
+position = Vector2(2835, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_31" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012031]
+position = Vector2(2931, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_32" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012032]
+position = Vector2(3027, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_33" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012033]
+position = Vector2(3123, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_34" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012034]
+position = Vector2(3219, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_35" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012035]
+position = Vector2(3315, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_36" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1700012036]
+position = Vector2(3380, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_37" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=266116413]
+position = Vector2(4340, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_38" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=2116316451]
+position = Vector2(4436, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_39" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1223688063]
+position = Vector2(4532, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_40" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=247579161]
+position = Vector2(4628, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_41" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1588112776]
+position = Vector2(4724, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_42" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=944463305]
+position = Vector2(4820, 673)
+texture = ExtResource("5_oejvn")
+
+[node name="2_43" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=844248796]
+position = Vector2(4915, 683)
+texture = ExtResource("5_oejvn")
+
+[node name="2_44" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=562828124]
+position = Vector2(5011, 683)
+texture = ExtResource("5_oejvn")
+
+[node name="2_45" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=803190687]
+position = Vector2(5107, 683)
+texture = ExtResource("5_oejvn")
+
+[node name="2_46" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=286394097]
+position = Vector2(8259, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="2_47" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1480251320]
+position = Vector2(8355, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="2_48" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1688345790]
+position = Vector2(8451, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="2_49" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=551614492]
+position = Vector2(8547, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="2_50" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1252119664]
+position = Vector2(8643, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="2_51" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=494253922]
+position = Vector2(8739, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="2_52" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1126928785]
+position = Vector2(8835, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="2_53" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1248035631]
+position = Vector2(8931, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="2_54" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=663316143]
+position = Vector2(9027, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="2_55" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=76550008]
+position = Vector2(9123, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="2_56" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1431777317]
+position = Vector2(9219, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="2_57" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1180423081]
+position = Vector2(9315, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="2_58" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=2127531385]
+position = Vector2(9411, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="2_59" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=953329120]
+position = Vector2(9507, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="2_60" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1316356822]
+position = Vector2(9603, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="2_61" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1996265254]
+position = Vector2(9699, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="2_62" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=1242214461]
+position = Vector2(9795, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="2_63" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=259598145]
+position = Vector2(9891, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="2_64" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=627312940]
+position = Vector2(9987, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="2_65" type="Sprite2D" parent="Gameplay/TerrainA/dirt2" unique_id=546868296]
+position = Vector2(10083, 676)
+texture = ExtResource("5_oejvn")
+
+[node name="dirt3" type="Node2D" parent="Gameplay/TerrainA" unique_id=1765983683]
+
+[node name="3_1" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=746791965]
+position = Vector2(3477, 673)
+texture = ExtResource("6_b08u7")
+
+[node name="3_2" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1378935652]
+position = Vector2(3573, 673)
+texture = ExtResource("6_b08u7")
+
+[node name="3_3" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1800032003]
+position = Vector2(3669, 673)
+texture = ExtResource("6_b08u7")
+
+[node name="3_4" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1800032004]
+position = Vector2(3765, 673)
+texture = ExtResource("6_b08u7")
+
+[node name="3_5" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1800032005]
+position = Vector2(3861, 673)
+texture = ExtResource("6_b08u7")
+
+[node name="3_6" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1800032006]
+position = Vector2(3957, 673)
+texture = ExtResource("6_b08u7")
+
+[node name="3_7" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1800032007]
+position = Vector2(4053, 673)
+texture = ExtResource("6_b08u7")
+
+[node name="3_8" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1800032008]
+position = Vector2(4149, 673)
+texture = ExtResource("6_b08u7")
+
+[node name="3_9" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1800032009]
+position = Vector2(4245, 673)
+texture = ExtResource("6_b08u7")
+
+[node name="3_10" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1823747730]
+position = Vector2(5204, 683.5)
+texture = ExtResource("6_b08u7")
+
+[node name="3_11" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=161935699]
+position = Vector2(5300, 683.5)
+texture = ExtResource("6_b08u7")
+
+[node name="3_12" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1450655159]
+position = Vector2(5396, 683.5)
+texture = ExtResource("6_b08u7")
+
+[node name="3_13" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=820009642]
+position = Vector2(5492, 683.5)
+texture = ExtResource("6_b08u7")
+
+[node name="3_14" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1870463458]
+position = Vector2(5588, 683.5)
+texture = ExtResource("6_b08u7")
+
+[node name="3_15" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1031343659]
+position = Vector2(5684, 683.5)
+texture = ExtResource("6_b08u7")
+
+[node name="3_16" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=21098106]
+position = Vector2(5775, 683)
+texture = ExtResource("6_b08u7")
+
+[node name="3_17" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1978028231]
+position = Vector2(5871, 683)
+texture = ExtResource("6_b08u7")
+
+[node name="3_18" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1847199739]
+position = Vector2(5967, 683)
+texture = ExtResource("6_b08u7")
+
+[node name="3_19" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1769165685]
+position = Vector2(6063, 683)
+texture = ExtResource("6_b08u7")
+
+[node name="3_20" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=2067605203]
+position = Vector2(6159, 683)
+texture = ExtResource("6_b08u7")
+
+[node name="3_21" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=267405377]
+position = Vector2(6255, 683)
+texture = ExtResource("6_b08u7")
+
+[node name="3_22" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=932152855]
+position = Vector2(7112, 675.5)
+texture = ExtResource("6_b08u7")
+
+[node name="3_23" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1372942463]
+position = Vector2(7208, 675.5)
+texture = ExtResource("6_b08u7")
+
+[node name="3_24" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1786028671]
+position = Vector2(7304, 675.5)
+texture = ExtResource("6_b08u7")
+
+[node name="3_25" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1809974313]
+position = Vector2(7400, 675.5)
+texture = ExtResource("6_b08u7")
+
+[node name="3_26" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=485692611]
+position = Vector2(7496, 675.5)
+texture = ExtResource("6_b08u7")
+
+[node name="3_27" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1225348456]
+position = Vector2(7592, 675.5)
+texture = ExtResource("6_b08u7")
+
+[node name="3_28" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1003279568]
+position = Vector2(7683, 675)
+texture = ExtResource("6_b08u7")
+
+[node name="3_29" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=797964146]
+position = Vector2(7779, 675)
+texture = ExtResource("6_b08u7")
+
+[node name="3_30" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=326992478]
+position = Vector2(7875, 675)
+texture = ExtResource("6_b08u7")
+
+[node name="3_31" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=561486786]
+position = Vector2(7971, 675)
+texture = ExtResource("6_b08u7")
+
+[node name="3_32" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1447076698]
+position = Vector2(8067, 675)
+texture = ExtResource("6_b08u7")
+
+[node name="3_33" type="Sprite2D" parent="Gameplay/TerrainA/dirt3" unique_id=1154908057]
+position = Vector2(8163, 675)
+texture = ExtResource("6_b08u7")
+
+[node name="TerrainB" type="Node2D" parent="Gameplay" unique_id=1905625588]
+
+[node name="half_stone1" type="Node2D" parent="Gameplay/TerrainB" unique_id=1326015697]
+
+[node name="hs_1_0" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=847611133]
+position = Vector2(5203, 613)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_1" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=142920811]
+position = Vector2(5299, 613)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_2" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1972966685]
+position = Vector2(5680.9995, 524)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_3" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=230718841]
+position = Vector2(3652, 104.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_4" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=378088657]
+position = Vector2(3748, 104.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_5" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1437149145]
+position = Vector2(3845, 104.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_6" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=175591784]
+position = Vector2(3941, 104.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_7" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=631401234]
+position = Vector2(4665, 247.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_8" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=960479619]
+position = Vector2(4762, 247.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_9" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=94966229]
+position = Vector2(4858, 247.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_10" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1833325909]
+position = Vector2(6858, 98.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_11" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=2120576253]
+position = Vector2(6457, 297.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_12" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=996238384]
+position = Vector2(6554, 297.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_13" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1592696974]
+position = Vector2(6650, 297.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_14" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=834732034]
+position = Vector2(6955.9995, 98.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_15" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1468869812]
+position = Vector2(7591, 316.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_16" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=59088269]
+position = Vector2(7688.9995, 316.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_17" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1643728276]
+position = Vector2(9326, -281.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_18" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=513061931]
+position = Vector2(9423, -281.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_19" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=2091163203]
+position = Vector2(9519, -281.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_20" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=700605150]
+position = Vector2(9680, -59.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_21" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1435781812]
+position = Vector2(9777, -59.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_22" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=559058445]
+position = Vector2(9873, -59.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_23" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1752817656]
+position = Vector2(7395, 622.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_24" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1170395557]
+position = Vector2(7492.9995, 622.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_25" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1219736605]
+position = Vector2(9605, 318.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_26" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1629536994]
+position = Vector2(9702, 318.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_27" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=41738625]
+position = Vector2(9798, 318.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_28" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1216284933]
+position = Vector2(10566, 473.99997)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_29" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=96638327]
+position = Vector2(11628, 334.99997)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_30" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=210960227]
+position = Vector2(12784.999, 263)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_31" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1302225570]
+position = Vector2(12883.999, 238)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_32" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=666687253]
+position = Vector2(12982, 216.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_33" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1022902821]
+position = Vector2(13079, 191.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_34" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1629929966]
+position = Vector2(13177, 163.99998)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_35" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=195279276]
+position = Vector2(13274, 142.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_36" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1377401480]
+position = Vector2(13372, 120.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_38" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1834839323]
+position = Vector2(12785, 288)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_39" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1470087500]
+position = Vector2(12884, 263)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_40" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1232791024]
+position = Vector2(12982.001, 241.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_41" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=2048429509]
+position = Vector2(13079.001, 216.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_42" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1140127964]
+position = Vector2(13177, 190.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_43" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=618237929]
+position = Vector2(13275, 168.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_44" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1377862523]
+position = Vector2(13373, 146.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_47" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=475971181]
+position = Vector2(14050, 71)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_48" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=443864366]
+position = Vector2(14147, 48)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_49" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=369283783]
+position = Vector2(14241.999, 25)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_50" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=647141386]
+position = Vector2(14339, -0.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_51" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=2136894384]
+position = Vector2(14437, -23)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_52" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1850789507]
+position = Vector2(14534, -45.999996)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_53" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1507742221]
+position = Vector2(14632, -69)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_55" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1714995871]
+position = Vector2(14050.001, 96)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_56" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=319488974]
+position = Vector2(14147, 71)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_57" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=2065795788]
+position = Vector2(14243, 49)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_58" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=384766343]
+position = Vector2(14339.001, 24.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_59" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1351322111]
+position = Vector2(14437, -0.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_60" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=1029075426]
+position = Vector2(14533, -23)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_61" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=460080061]
+position = Vector2(14632, -45.999996)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_37" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=2119834042]
+position = Vector2(5202, 64.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="hs_1_45" type="Sprite2D" parent="Gameplay/TerrainB/half_stone1" unique_id=210920432]
+position = Vector2(5299.9995, 64.5)
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("11_ttw41")
+
+[node name="half_stone2" type="Node2D" parent="Gameplay/TerrainB" unique_id=349149169]
+
+[node name="hs_2_0" type="Sprite2D" parent="Gameplay/TerrainB/half_stone2" unique_id=1494867962]
+position = Vector2(5586.9995, 524)
+rotation = 6.2831855
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("12_w680h")
+
+[node name="hs_2_1" type="Sprite2D" parent="Gameplay/TerrainB/half_stone2" unique_id=514313253]
+position = Vector2(7591.9995, 432)
+rotation = 6.2831855
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("12_w680h")
+
+[node name="hs_2_2" type="Sprite2D" parent="Gameplay/TerrainB/half_stone2" unique_id=57537226]
+position = Vector2(7691, 431.99997)
+rotation = 6.2831855
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("12_w680h")
+
+[node name="hs_2_3" type="Sprite2D" parent="Gameplay/TerrainB/half_stone2" unique_id=1750117169]
+visible = false
+position = Vector2(7784, 431.50003)
+rotation = 6.2831855
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("12_w680h")
+
+[node name="hs_2_4" type="Sprite2D" parent="Gameplay/TerrainB/half_stone2" unique_id=2023389620]
+position = Vector2(7789, 434)
+rotation = 6.2831855
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("12_w680h")
+
+[node name="hs_2_5" type="Sprite2D" parent="Gameplay/TerrainB/half_stone2" unique_id=185566497]
+position = Vector2(7977, 200.50003)
+rotation = 6.2831855
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("12_w680h")
+
+[node name="hs_2_6" type="Sprite2D" parent="Gameplay/TerrainB/half_stone2" unique_id=1138877154]
+position = Vector2(8076.0005, 200.5)
+rotation = 6.2831855
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("12_w680h")
+
+[node name="hs_2_7" type="Sprite2D" parent="Gameplay/TerrainB/half_stone2" unique_id=752427627]
+position = Vector2(8172, 158.50003)
+rotation = 6.2831855
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("12_w680h")
+
+[node name="hs_2_8" type="Sprite2D" parent="Gameplay/TerrainB/half_stone2" unique_id=1229861634]
+position = Vector2(8265, 159)
+rotation = 6.2831855
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("12_w680h")
+
+[node name="hs_2_9" type="Sprite2D" parent="Gameplay/TerrainB/half_stone2" unique_id=317555296]
+position = Vector2(8952, -105.49996)
+rotation = 6.2831855
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("12_w680h")
+
+[node name="hs_2_10" type="Sprite2D" parent="Gameplay/TerrainB/half_stone2" unique_id=1813987879]
+position = Vector2(9051, -105.49999)
+rotation = 6.2831855
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("12_w680h")
+
+[node name="hs_2_11" type="Sprite2D" parent="Gameplay/TerrainB/half_stone2" unique_id=268452734]
+position = Vector2(10181, -216.49997)
+rotation = 6.2831855
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("12_w680h")
+
+[node name="hs_2_12" type="Sprite2D" parent="Gameplay/TerrainB/half_stone2" unique_id=536845535]
+position = Vector2(10280, -216.5)
+rotation = 6.2831855
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("12_w680h")
+
+[node name="hs_2_13" type="Sprite2D" parent="Gameplay/TerrainB/half_stone2" unique_id=1294536293]
+position = Vector2(9898, 291.50003)
+rotation = 6.2831855
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("12_w680h")
+
+[node name="hs_2_14" type="Sprite2D" parent="Gameplay/TerrainB/half_stone2" unique_id=2099255077]
+position = Vector2(10582, 26.500038)
+rotation = 6.2831855
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("12_w680h")
+
+[node name="hs_2_15" type="Sprite2D" parent="Gameplay/TerrainB/half_stone2" unique_id=1361871240]
+position = Vector2(10681, 26.500008)
+rotation = 6.2831855
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("12_w680h")
+
+[node name="hs_2_16" type="Sprite2D" parent="Gameplay/TerrainB/half_stone2" unique_id=1573368528]
+position = Vector2(10780, 29.000002)
+rotation = 6.2831855
+scale = Vector2(0.765625, 0.765625)
+texture = ExtResource("12_w680h")
+
+[node name="stone1" type="Node2D" parent="Gameplay/TerrainB" unique_id=794983184]
+
+[node name="s_1_0" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=2019708054]
+position = Vector2(5491, 588.00006)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_1" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1494827316]
+position = Vector2(5777, 358.00006)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_2" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=807552174]
+position = Vector2(5873, 547)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_3" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=791866068]
+position = Vector2(5969, 547)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_4" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=123320611]
+position = Vector2(6063, 454)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_5" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=134743763]
+position = Vector2(6159, 454)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_6" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1158288123]
+position = Vector2(6161, 645)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_7" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=709562520]
+position = Vector2(6257, 645)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_8" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1090780600]
+position = Vector2(7110, 358)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_9" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=433846770]
+position = Vector2(7206, 358)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_10" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=593488002]
+position = Vector2(7302.0005, 450)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_11" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1858086196]
+position = Vector2(7495.0005, 453)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_12" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1577254846]
+position = Vector2(7592, 359)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_13" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=7511794]
+position = Vector2(7785, 362)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_14" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1005529877]
+position = Vector2(7400.0005, 551)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_15" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=2112714123]
+position = Vector2(7494.0005, 551)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_16" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1995220880]
+position = Vector2(8650, 137)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_17" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1050769271]
+position = Vector2(8746, 138)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_18" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=252754258]
+position = Vector2(8074, 270)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_19" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=714229353]
+position = Vector2(8170, 228)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_20" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=767167301]
+position = Vector2(8266, 229)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_21" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1069583284]
+position = Vector2(8554, 326)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_22" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1738803706]
+position = Vector2(8650, 327)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_23" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=2139721132]
+position = Vector2(8459, 230)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_24" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1568682862]
+position = Vector2(8555, 231)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_25" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=213229610]
+position = Vector2(8932, 484)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_26" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=334055541]
+position = Vector2(9028, 580)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_27" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1811968572]
+position = Vector2(9028, 484)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_28" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1088077660]
+position = Vector2(9028, 388)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_29" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=2029342576]
+position = Vector2(9028, 292)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_30" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1725138905]
+position = Vector2(9508, 389)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_31" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=482504474]
+position = Vector2(9604, 389)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_32" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1533143381]
+position = Vector2(9895, 299)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_33" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=753086646]
+position = Vector2(9991, 299)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_34" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1341765896]
+position = Vector2(9894, 583)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_35" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=67809539]
+position = Vector2(9990, 583)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_36" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=626237298]
+position = Vector2(10182, 488.99994)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_37" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1374765579]
+position = Vector2(11242, 499)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_38" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1058175260]
+position = Vector2(11435, 500)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_39" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=556251227]
+position = Vector2(11531, 501)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_40" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=149393228]
+position = Vector2(10660, 399)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_41" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=2028490036]
+position = Vector2(10756, 400)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_42" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1611820899]
+position = Vector2(10952, 404)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_43" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=2089506849]
+position = Vector2(11048, 405)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_44" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=994675444]
+position = Vector2(10180, 679)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_45" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1231096823]
+position = Vector2(10180, 583)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_46" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1596297827]
+position = Vector2(10664, 686)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_47" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=836218176]
+position = Vector2(10664, 590)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_48" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1697094982]
+position = Vector2(12014, 500)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_49" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1267602884]
+position = Vector2(12207, 501)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_50" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=212939702]
+position = Vector2(12303, 502)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_51" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1375914219]
+position = Vector2(11724, 405)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_52" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=960062200]
+position = Vector2(11820, 406)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_53" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=900056002]
+position = Vector2(12494, 505)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_54" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=62674350]
+position = Vector2(12494, 409)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_55" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1373432575]
+position = Vector2(12589, 504)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_56" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=204390725]
+position = Vector2(12589, 408)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_57" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1024650580]
+position = Vector2(12686, 502)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="s_1_58" type="Sprite2D" parent="Gameplay/TerrainB/stone1" unique_id=1680260509]
+position = Vector2(12686, 406)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_stone1")
+
+[node name="stone2" type="Node2D" parent="Gameplay/TerrainB" unique_id=1124821282]
+
+[node name="s_2_0" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=292706559]
+position = Vector2(5396, 587)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_1" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=245846623]
+position = Vector2(5587, 589)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_2" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=151453081]
+position = Vector2(5873, 453)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_3" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=174893080]
+position = Vector2(5778, 642)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_4" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=977003673]
+position = Vector2(5874, 643)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_5" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1967340776]
+position = Vector2(5970, 643)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_6" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1300485894]
+position = Vector2(6066, 644)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_7" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1295020379]
+position = Vector2(6065, 549)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_8" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=894150832]
+position = Vector2(6161, 549)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_9" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=357596118]
+position = Vector2(6257, 550)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_10" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=321230625]
+position = Vector2(7303, 358)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_11" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1787849641]
+position = Vector2(7399, 358)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_12" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1540994999]
+position = Vector2(7495, 359)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_13" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1427118514]
+position = Vector2(7208, 450)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_14" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1054149379]
+position = Vector2(7882, 363)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_15" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=542176735]
+position = Vector2(7978, 363)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_16" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=2064613852]
+position = Vector2(8074, 364)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_17" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=826129796]
+position = Vector2(7786, 269)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_18" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1745191298]
+position = Vector2(7882, 269)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_19" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=350018862]
+position = Vector2(7978, 270)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_20" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=626171756]
+position = Vector2(7114, 642)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_21" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1590857545]
+position = Vector2(7113, 547)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_22" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1494555108]
+position = Vector2(7211, 644)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_23" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=93867174]
+position = Vector2(7210, 549)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_24" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=2116416847]
+position = Vector2(7308, 644)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_25" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1156798458]
+position = Vector2(7307, 549)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_26" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1222055217]
+position = Vector2(8362, 136)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_27" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1656135346]
+position = Vector2(8458, 136)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_28" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1963793229]
+position = Vector2(8554, 136)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_29" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=739823721]
+position = Vector2(8268, 323)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_30" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1164397369]
+position = Vector2(8364, 324)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_31" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1342989543]
+position = Vector2(8931, 579)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_32" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1281435171]
+position = Vector2(9124, 579)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_33" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1030884018]
+position = Vector2(9220, 579)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_34" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=505514747]
+position = Vector2(9124, 485)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_35" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=946263123]
+position = Vector2(9220, 486)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_36" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1734508150]
+position = Vector2(9317, 580)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_37" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1260282007]
+position = Vector2(9413, 580)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_38" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1243762385]
+position = Vector2(9317, 486)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_39" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1962664654]
+position = Vector2(9413, 487)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_40" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=356118589]
+position = Vector2(9411, 389.00003)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_41" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=268808340]
+position = Vector2(9509, 581)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_42" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=842957495]
+position = Vector2(9605, 581)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_43" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1343019492]
+position = Vector2(9509, 487)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_44" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1495050554]
+position = Vector2(9605, 488)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_45" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1924210618]
+position = Vector2(9702, 582)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_46" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1910688311]
+position = Vector2(9798, 582)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_47" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1809120023]
+position = Vector2(9702, 488)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_48" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=625620420]
+position = Vector2(9798, 489)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_49" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=2135487945]
+position = Vector2(9895, 488)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_50" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=70852225]
+position = Vector2(9991, 488)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_51" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=858195721]
+position = Vector2(9895, 394)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_52" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=65561127]
+position = Vector2(9991, 395)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_53" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=2107642285]
+position = Vector2(10087, 488)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_54" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1920070171]
+position = Vector2(11338, 500)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_55" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1048957644]
+position = Vector2(10662, 496)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_56" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1069676018]
+position = Vector2(10759, 496)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_57" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1334184607]
+position = Vector2(10855, 497)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_58" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1992353071]
+position = Vector2(10952, 496)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_59" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=882608368]
+position = Vector2(11048, 496)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_60" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1133479100]
+position = Vector2(11145, 497)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_61" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=30124391]
+position = Vector2(11146, 404)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_62" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=577847682]
+position = Vector2(11243, 404)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_63" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=2095332361]
+position = Vector2(11339, 405)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_64" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1047488649]
+position = Vector2(11436, 404)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_65" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=480496138]
+position = Vector2(11532, 404)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_66" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1741803043]
+position = Vector2(11628, 404)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_67" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=851914200]
+position = Vector2(10087, 583)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_68" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1307455063]
+position = Vector2(11628, 501)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_69" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1671070268]
+position = Vector2(11722, 310)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_70" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1589747517]
+position = Vector2(11819, 310)
+rotation = 3.1415927
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("17_54btx")
+
+[node name="s_2_71" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=475634859]
+position = Vector2(11915, 311)
+rotation = 3.1415927
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("16_0fdgw")
+
+[node name="s_2_72" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=774326771]
+position = Vector2(12012, 310)
+rotation = 3.1415927
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("17_54btx")
+
+[node name="s_2_73" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=8789778]
+position = Vector2(12108, 310)
+rotation = 3.1415927
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("16_0fdgw")
+
+[node name="s_2_74" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=180646139]
+position = Vector2(12204, 310)
+rotation = 3.1415927
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("16_0fdgw")
+
+[node name="s_2_75" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=301566022]
+position = Vector2(12300, 310)
+rotation = 3.1415927
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("17_54btx")
+
+[node name="s_2_76" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1913711094]
+position = Vector2(12397, 310)
+rotation = 3.1415927
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("17_54btx")
+
+[node name="s_2_77" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=2107844326]
+position = Vector2(12493, 311)
+rotation = 3.1415927
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("17_54btx")
+
+[node name="s_2_78" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1266089607]
+position = Vector2(12590, 310)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_79" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=118165547]
+position = Vector2(12686, 310)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_80" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=2027026853]
+position = Vector2(12109, 504)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_81" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1945014843]
+position = Vector2(11723, 500)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_82" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1813010343]
+position = Vector2(11819, 500)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_83" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=890178416]
+position = Vector2(11916, 501)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_84" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1458878328]
+position = Vector2(11917, 408)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_85" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=103617238]
+position = Vector2(12014, 408)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_86" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=206228842]
+position = Vector2(12110, 409)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_87" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1887606388]
+position = Vector2(12207, 408)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_88" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1618604315]
+position = Vector2(12303, 408)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_89" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=713513997]
+position = Vector2(12399, 408)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_90" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=242256532]
+position = Vector2(12399, 505)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_91" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1917058286]
+position = Vector2(13567, 121)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_92" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=955120264]
+position = Vector2(13664, 121)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_93" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1421512013]
+position = Vector2(13760, 122)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_94" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1479739621]
+position = Vector2(13857, 121)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_95" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=370429570]
+position = Vector2(13953, 121)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_96" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1580014569]
+position = Vector2(13470, 121)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_97" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1806756906]
+position = Vector2(14821, -72)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_98" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1242482487]
+position = Vector2(14918, -72)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_99" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=511182719]
+position = Vector2(15014, -71)
+rotation = 3.1415927
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("16_0fdgw")
+
+[node name="s_2_100" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1381242369]
+position = Vector2(15111, -72)
+rotation = 3.1415927
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("16_0fdgw")
+
+[node name="s_2_101" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=170497262]
+position = Vector2(15207, -72)
+rotation = 3.1415927
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("16_0fdgw")
+
+[node name="s_2_102" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=2102059109]
+position = Vector2(14724, -72)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_103" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1535980090]
+position = Vector2(15303, -72)
+rotation = 3.1415927
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("16_0fdgw")
+
+[node name="s_2_104" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=719851529]
+position = Vector2(15399, -71)
+rotation = 3.1415927
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("16_0fdgw")
+
+[node name="s_2_105" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=600984444]
+position = Vector2(15496, -72)
+rotation = 3.1415927
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("16_0fdgw")
+
+[node name="s_2_106" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1183314349]
+position = Vector2(15592, -72)
+rotation = 3.1415927
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("16_0fdgw")
+
+[node name="s_2_107" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1698065231]
+position = Vector2(14146, 120)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_108" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=2115601359]
+position = Vector2(14243, 120)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_109" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=744974441]
+position = Vector2(14339, 121)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_110" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=402636159]
+position = Vector2(14436, 120)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_111" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1852341403]
+position = Vector2(14532, 120)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_112" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1154386968]
+position = Vector2(14049, 120)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_113" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=356370928]
+position = Vector2(14821, 23)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_114" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1219096382]
+position = Vector2(14918, 23)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_115" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1137903547]
+position = Vector2(15014, 24)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_116" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=818287369]
+position = Vector2(15111, 23)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_117" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1592371766]
+position = Vector2(15207, 23)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_118" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1337855840]
+position = Vector2(14724, 23)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_119" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1777251478]
+position = Vector2(15303, 23)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_120" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=269892477]
+position = Vector2(15399, 24)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_121" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=290097970]
+position = Vector2(15496, 23)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_122" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=166030322]
+position = Vector2(15592, 23)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_123" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=2084612932]
+position = Vector2(14822, 120)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_124" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=255297940]
+position = Vector2(14919, 120)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_125" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1673984955]
+position = Vector2(15015, 121)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_126" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=149514196]
+position = Vector2(15112, 120)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_127" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1248475944]
+position = Vector2(15208, 120)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_128" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=448235062]
+position = Vector2(14725, 120)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_129" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=155257503]
+position = Vector2(15304, 120)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_130" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=777588525]
+position = Vector2(15400, 121)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_131" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1421069962]
+position = Vector2(15497, 120)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_132" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1479974153]
+position = Vector2(15593, 120)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_133" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=2060212755]
+position = Vector2(14627, 120.00001)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_135" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1249750793]
+position = Vector2(14340, 26)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_136" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=70707633]
+position = Vector2(14437, 25)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_137" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=1493479210]
+position = Vector2(14533, 25)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="s_2_138" type="Sprite2D" parent="Gameplay/TerrainB/stone2" unique_id=243976343]
+position = Vector2(14628, 25.000008)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("7_stone2")
+
+[node name="stone3" type="Node2D" parent="Gameplay/TerrainB" unique_id=1013728732]
+
+[node name="s_3_0" type="Sprite2D" parent="Gameplay/TerrainB/stone3" unique_id=1404286348]
+position = Vector2(5682, 589.00006)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("8_stone3")
+
+[node name="s_3_1" type="Sprite2D" parent="Gameplay/TerrainB/stone3" unique_id=994484043]
+position = Vector2(5778, 547)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("8_stone3")
+
+[node name="s_3_2" type="Sprite2D" parent="Gameplay/TerrainB/stone3" unique_id=1234985630]
+position = Vector2(5777, 452)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("8_stone3")
+
+[node name="s_3_3" type="Sprite2D" parent="Gameplay/TerrainB/stone3" unique_id=481907822]
+position = Vector2(5969, 453)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("8_stone3")
+
+[node name="s_3_4" type="Sprite2D" parent="Gameplay/TerrainB/stone3" unique_id=56731348]
+position = Vector2(7112, 451)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("8_stone3")
+
+[node name="s_3_5" type="Sprite2D" parent="Gameplay/TerrainB/stone3" unique_id=696461293]
+position = Vector2(7400, 454)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("8_stone3")
+
+[node name="s_3_6" type="Sprite2D" parent="Gameplay/TerrainB/stone3" unique_id=1909218430]
+position = Vector2(7689.0005, 360)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("8_stone3")
+
+[node name="s_3_7" type="Sprite2D" parent="Gameplay/TerrainB/stone3" unique_id=423571832]
+position = Vector2(8172, 322)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("8_stone3")
+
+[node name="s_3_8" type="Sprite2D" parent="Gameplay/TerrainB/stone3" unique_id=1858195094]
+position = Vector2(8459, 325)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("8_stone3")
+
+[node name="s_3_9" type="Sprite2D" parent="Gameplay/TerrainB/stone3" unique_id=1465903592]
+position = Vector2(9315, 579)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("8_stone3")
+
+[node name="s_3_10" type="Sprite2D" parent="Gameplay/TerrainB/stone3" unique_id=252198323]
+position = Vector2(9409, 580.00006)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("8_stone3")
+
+[node name="s_3_11" type="Sprite2D" parent="Gameplay/TerrainB/stone3" unique_id=1192991044]
+position = Vector2(8363, 228)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("8_stone3")
+
+[node name="s_3_12" type="Sprite2D" parent="Gameplay/TerrainB/stone3" unique_id=256105616]
+position = Vector2(8651, 229)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("8_stone3")
+
+[node name="s_3_13" type="Sprite2D" parent="Gameplay/TerrainB/stone3" unique_id=796585092]
+position = Vector2(9702, 390)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("8_stone3")
+
+[node name="s_3_14" type="Sprite2D" parent="Gameplay/TerrainB/stone3" unique_id=396428833]
+position = Vector2(9796, 391.00006)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("8_stone3")
+
+[node name="s_3_15" type="Sprite2D" parent="Gameplay/TerrainB/stone3" unique_id=1898236797]
+position = Vector2(10087, 393)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("8_stone3")
+
+[node name="s_3_16" type="Sprite2D" parent="Gameplay/TerrainB/stone3" unique_id=653271166]
+position = Vector2(10183, 393)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("8_stone3")
+
+[node name="Platforms" type="Node2D" parent="Gameplay" unique_id=1322772253]
+
+[node name="Dress" type="Node2D" parent="Gameplay" unique_id=1925579832]
+
+[node name="moss" type="TileMapLayer" parent="Gameplay/Dress" unique_id=2098341093]
+tile_map_data = PackedByteArray("AAAoACMAAgABAAAAAAAoACQAAgABAAEAAAApACMAAgACAAAAAAApACQAAgACAAEAAAAqACMAAgADAAAAAAAqACQAAgADAAEAAAArACMAAgAEAAAAAAArACQAAgAEAAEAAAAsACMAAgAFAAAAAAAtACMAAQAAAAAAAAAtACQAAQAAAAEAAAAuACMAAQABAAAAAAAuACQAAQABAAEAAAAvACMAAQACAAAAAAAvACQAAQACAAEAAAAwACMAAgAAAAAAAAAwACQAAgAAAAEAAAAxACMAAgABAAAAAAAxACQAAgABAAEAAAAyACMAAgACAAAAAAAzACMAAgADAAAAAAAzACQAAgADAAEAAAA0ACMAAgAEAAAAAAA0ACQAAgAEAAEAAAA1ACMAAgAFAAAAAAA1ACQAAgAFAAEAAAA2ACMAAgAAAAAAAAA2ACQAAgAAAAEAAAA3ACMAAgABAAAAAAA3ACQAAgABAAEAAAA4ACMAAgACAAAAAAA5ACMAAgADAAAAAAA5ACQAAgADAAEAAAA6ACMAAgAEAAAAAAA6ACQAAgAEAAEAAAA7ACMAAgAFAAAAAAA7ACQAAgAFAAEAAAA8ACMAAQAFAAAAAAA8ACQAAQAFAAEAAAA9ACMAAAADAAAAAAA9ACQAAAADAAEAAAA+ACMAAAAEAAAAAAA/ACMAAAAFAAAAAAA/ACQAAAAFAAEAAABAACMAAAAAAAAAAABAACQAAAAAAAEAAABBACMAAAABAAAAAABBACQAAAABAAEAAABCACMAAAACAAAAAABCACQAAAACAAEAAABDACMAAgAAAAAAAABDACQAAgAAAAEAAABEACMAAgABAAAAAABFACMAAgACAAAAAABFACQAAgACAAEAAABGACMAAgADAAAAAABGACQAAgADAAEAAABHACMAAgAEAAAAAABHACQAAgAEAAEAAABIACMAAgAFAAAAAABIACQAAgAFAAEAAABJACMAAAADAAAAAABJACQAAAADAAEAAABKACMAAAAEAAAAAABLACMAAAAFAAAAAABLACQAAAAFAAEAAABMACMAAAAAAAAAAABMACQAAAAAAAEAAABNACMAAAABAAAAAABNACQAAAABAAEAAABOACMAAAACAAAAAABOACQAAAACAAEAAABPACMAAgAAAAAAAABPACQAAgAAAAEAAABQACMAAgABAAAAAABRACMAAgACAAAAAABRACQAAgACAAEAAABSACMAAgADAAAAAABSACQAAgADAAEAAABTACMAAgAEAAAAAABTACQAAgAEAAEAAABUACMAAgAFAAAAAABUACQAAgAFAAEAAABVACMAAQAEAAAAAABVACQAAQAEAAEAAABWACMAAQAFAAAAAABWACQAAQAFAAEAAABXACMAAQAAAAAAAABXACQAAQAAAAEAAABYACMAAQABAAAAAABYACQAAQABAAEAAABZACMAAgAAAAAAAABZACQAAgAAAAEAAABaACMAAgABAAAAAABaACQAAgABAAEAAABbACMAAgACAAAAAABbACQAAgACAAEAAABcACMAAgADAAAAAABcACQAAgADAAEAAABdACMAAgAEAAAAAABdACQAAgAEAAEAAABeACMAAgAFAAAAAABeACQAAgAFAAEAAABfACMAAQACAAAAAABfACQAAQACAAEAAABgACMAAQADAAAAAABgACQAAQADAAEAAABhACMAAQAEAAAAAABhACQAAQAEAAEAAABiACMAAQAFAAAAAABiACQAAQAFAAEAAABjACMAAQAAAAAAAABjACQAAQAAAAEAAABkACMAAQABAAAAAABkACQAAQABAAEAAABlACMAAQACAAAAAABlACQAAQACAAEAAABmACMAAgAAAAAAAABmACQAAgAAAAEAAABnACMAAgABAAAAAABnACQAAgABAAEAAABoACMAAgACAAAAAABoACQAAgACAAEAAAAyACQAAgACAAEAAAA4ACQAAgACAAEAAAAnACMAAgAAAAAAAAAnACQAAgAAAAEAAAAsACQAAgAFAAEAAABEACQAAgABAAEAAABQACQAAgABAAEAAABpACMAAgADAAAAAABpACQAAgADAAEAAABqACMAAgAEAAAAAABqACQAAgAEAAEAAABrACMAAgAFAAAAAABrACQAAgAFAAEAAAAhACMAAQAAAAAAAAAhACQAAQAAAAEAAAAiACMAAQABAAAAAAAiACQAAQABAAEAAAAjACMAAQACAAAAAAAjACQAAQACAAEAAAAkACMAAQADAAAAAAAkACQAAQADAAEAAAAlACMAAQAEAAAAAAAlACQAAQAEAAEAAAAmACMAAQAFAAAAAAAmACQAAQAFAAEAAAAAACMAAgAAAAAAAAAAACQAAgAAAAEAAAABACMAAgABAAAAAAABACQAAgABAAEAAAACACMAAQAAAAAAAAACACQAAQAAAAEAAAADACMAAQABAAAAAAADACQAAQABAAEAAAAEACMAAQACAAAAAAAEACQAAQACAAEAAAAFACMAAQADAAAAAAAFACQAAQADAAEAAAAGACMAAQAEAAAAAAAGACQAAQAEAAEAAAAHACMAAQAFAAAAAAAHACQAAQAFAAEAAAAIACMAAgACAAAAAAAIACQAAgACAAEAAAAJACMAAgADAAAAAAAJACQAAgADAAEAAAAKACMAAgAEAAAAAAAKACQAAgAEAAEAAAALACMAAQAAAAAAAAALACQAAQAAAAEAAAAQACMAAQAFAAAAAAAQACQAAQAFAAEAAAARACMAAgABAAAAAAARACQAAgABAAEAAAASACMAAgACAAAAAAASACQAAgACAAEAAAATACMAAgADAAAAAAATACQAAgADAAEAAAAUACMAAgAEAAAAAAAUACQAAgAEAAEAAAAVACMAAQAAAAAAAAAVACQAAQAAAAEAAAAZACMAAQAEAAAAAAAZACQAAQAEAAEAAAAaACMAAQAFAAAAAAAaACQAAQAFAAEAAAAbACMAAgACAAAAAAAbACQAAgACAAEAAAAcACMAAgADAAAAAAAcACQAAgADAAEAAAAdACMAAgAEAAAAAAAdACQAAgAEAAEAAAAeACMAAgAFAAAAAAAeACQAAgAFAAEAAAAMACMAAQABAAAAAAAMACQAAQABAAEAAAANACMAAQACAAAAAAANACQAAQACAAEAAAAOACMAAQADAAAAAAAOACQAAQADAAEAAAAPACMAAQAEAAAAAAAPACQAAQAEAAEAAAAWACMAAQABAAAAAAAWACQAAQABAAEAAAAXACMAAQACAAAAAAAXACQAAQACAAEAAAAYACMAAQADAAAAAAAYACQAAQADAAEAAABrAB0AAQAAAAAAAABrAB4AAQAAAAEAAABsAB0AAQABAAAAAABsAB4AAQABAAEAAABtAB0AAQACAAAAAABtAB4AAQACAAEAAABuAB0AAQADAAAAAABuAB4AAQADAAEAAABvAB0AAQAEAAAAAABvAB4AAQAEAAEAAABwAB0AAQAAAAAAAABwAB4AAQAAAAEAAABxAB0AAQABAAAAAABxAB4AAQABAAEAAAByAB0AAgAAAAAAAAByAB4AAgAAAAEAAABzAB0AAgABAAAAAABzAB4AAgABAAEAAAB0AB0AAgACAAAAAAB0AB4AAgACAAEAAABwAB8AAQAAAAAAAABwACAAAQAAAAEAAABxAB8AAQABAAAAAABxACAAAQABAAEAAAByAB8AAQACAAAAAAByACAAAQACAAEAAABzAB8AAQADAAAAAABzACAAAQADAAEAAAB0AB8AAQAEAAAAAAB0ACAAAQAEAAEAAAB1AB8AAQAAAAAAAAB1ACAAAQAAAAEAAAB2AB8AAQABAAAAAAB2ACAAAQABAAEAAAB3AB8AAQACAAAAAAB3ACAAAQACAAEAAAB4AB8AAQADAAAAAAB4ACAAAQADAAEAAAB5AB8AAQAEAAAAAAB5ACAAAQAEAAEAAAB1AB0AAgADAAAAAAB1AB4AAgADAAEAAAB2AB0AAgAEAAAAAAB2AB4AAgAEAAEAAAB3AB0AAgAAAAAAAAB3AB4AAgAAAAEAAAB4AB0AAgABAAAAAAB4AB4AAgABAAEAAAB5AB0AAgACAAAAAAB5AB4AAgACAAEAAAB6AB0AAgADAAAAAAB6AB4AAgADAAEAAAB7AB0AAgAEAAAAAAB7AB4AAgAEAAEAAAB8AB0AAQACAAAAAAB8AB4AAQACAAEAAAB9AB0AAQADAAAAAAB9AB4AAQADAAEAAAB+AB0AAQAEAAAAAAB+AB4AAQAEAAEAAAB/AB0AAQAAAAAAAAB/AB4AAQAAAAEAAACAAB0AAQABAAAAAACAAB4AAQABAAEAAACBAB0AAQACAAAAAACBAB4AAQACAAEAAACCAB0AAQADAAAAAACCAB4AAQADAAEAAACDAB0AAQAEAAAAAACDAB4AAQAEAAEAAACEAB0AAQAAAAAAAACEAB4AAQAAAAEAAACFAB0AAgAAAAAAAACFAB4AAgAAAAEAAACGAB0AAgABAAAAAACGAB4AAgABAAEAAACHAB0AAgACAAAAAACHAB4AAgACAAEAAACIAB0AAgADAAAAAACIAB4AAgADAAEAAACOAB4AAgAEAAEAAACOAB8AAQAAAAEAAACPAB4AAgAAAAEAAACPAB8AAQABAAEAAACQAB4AAgABAAEAAACQAB8AAQACAAEAAACRAB4AAgACAAEAAACRAB8AAQADAAEAAACSAB4AAgADAAEAAACSAB8AAQAEAAEAAACVAB0AAgABAAAAAACVAB4AAgABAAEAAACWAB0AAgACAAAAAACWAB4AAgACAAEAAACXAB0AAgADAAAAAACXAB4AAgADAAEAAACYAB0AAgAEAAAAAACYAB4AAgAEAAEAAACZAB0AAQAAAAAAAACZAB4AAQAAAAEAAACaAB0AAQABAAAAAACaAB4AAQABAAEAAACbAB0AAQACAAAAAACbAB4AAQACAAEAAACcAB0AAQADAAAAAACcAB4AAQAAAAAAAACdAB0AAQAAAAAAAACdAB4AAQAAAAEAAACcAB8AAQAAAAEAAACdAB8AAQABAAEAAACeAB4AAQABAAEAAACeAB8AAQACAAEAAACfAB4AAQACAAEAAACfAB8AAQADAAEAAACgAB4AAQADAAEAAACgAB8AAQAEAAEAAACeAB0AAQABAAAAAACfAB0AAQACAAAAAACgAB0AAQADAAAAAAChAB0AAQAEAAAAAAChAB4AAQAEAAEAAACiAB0AAQAAAAAAAACiAB4AAQAAAAEAAACjAB0AAgAAAAAAAACjAB4AAgAAAAEAAACkAB0AAgABAAAAAACkAB4AAgABAAEAAAClAB0AAgACAAAAAAClAB4AAgACAAEAAACmAB0AAgADAAAAAACmAB4AAgADAAEAAACJAB0AAgAEAAAAAACJAB4AAgAEAAEAAACKAB0AAgAAAAAAAACKAB4AAgAAAAEAAACLAB0AAgABAAAAAACLAB4AAgABAAEAAACMAB0AAgACAAAAAACMAB4AAgACAAEAAACNAB0AAgADAAAAAACNAB4AAgADAAEAAACOAB0AAAAAAAAAAACPAB0AAAABAAAAAACQAB0AAAACAAAAAACRAB0AAAADAAAAAACSAB0AAAAEAAAAAACTAB0AAAAFAAAAAACTAB4AAgAEAAEAAACUAB0AAgAAAAAAAACUAB4AAgAAAAEAAACnAB0AAgAEAAAAAACnAB4AAgAEAAEAAACoAB0AAgAAAAAAAACoAB4AAgAAAAEAAACpAB0AAgABAAAAAACpAB4AAgABAAEAAACqAB0AAgACAAAAAACqAB4AAgACAAEAAACrAB0AAgADAAAAAACrAB4AAgADAAEAAACsAB0AAgAEAAAAAACsAB4AAgAEAAEAAACtABEAAQAAAAAAAACtABIAAQAAAAEAAACuABEAAQABAAAAAACuABIAAQABAAEAAACvABEAAQACAAAAAACvABIAAQACAAEAAACwABEAAQADAAAAAACwABIAAQADAAEAAACxABEAAgAAAAAAAACxABIAAgAAAAEAAACyABEAAgABAAAAAACyABIAAgABAAEAAAC2ABEAAgAFAAAAAAC2ABIAAgAFAAEAAAC3ABEAAQABAAAAAAC3ABIAAQABAAEAAAC4ABEAAQACAAAAAAC4ABIAAQACAAEAAAC5ABEAAgAAAAAAAAC5ABIAAgAAAAEAAAC6ABEAAgABAAAAAAC6ABIAAgABAAEAAAC7ABEAAgACAAAAAAC7ABIAAgACAAEAAAC8ABEAAgADAAAAAAC8ABIAAgADAAEAAAC9ABEAAgAEAAAAAAC9ABIAAgAEAAEAAAC+ABEAAgAFAAAAAAC+ABIAAgAFAAEAAAC/ABEAAQADAAAAAAC/ABIAAQADAAEAAADAABEAAQAEAAAAAADAABIAAQAEAAEAAADBABEAAgAAAAAAAADBABIAAgAAAAEAAADKABEAAAAEAAAAAADKABIAAQAAAAEAAADLABEAAAAFAAAAAADLABIAAQABAAEAAADMABEAAQACAAAAAADMABIAAQACAAEAAADNABEAAQADAAAAAADNABIAAQADAAEAAADOABEAAAAAAAAAAADOABIAAQAEAAEAAADPABEAAAABAAAAAADPABIAAQAFAAEAAACzABEAAgACAAAAAACzABIAAgACAAEAAAC0ABEAAgADAAAAAAC0ABIAAgADAAEAAAC1ABEAAgAEAAAAAAC1ABIAAgAEAAEAAADCABEAAgABAAAAAADCABIAAgABAAEAAADDABEAAgACAAAAAADDABIAAgACAAEAAADEABEAAgADAAAAAADEABIAAgADAAEAAADFABEAAgAEAAAAAADFABIAAgAEAAEAAADGABEAAAAAAAAAAADGABIAAgAFAAEAAADHABEAAAABAAAAAADIABEAAAACAAAAAADJABEAAAADAAAAAADQABEAAAACAAAAAADRABEAAAADAAAAAADSABEAAAAEAAAAAADTABEAAAAFAAAAAAAFARgAAgAAAAAAAAAFARkAAgAAAAEAAAAGARgAAgABAAAAAAAGARkAAgABAAEAAAAHARgAAgACAAAAAAAHARkAAgACAAEAAAAIARgAAgADAAAAAAAIARkAAgADAAEAAAAJARgAAQAAAAAAAAAJARkAAQAAAAEAAAAKARgAAQABAAAAAAAKARkAAQABAAEAAAALARgAAQACAAAAAAALARkAAQACAAEAAAAMARgAAQADAAAAAAAMARkAAQADAAEAAAANARgAAAAAAAAAAAANARkAAAAAAAEAAAAOARgAAAABAAAAAAAOARkAAAABAAEAAAAPARgAAAACAAAAAAAPARkAAAACAAEAAAAQARgAAAADAAAAAAAQARkAAAADAAEAAAARARgAAAAEAAAAAAARARkAAQACAAEAAAASARgAAQADAAAAAAASARkAAQADAAEAAAATARgAAQACAAAAAAATARkAAQACAAEAAAAUARgAAQAAAAAAAAAUARkAAQAAAAEAAAAUARoAAQAAAAEAAAAVARkAAQABAAEAAAAVARoAAQABAAEAAAAWARkAAQACAAEAAAAWARoAAQACAAEAAAAXARkAAQADAAEAAAAXARoAAQADAAEAAAAVARgAAQABAAAAAAAWARgAAQACAAAAAAAXARgAAQADAAAAAAAXAR4AAAAAAAAAAAAXAR8AAAAAAAEAAAAYAR4AAAABAAAAAAAYAR8AAAABAAEAAAAZAR4AAAACAAAAAAAZAR8AAAACAAEAAAAaAR4AAAADAAAAAAAaAR8AAAADAAEAAAAbAR4AAgAAAAAAAAAcAR4AAgABAAAAAAAcAR8AAAAAAAEAAAAdAR4AAgACAAAAAAAdAR8AAAABAAEAAAAeAR4AAgADAAAAAAAeAR8AAAACAAEAAAAfAR4AAQAAAAAAAAAfAR8AAAADAAEAAAAgAR4AAQABAAAAAAAhAR4AAQACAAAAAAAhAR8AAAAAAAEAAAAiAR4AAQADAAAAAAAiAR8AAAABAAEAAAAjAR4AAgAAAAAAAAAjAR8AAAACAAEAAAAkAR4AAgABAAAAAAAkAR8AAAADAAEAAAAlAR4AAgACAAAAAAAmAR4AAgADAAAAAAAnAR4AAgAEAAAAAAAoAR4AAgAAAAAAAAApAR4AAgABAAAAAAAqAR4AAgACAAAAAAAnAR8AAQAAAAAAAAAoAR8AAQABAAAAAAApAR8AAQACAAAAAAAqAR8AAQADAAAAAAAsAR4AAgAEAAAAAAAtAR4AAgAFAAAAAAAuAR4AAgACAAAAAAAvAR4AAgADAAAAAAArAR4AAgADAAAAAAAvASQAAgAAAAAAAAAvASUAAgAAAAEAAAAwASQAAgABAAAAAAAwASUAAgABAAEAAAAxASQAAgACAAAAAAAxASUAAgACAAEAAAAyASQAAQAAAAAAAAAyASUAAQAAAAEAAAAzASQAAQABAAAAAAAzASUAAQABAAEAAAA0ASQAAQACAAAAAAA0ASUAAQACAAEAAAA1ASQAAQADAAAAAAA1ASUAAQADAAEAAAA2ASQAAQAEAAAAAAA2ASUAAQAEAAEAAAA3ASQAAQAFAAAAAAA3ASUAAQAFAAEAAAA4ASQAAgADAAAAAAA4ASUAAgADAAEAAAA5ASQAAgAEAAAAAAA5ASUAAgAEAAEAAAA6ASQAAgAFAAAAAAA6ASUAAgAFAAEAAAA7ASQAAgAAAAAAAAA7ASUAAgAAAAEAAAA8ASQAAgABAAAAAAA8ASUAAgABAAEAAAA9ASQAAgACAAAAAAA9ASUAAgACAAEAAAA+ASQAAgADAAAAAAA+ASUAAgADAAEAAAA/ASQAAgAEAAAAAAA/ASUAAgAEAAEAAABAASQAAgAFAAAAAABAASUAAgAFAAEAAAA=")
+tile_set = SubResource("TileSet_fvie2")
+
+[node name="grass" type="TileMapLayer" parent="Gameplay/Dress" unique_id=489064307]
+tile_map_data = PackedByteArray("AAAAACIAAgAAAAIAAAAAACMAAgAAAAMAAAABACIAAgABAAIAAAABACMAAgABAAMAAAACACIAAgACAAIAAAACACMAAgACAAMAAAADACIAAgADAAIAAAADACMAAgADAAMAAAAEACIAAgAAAAIAAAAEACMAAgAAAAMAAAAFACIAAgABAAIAAAAFACMAAgABAAMAAAAGACIAAAAAAAIAAAAGACMAAAAAAAMAAAAHACIAAAABAAIAAAAHACMAAAABAAMAAAAIACIAAAACAAIAAAAIACMAAAACAAMAAAAJACIAAAADAAIAAAAJACMAAAADAAMAAAAKACIAAAAAAAIAAAAKACMAAAAAAAMAAAALACIAAAABAAIAAAALACMAAAABAAMAAAAMACIAAAACAAIAAAAMACMAAAACAAMAAAANACIAAAADAAIAAAANACMAAAADAAMAAAAOACIAAgACAAIAAAAOACMAAgACAAMAAAAPACIAAgADAAIAAAAPACMAAgADAAMAAAAQACIAAgAAAAIAAAAQACMAAgAAAAMAAAARACIAAgABAAIAAAARACMAAgABAAMAAAASACIAAgACAAIAAAASACMAAgACAAMAAAATACIAAgADAAIAAAATACMAAgADAAMAAAAUACIAAgAAAAIAAAAUACMAAgAAAAMAAAAVACIAAgABAAIAAAAVACMAAgABAAMAAAAWACIAAgACAAIAAAAWACMAAgACAAMAAAAXACIAAgADAAIAAAAXACMAAgADAAMAAAAYACIAAgAAAAIAAAAYACMAAgAAAAMAAAAZACIAAgABAAIAAAAZACMAAgABAAMAAAAaACIAAAAAAAIAAAAaACMAAAAAAAMAAAAbACIAAAABAAIAAAAbACMAAAABAAMAAAAjACIAAAADAAIAAAAjACMAAAADAAMAAAAkACIAAgABAAIAAAAkACMAAgABAAMAAAAlACIAAgACAAIAAAAlACMAAgACAAMAAAAmACIAAgADAAIAAAAmACMAAgADAAMAAAAnACIAAgAAAAIAAAAnACMAAgAAAAMAAAAoACIAAgABAAIAAAAoACMAAgABAAMAAAApACIAAgACAAIAAAApACMAAgACAAMAAAAqACIAAgADAAIAAAAqACMAAgADAAMAAAArACIAAgAAAAIAAAArACMAAgAAAAMAAAAsACIAAgABAAIAAAAsACMAAgABAAMAAAAtACIAAgACAAIAAAAtACMAAgACAAMAAAAuACIAAgADAAIAAAAuACMAAgADAAMAAAAvACIAAgAAAAIAAAAvACMAAgAAAAMAAAAwACIAAgABAAIAAAAwACMAAgABAAMAAAAxACIAAgACAAIAAAAxACMAAgACAAMAAAAyACIAAgADAAIAAAAyACMAAgADAAMAAABAACIAAAADAAIAAABAACMAAAADAAMAAABBACIAAgABAAIAAABBACMAAgABAAMAAABCACIAAgACAAIAAABCACMAAgACAAMAAABDACIAAgADAAIAAABDACMAAgADAAMAAABEACIAAgAAAAIAAABEACMAAgAAAAMAAABFACIAAgABAAIAAABFACMAAgABAAMAAABGACIAAgACAAIAAABGACMAAgACAAMAAABHACIAAgADAAIAAABHACMAAgADAAMAAABRACIAAgAAAAIAAABRACMAAgAAAAMAAABSACIAAgABAAIAAABSACMAAgABAAMAAABTACIAAgACAAIAAABTACMAAgACAAMAAABUACIAAgADAAIAAABUACMAAgADAAMAAABNACIAAgAAAAIAAABNACMAAgAAAAMAAABOACIAAgABAAIAAABOACMAAgABAAMAAABPACIAAgACAAIAAABPACMAAgACAAMAAABQACIAAgADAAIAAABQACMAAgADAAMAAABVACIAAgAAAAIAAABVACMAAgAAAAMAAABWACIAAgABAAIAAABWACMAAgABAAMAAABXACIAAgACAAIAAABXACMAAgACAAMAAABYACIAAQAAAAIAAABYACMAAQAAAAMAAABhACIAAQACAAIAAABhACMAAQACAAMAAABiACIAAQADAAIAAABiACMAAQADAAMAAABjACIAAgACAAIAAABjACMAAgACAAMAAABkACIAAgADAAIAAABkACMAAgADAAMAAABlACIAAgAAAAIAAABlACMAAgAAAAMAAABmACIAAQAAAAIAAABmACMAAQAAAAMAAABnACIAAQABAAIAAABnACMAAQABAAMAAABoACIAAQACAAIAAABoACMAAQACAAMAAAAcACIAAAAAAAIAAAAcACMAAAAAAAMAAAAdACIAAAABAAIAAAAdACMAAAABAAMAAAAgACIAAAAAAAIAAAAgACMAAAAAAAMAAAAhACIAAAABAAIAAAAhACMAAAABAAMAAAAiACIAAAACAAIAAAAiACMAAAACAAMAAAAeACIAAAACAAIAAAAeACMAAAACAAMAAAAfACIAAAADAAIAAAAfACMAAAADAAMAAAA1ACIAAAAAAAIAAAA1ACMAAAAAAAMAAAA2ACIAAAABAAIAAAA2ACMAAAABAAMAAAA3ACIAAAACAAIAAAA3ACMAAAACAAMAAAA4ACIAAAADAAIAAAA4ACMAAAADAAMAAAA5ACIAAQAAAAIAAAA5ACMAAQAAAAMAAAA6ACIAAQABAAIAAAA6ACMAAQABAAMAAAA7ACIAAQACAAIAAAA7ACMAAQACAAMAAAA8ACIAAQADAAIAAAA8ACMAAQADAAMAAAA9ACIAAAAAAAIAAAA9ACMAAAAAAAMAAAA+ACIAAAABAAIAAAA+ACMAAAABAAMAAAA/ACIAAAACAAIAAAA/ACMAAAACAAMAAABIACIAAQAAAAIAAABIACMAAQAAAAMAAABJACIAAQABAAIAAABJACMAAQABAAMAAABKACIAAQACAAIAAABKACMAAQACAAMAAABLACIAAQADAAIAAABLACMAAQADAAMAAABZACIAAQABAAIAAABZACMAAQABAAMAAABaACIAAQACAAIAAABaACMAAQACAAMAAABbACIAAQADAAIAAABbACMAAQADAAMAAABfACIAAQAAAAIAAABfACMAAQAAAAMAAABgACIAAQABAAIAAABgACMAAQABAAMAAABpACIAAQADAAIAAABpACMAAQADAAMAAABrABwAAAAAAAIAAABrAB0AAAAAAAMAAABsABwAAAABAAIAAABsAB0AAAABAAMAAABtABwAAAACAAIAAABtAB0AAAACAAMAAABuABwAAAADAAIAAABuAB0AAAADAAMAAABvABwAAAAAAAIAAABvAB0AAAAAAAMAAABwABwAAAABAAIAAABwAB0AAAABAAMAAABxABwAAAACAAIAAABxAB0AAAACAAMAAAByABwAAAADAAIAAAByAB0AAAADAAMAAABzABwAAAAAAAIAAABzAB0AAAAAAAMAAAB0ABwAAAABAAIAAAB0AB0AAAABAAMAAAB1ABwAAAACAAIAAAB1AB0AAAACAAMAAAB2ABwAAAADAAIAAAB2AB0AAAADAAMAAAB3ABwAAAAAAAIAAAB3AB0AAAAAAAMAAAB4ABwAAAABAAIAAAB4AB0AAAABAAMAAAB5ABwAAAACAAIAAAB5AB0AAAACAAMAAAB6ABwAAAADAAIAAAB6AB0AAAADAAMAAAB7ABwAAAAAAAIAAAB7AB0AAAAAAAMAAAB8ABwAAAABAAIAAAB8AB0AAAABAAMAAAB9ABwAAAACAAIAAAB9AB0AAAACAAMAAAB+ABwAAAADAAIAAAB+AB0AAAADAAMAAACBABwAAAAAAAIAAACBAB0AAAAAAAMAAACCABwAAAABAAIAAACCAB0AAAABAAMAAACDABwAAAACAAIAAACDAB0AAAACAAMAAACEABwAAAADAAIAAACEAB0AAAADAAMAAACFABwAAAAAAAIAAACFAB0AAAAAAAMAAACGABwAAAABAAIAAACGAB0AAAABAAMAAACHABwAAAACAAIAAACHAB0AAAACAAMAAACIABwAAAADAAIAAACIAB0AAAADAAMAAACJABwAAAAAAAIAAACJAB0AAAAAAAMAAACKABwAAAABAAIAAACKAB0AAAABAAMAAACLABwAAAACAAIAAACLAB0AAAACAAMAAACMABwAAAADAAIAAACMAB0AAAADAAMAAACPABwAAAAAAAIAAACPAB0AAAAAAAMAAACQABwAAAABAAIAAACQAB0AAAABAAMAAACRABwAAAACAAIAAACRAB0AAAACAAMAAACSABwAAgAAAAIAAACSAB0AAgAAAAMAAACTABwAAgABAAIAAACTAB0AAgABAAMAAACUABwAAgACAAIAAACUAB0AAgACAAMAAACVABwAAgADAAIAAACVAB0AAgADAAMAAACWABwAAgAAAAIAAACWAB0AAgAAAAMAAACXABwAAgABAAIAAACXAB0AAgABAAMAAACYABwAAgACAAIAAACYAB0AAgACAAMAAACZABwAAgADAAIAAACZAB0AAgADAAMAAACaABwAAgAAAAIAAACaAB0AAgAAAAMAAACbABwAAgABAAIAAACbAB0AAgABAAMAAACcABwAAgACAAIAAACcAB0AAgACAAMAAACdABwAAgADAAIAAACdAB0AAgADAAMAAACeABwAAgAAAAIAAACeAB0AAgAAAAMAAACfABwAAgABAAIAAACfAB0AAgABAAMAAACgABwAAgACAAIAAACgAB0AAgACAAMAAAChABwAAgADAAIAAAChAB0AAgADAAMAAACoABwAAAAAAAIAAACoAB0AAAAAAAMAAACpABwAAAABAAIAAACpAB0AAAABAAMAAACqABwAAAACAAIAAACqAB0AAAACAAMAAACrABwAAAADAAIAAACrAB0AAAADAAMAAACkABwAAQABAAIAAACkAB0AAAAAAAMAAAClABwAAQACAAIAAAClAB0AAAABAAMAAACmABwAAQADAAIAAACmAB0AAAACAAMAAACnABwAAAADAAIAAACnAB0AAAADAAMAAACjABwAAQAAAAIAAACsABAAAQAAAAIAAACsABEAAQAAAAMAAACtABAAAQABAAIAAACtABEAAQABAAMAAACuABAAAQACAAIAAACuABEAAQACAAMAAACvABAAAQADAAIAAACvABEAAQADAAMAAACwABAAAQAAAAIAAACwABEAAQAAAAMAAACxABAAAQABAAIAAACxABEAAQABAAMAAACyABAAAgAAAAIAAACyABEAAgAAAAMAAACzABAAAgABAAIAAACzABEAAgABAAMAAAC0ABAAAgACAAIAAAC0ABEAAgACAAMAAAC1ABAAAgADAAIAAAC1ABEAAgADAAMAAAC2ABAAAgAAAAIAAAC2ABEAAgAAAAMAAAC3ABAAAgABAAIAAAC3ABEAAgABAAMAAAC4ABAAAgACAAIAAAC4ABEAAgACAAMAAAC5ABAAAgADAAIAAAC5ABEAAgADAAMAAAC6ABAAAgAAAAIAAAC6ABEAAgAAAAMAAAC7ABAAAgABAAIAAAC7ABEAAgABAAMAAAC8ABAAAgACAAIAAAC8ABEAAgACAAMAAAC9ABAAAgADAAIAAAC9ABEAAgADAAMAAAC+ABAAAQACAAIAAAC+ABEAAQACAAMAAAC/ABAAAQADAAIAAAC/ABEAAQADAAMAAADAABAAAQAAAAIAAADAABEAAQAAAAMAAADBABAAAQABAAIAAADBABEAAQABAAMAAADCABAAAAABAAIAAADCABEAAAABAAMAAADDABAAAAACAAIAAADDABEAAAACAAMAAADEABAAAAADAAIAAADEABEAAAADAAMAAADFABAAAAABAAIAAADFABEAAAABAAMAAADGABAAAAACAAIAAADGABEAAAACAAMAAADHABAAAAADAAIAAADHABEAAAADAAMAAADIABAAAAABAAIAAADIABEAAAABAAMAAADJABAAAAACAAIAAADJABEAAAACAAMAAADKABAAAAADAAIAAADKABEAAAADAAMAAADLABAAAAABAAIAAADLABEAAAABAAMAAADMABAAAAACAAIAAADMABEAAAACAAMAAADNABAAAAADAAIAAADNABEAAAADAAMAAADOABAAAAABAAIAAADOABEAAAABAAMAAADPABAAAAACAAIAAADPABEAAAACAAMAAADQABAAAAADAAIAAADQABEAAAADAAMAAADRABAAAQABAAIAAADRABEAAQABAAMAAADSABAAAQACAAIAAADSABEAAQACAAMAAADTABAAAQADAAIAAADTABEAAQADAAMAAAAIARcAAgAAAAIAAAAIARgAAgAAAAMAAAAJARcAAgABAAIAAAAJARgAAgABAAMAAAAKARcAAgACAAIAAAAKARgAAgACAAMAAAALARcAAQAAAAIAAAALARgAAQAAAAMAAAAOARcAAQADAAIAAAAOARgAAQADAAMAAAAPARcAAgABAAIAAAAPARgAAgABAAMAAAAQARcAAgACAAIAAAAQARgAAgACAAMAAAARARcAAQAAAAIAAAARARgAAQAAAAMAAAATARgAAQACAAMAAAATARkAAgAAAAMAAAAUARgAAQADAAMAAAAUARkAAgABAAMAAAAVARgAAQAAAAMAAAAVARkAAgACAAMAAAAWARgAAQABAAMAAAAWARkAAgADAAMAAAAYAR0AAgAAAAIAAAAYAR4AAgAAAAMAAAAZAR0AAQAAAAIAAAAZAR4AAQAAAAMAAAAaAR0AAQABAAIAAAAaAR4AAQABAAMAAAAbAR0AAAAAAAMAAAAbAR4AAAAAAAMAAAAeAR0AAAADAAMAAAAeAR4AAAADAAMAAAAfAR0AAQACAAIAAAAfAR4AAQACAAMAAAAgAR0AAAAAAAIAAAAgAR4AAAAAAAMAAAAhAR0AAAABAAIAAAAhAR4AAAABAAMAAAAiAR0AAAACAAIAAAAiAR4AAAACAAMAAAAjAR0AAAADAAIAAAAjAR4AAAADAAMAAAAkAR0AAQAAAAIAAAAkAR4AAQAAAAMAAAAlAR0AAQABAAIAAAAlAR4AAQABAAMAAAAMARcAAQABAAIAAAAMARgAAQABAAMAAAANARcAAQACAAIAAAANARgAAQACAAMAAAASARcAAQABAAIAAAASARgAAQABAAMAAAATARcAAQACAAIAAAAUARcAAQADAAIAAAAVARcAAQAAAAIAAAAWARcAAQABAAIAAAAXARcAAQACAAIAAAAXARgAAQACAAMAAAAYARcAAQADAAIAAAAYARgAAQADAAMAAAAcAR0AAAABAAMAAAAcAR4AAAABAAMAAAAdAR0AAAACAAMAAAAdAR4AAAACAAMAAAAmAR0AAQACAAIAAAAmAR4AAQACAAMAAAAnAR0AAQADAAIAAAAnAR4AAQADAAMAAAAoAR0AAQAAAAIAAAAoAR4AAQAAAAMAAAApAR0AAQABAAIAAAApAR4AAQABAAMAAAAqAR0AAQACAAIAAAAqAR4AAQACAAMAAAArAR0AAQADAAIAAAArAR4AAQADAAMAAAAsAR0AAQAAAAIAAAAsAR4AAQAAAAMAAAAtAR0AAQABAAIAAAAtAR4AAQABAAMAAAAuAR0AAQACAAIAAAAuAR4AAQACAAMAAAAvAR0AAQADAAIAAAAvAR4AAQADAAMAAAAbARwAAAAAAAIAAAAcARwAAAABAAIAAAAdARwAAAACAAIAAAAeARwAAAADAAIAAAA=")
+tile_set = SubResource("TileSet_34l5q")
+
+[node name="gravel" type="TileMapLayer" parent="Gameplay/Dress" unique_id=666493259]
+tile_map_data = PackedByteArray("AAAAACcAAgAAAAAAAAAAACgAAgAAAAEAAAAAACkAAgAAAAIAAAABACcAAgABAAAAAAABACgAAgABAAEAAAABACkAAgABAAIAAAACACcAAgACAAAAAAACACgAAgACAAEAAAACACkAAgACAAIAAAADACcAAgADAAAAAAADACgAAgADAAEAAAADACkAAgADAAIAAAAEACcAAgAEAAAAAAAEACgAAgAEAAEAAAAEACkAAgAEAAIAAAAFACcAAgAFAAAAAAAFACgAAgAFAAEAAAAFACkAAgAFAAIAAAAHACkAAgAAAAAAAAAHACoAAgAAAAEAAAAHACsAAgAAAAIAAAAIACkAAgABAAAAAAAIACoAAgABAAEAAAAIACsAAgABAAIAAAAJACkAAgACAAAAAAAJACoAAgACAAEAAAAJACsAAgACAAIAAAAKACkAAgADAAAAAAAKACoAAgADAAEAAAAKACsAAgADAAIAAAALACkAAgAEAAAAAAALACoAAgAEAAEAAAALACsAAgAEAAIAAAAMACkAAgAFAAAAAAAMACoAAgAFAAEAAAAMACsAAgAFAAIAAAATACgAAgAAAAAAAAATACkAAgAAAAEAAAATACoAAgAAAAIAAAAUACgAAgABAAAAAAAUACkAAgABAAEAAAAUACoAAgABAAIAAAAVACgAAgACAAAAAAAVACkAAgACAAEAAAAVACoAAgACAAIAAAAWACgAAgADAAAAAAAWACkAAgADAAEAAAAWACoAAgADAAIAAAAXACgAAgAEAAAAAAAXACkAAgAEAAEAAAAXACoAAgAEAAIAAAAYACgAAgAFAAAAAAAYACkAAgAFAAEAAAAYACoAAgAFAAIAAAAnACcAAgAAAAAAAAAnACgAAQAFAAAAAAAnACkAAQAFAAEAAAAoACcAAgABAAAAAAAoACgAAgABAAEAAAAoACkAAgABAAIAAAApACcAAQAAAAEAAAApACgAAgACAAEAAAApACkAAgACAAIAAAAqACcAAQABAAEAAAAqACgAAgADAAEAAAAqACkAAgADAAIAAAArACcAAQACAAEAAAArACgAAgAEAAEAAAArACkAAgAEAAIAAAAsACcAAQADAAEAAAAsACgAAgAFAAEAAAAsACkAAgAFAAIAAAAjACoAAQACAAAAAAAjACsAAQACAAEAAAAjACwAAgAAAAIAAAAkACoAAQADAAAAAAAkACsAAQADAAEAAAAkACwAAgABAAIAAAAlACoAAQAEAAAAAAAlACsAAQAEAAEAAAAlACwAAgACAAIAAAAmACoAAQAFAAAAAAAmACsAAQAFAAEAAAAmACwAAgADAAIAAAAnACoAAgAEAAAAAAAnACsAAgAEAAEAAAAnACwAAgAEAAIAAAAoACoAAgAFAAAAAAAoACsAAgAFAAEAAAAoACwAAgAFAAIAAAA1ACoAAQAAAAAAAAA1ACsAAQAAAAEAAAA2ACoAAQABAAAAAAA2ACsAAQABAAEAAAA3ACoAAQACAAAAAAA3ACsAAQACAAEAAAA4ACoAAQADAAAAAAA4ACsAAQADAAEAAAA5ACoAAQAEAAAAAAA5ACsAAQAEAAEAAAA6ACoAAQAFAAAAAAA6ACsAAQAFAAEAAAA2ACYAAQAAAAAAAAA2ACcAAQAAAAEAAAA3ACYAAQABAAAAAAA3ACcAAQABAAEAAAA4ACYAAQACAAAAAAA4ACcAAQACAAEAAAA5ACYAAQADAAAAAAA5ACcAAQADAAEAAAA6ACYAAQAEAAAAAAA6ACcAAQAEAAEAAAA7ACYAAQAFAAAAAAA7ACcAAQAFAAEAAAApACYAAQAAAAAAAAAqACYAAQABAAAAAAArACYAAQACAAAAAAAsACYAAQADAAAAAAAtACYAAQAEAAAAAAAtACcAAQAEAAEAAAAuACYAAQAFAAAAAAAuACcAAQAFAAEAAAAiACgAAQAAAAAAAAAiACkAAQAAAAEAAAAjACgAAQABAAAAAAAjACkAAQABAAEAAAAkACgAAQACAAAAAAAkACkAAQACAAEAAAAlACgAAQADAAAAAAAlACkAAQADAAEAAAAmACgAAQAEAAAAAAAmACkAAQAEAAEAAAAhACoAAQAAAAAAAAAhACsAAQAAAAEAAAAiACoAAQABAAAAAAAiACsAAQABAAEAAAA8ACcAAQAAAAAAAAA8ACgAAQAAAAEAAAA9ACcAAQABAAAAAAA9ACgAAQABAAEAAAA+ACcAAQACAAAAAAA+ACgAAQACAAEAAAA/ACcAAQADAAAAAAA/ACgAAQADAAEAAABAACcAAQAEAAAAAABAACgAAQAEAAEAAABBACcAAQAFAAAAAABBACgAAQAFAAEAAABBACsAAQAAAAAAAABBACwAAQAAAAEAAABCACsAAQABAAAAAABCACwAAQABAAEAAABDACsAAQACAAAAAABDACwAAQACAAEAAABEACsAAQADAAAAAABEACwAAQADAAEAAABFACsAAQAEAAAAAABFACwAAQAEAAEAAABGACsAAQAFAAAAAABGACwAAQAFAAEAAABFACUAAQAAAAAAAABFACYAAQAAAAEAAABGACUAAQABAAAAAABGACYAAQABAAEAAABHACUAAQACAAAAAABHACYAAQACAAEAAABIACUAAQADAAAAAABIACYAAQADAAEAAABJACUAAQAEAAAAAABJACYAAQAEAAEAAABKACUAAQAFAAAAAABKACYAAQAFAAEAAABTACcAAAAAAAAAAABUACcAAAABAAAAAABUACgAAAABAAEAAABVACcAAAACAAAAAABWACgAAAADAAEAAABXACcAAAAEAAAAAABYACcAAAAFAAAAAABYACgAAAAFAAEAAABJACkAAAAAAAAAAABKACkAAAABAAAAAABKACoAAAABAAEAAABLACkAAAACAAAAAABMACoAAAADAAEAAABNACkAAAAEAAAAAABOACkAAAAFAAAAAABOACoAAAAFAAEAAABSACoAAQAAAAAAAABSACsAAQAAAAEAAABTACoAAQABAAAAAABTACsAAQABAAEAAABUACoAAQACAAAAAABUACsAAQACAAEAAABVACoAAQADAAAAAABVACsAAQADAAEAAABWACoAAQAEAAAAAABWACsAAQAEAAEAAABjACYAAQAAAAAAAABjACcAAQAAAAEAAABkACYAAQABAAAAAABkACcAAQABAAEAAABlACYAAQACAAAAAABlACcAAQACAAEAAABmACYAAQADAAAAAABmACcAAQADAAEAAABnACYAAQAEAAAAAABnACcAAQAEAAEAAABdACoAAQAAAAAAAABdACsAAQAAAAEAAABeACoAAQABAAAAAABeACsAAQABAAEAAABfACoAAQACAAAAAABfACsAAQACAAEAAABgACoAAQADAAAAAABgACsAAQADAAEAAABhACoAAQAEAAAAAABhACsAAQAEAAEAAABxACIAAQAAAAAAAABxACMAAQAAAAEAAAByACIAAQABAAAAAAByACMAAQABAAEAAABzACIAAQACAAAAAABzACMAAQACAAEAAAB0ACIAAQADAAAAAAB0ACMAAQADAAEAAAB1ACIAAQAEAAAAAAB1ACMAAQAEAAEAAABtACcAAQAAAAAAAABtACgAAQAAAAEAAABuACcAAQABAAAAAABuACgAAQABAAEAAABvACcAAQACAAAAAABvACgAAQACAAEAAABwACcAAQADAAAAAABwACgAAQADAAEAAABxACcAAQAEAAAAAABxACgAAQAEAAEAAAByACsAAgACAAAAAAByACwAAgACAAEAAABzACsAAgADAAAAAABzACwAAgADAAEAAAB/ACMAAgACAAAAAAB/ACQAAgACAAEAAACAACMAAgADAAAAAACAACQAAgADAAEAAAB8ACgAAgACAAAAAAB8ACkAAgACAAEAAAB9ACgAAgADAAAAAAB9ACkAAgADAAEAAACLACYAAgACAAAAAACLACcAAgACAAEAAACMACYAAgADAAAAAACMACcAAgADAAEAAACNACIAAgACAAAAAACNACMAAgACAAEAAACOACIAAgADAAAAAACOACMAAgADAAEAAACVACsAAgACAAAAAACVACwAAgACAAEAAACWACsAAgADAAAAAACWACwAAgADAAEAAACHACoAAgACAAAAAACHACsAAgACAAEAAACIACoAAgADAAAAAACIACsAAgADAAEAAACcAB8AAgACAAAAAACcACAAAgACAAEAAACdAB8AAgADAAAAAACdACAAAgADAAEAAACZACQAAgACAAAAAACZACUAAgACAAEAAACaACQAAgADAAAAAACaACUAAgADAAEAAACkACgAAQADAAEAAAClACgAAQAEAAEAAACmACgAAQAFAAEAAAClACQAAQADAAEAAACmACQAAQAEAAEAAACnACQAAQAFAAEAAACkACEAAQADAAEAAAClACEAAQAEAAEAAACmACEAAQAFAAEAAACTACgAAQADAAEAAACUACgAAQAEAAEAAACVACgAAQAFAAEAAACRACAAAAABAAAAAACSACAAAAACAAAAAACUACAAAAAEAAAAAACVACAAAAAFAAAAAACqACEAAAABAAAAAACrACEAAAACAAAAAACtACEAAAAEAAAAAACuACEAAAAFAAAAAACpACgAAAABAAAAAACqACgAAAACAAAAAACsACgAAAAEAAAAAACtACgAAAAFAAAAAACvABkAAAABAAAAAACwABkAAAACAAAAAACyABkAAAAEAAAAAACzABkAAAAFAAAAAAC1ABIAAAABAAAAAAC2ABIAAAACAAAAAAC4ABIAAAAEAAAAAAC5ABIAAAAFAAAAAADDABsAAAABAAAAAADEABsAAAACAAAAAADGABsAAAAEAAAAAADHABsAAAAFAAAAAAC8ACAAAAABAAAAAAC9ACAAAAACAAAAAAC/ACAAAAAEAAAAAADAACAAAAAFAAAAAAC6ACMAAAABAAAAAAC7ACMAAAACAAAAAAC9ACMAAAAEAAAAAAC+ACMAAAAFAAAAAAC0ACQAAQABAAAAAAC0ACUAAQABAAEAAAC1ACQAAQACAAAAAAC1ACUAAQACAAEAAAC2ACQAAQADAAAAAAC2ACUAAQADAAEAAAC3ACQAAQAEAAAAAAC3ACUAAQAEAAEAAAC4ACQAAQAFAAAAAAC4ACUAAQAFAAEAAAC7ABkAAQABAAAAAAC7ABoAAQABAAEAAAC8ABkAAQACAAAAAAC8ABoAAQACAAEAAAC9ABkAAQADAAAAAAC9ABoAAQADAAEAAAC+ABkAAQAEAAAAAAC+ABoAAQAEAAEAAAC/ABkAAQAFAAAAAAC/ABoAAQAFAAEAAAC/ACgAAQABAAAAAAC/ACkAAQABAAEAAADAACgAAQACAAAAAADAACkAAQACAAEAAADBACgAAQADAAAAAADBACkAAQADAAEAAADCACgAAQAEAAAAAADCACkAAQAEAAEAAADDACgAAQAFAAAAAADDACkAAQAFAAEAAADDAB4AAgAAAAEAAADDAB8AAgAAAAIAAADEAB4AAgABAAEAAADEAB8AAgABAAIAAADFAB4AAgACAAEAAADFAB8AAgACAAIAAADDACAAAgAAAAEAAADDACEAAgAAAAIAAADEACAAAgABAAEAAADEACEAAgABAAIAAADFACAAAgACAAEAAADFACEAAgACAAIAAADDACIAAgAAAAEAAADDACMAAgAAAAIAAADEACIAAgABAAEAAADEACMAAgABAAIAAADFACIAAgACAAEAAADFACMAAgACAAIAAADDACQAAgAAAAEAAADDACUAAgAAAAIAAADEACQAAgABAAEAAADEACUAAgABAAIAAADFACQAAgACAAEAAADFACUAAgACAAIAAACzAB0AAgAAAAEAAACzAB4AAgAAAAIAAAC0AB0AAgABAAEAAAC0AB4AAgABAAIAAAC1AB0AAgACAAEAAAC1AB4AAgACAAIAAAC2AB0AAgAAAAEAAAC2AB4AAgAAAAIAAAC3AB0AAgABAAEAAAC3AB4AAgABAAIAAAC4AB0AAgACAAEAAAC4AB4AAgACAAIAAAC2AB8AAgAAAAEAAAC2ACAAAgAAAAIAAAC3AB8AAgABAAEAAAC3ACAAAgABAAIAAAC4AB8AAgACAAEAAAC4ACAAAgACAAIAAAC5AB8AAgAAAAEAAAC5ACAAAgAAAAIAAAC6AB8AAgABAAEAAAC6ACAAAgABAAIAAAC7AB8AAgACAAEAAAC7ACAAAgACAAIAAADKABcAAgAAAAEAAADKABgAAgAAAAIAAADLABcAAgABAAEAAADLABgAAgABAAIAAADMABcAAgACAAEAAADMABgAAgACAAIAAADKABkAAgAAAAEAAADKABoAAgAAAAIAAADLABkAAgABAAEAAADLABoAAgABAAIAAADMABkAAgACAAEAAADMABoAAgACAAIAAADNACEAAgAAAAEAAADNACIAAgAAAAIAAADOACEAAgABAAEAAADOACIAAgABAAIAAADPACEAAgACAAEAAADPACIAAgACAAIAAADVACgAAgAAAAEAAADVACkAAgAAAAIAAADWACgAAgABAAEAAADWACkAAgABAAIAAADXACgAAgACAAEAAADXACkAAgACAAIAAADSACgAAgAAAAEAAADSACkAAgAAAAIAAADTACgAAgABAAEAAADTACkAAgABAAIAAADUACgAAgACAAEAAADUACkAAgACAAIAAADSACYAAgAAAAEAAADSACcAAgAAAAIAAADTACYAAgABAAEAAADTACcAAgABAAIAAADUACYAAgACAAEAAADUACcAAgACAAIAAADPACQAAgAAAAEAAADPACUAAgAAAAIAAADQACQAAgABAAEAAADQACUAAgABAAIAAADRACQAAgACAAEAAADRACUAAgACAAIAAADMACQAAgAAAAEAAADMACUAAgAAAAIAAADNACQAAgABAAEAAADNACUAAgABAAIAAADOACQAAgACAAEAAADOACUAAgACAAIAAADeACwAAQADAAEAAADfACwAAQAEAAEAAADgACwAAQAFAAEAAADeACsAAQADAAEAAADfACsAAQAEAAEAAADgACsAAQAFAAEAAADhACsAAQADAAEAAADiACsAAQAEAAEAAADjACsAAQAFAAEAAADhACoAAQADAAEAAADiACoAAQAEAAEAAADjACoAAQAFAAEAAADrACoAAQADAAEAAADsACoAAQAEAAEAAADtACoAAQAFAAEAAADrACsAAQADAAEAAADsACsAAQAEAAEAAADtACsAAQAFAAEAAADrACwAAQADAAEAAADsACwAAQAEAAEAAADtACwAAQAFAAEAAADrAC0AAQADAAEAAADsAC0AAQAEAAEAAADtAC0AAQAFAAEAAADzACkAAQADAAEAAAD0ACkAAQAEAAEAAAD1ACkAAQAFAAEAAAD2ACkAAQADAAEAAAD3ACkAAQAEAAEAAAD4ACkAAQAFAAEAAAD2ACoAAQADAAEAAAD3ACoAAQAEAAEAAAD4ACoAAQAFAAEAAAAAAS0AAQADAAEAAAABAS0AAQAEAAEAAAACAS0AAQAFAAEAAAAAASwAAQADAAEAAAABASwAAQAEAAEAAAACASwAAQAFAAEAAAAAASsAAQADAAEAAAABASsAAQAEAAEAAAACASsAAQAFAAEAAAAIASoAAQADAAEAAAAJASoAAQAEAAEAAAAKASoAAQAFAAEAAAAIASkAAQADAAEAAAAJASkAAQAEAAEAAAAKASkAAQAFAAEAAAAIASgAAQADAAEAAAAJASgAAQAEAAEAAAAKASgAAQAFAAEAAAALASgAAQADAAEAAAAMASgAAQAEAAEAAAANASgAAQAFAAEAAAALAScAAQADAAEAAAAMAScAAQAEAAEAAAANAScAAQAFAAEAAAANASQAAQADAAEAAAAOASQAAQAEAAEAAAAPASQAAQAFAAEAAAAKASMAAQADAAEAAAALASMAAQAEAAEAAAAMASMAAQAFAAEAAAAKASIAAQADAAEAAAALASIAAQAEAAEAAAAMASIAAQAFAAEAAAAHASIAAQADAAEAAAAIASIAAQAEAAEAAAAJASIAAQAFAAEAAAAHASEAAQADAAEAAAAIASEAAQAEAAEAAAAJASEAAQAFAAEAAAAEASAAAQADAAEAAAAFASAAAQAEAAEAAAAGASAAAQAFAAEAAAAEAR8AAQADAAEAAAAFAR8AAQAEAAEAAAAGAR8AAQAFAAEAAAATASgAAAAAAAAAAAAUASgAAAABAAAAAAAVASgAAAACAAAAAAAXASgAAAAEAAAAAAAYASgAAAAFAAAAAAATAScAAAAAAAAAAAAUAScAAAABAAAAAAAVAScAAAACAAAAAAAXAScAAgABAAAAAAAYAScAAgACAAAAAAATASYAAAAAAAAAAAAUASYAAAABAAAAAAAVASYAAAACAAAAAAAXASYAAAAEAAAAAAAYASYAAAAFAAAAAAATASUAAAAAAAAAAAAUASUAAgABAAAAAAAVASUAAgACAAAAAAAXASUAAAAEAAAAAAAYASUAAAAFAAAAAAATASQAAAAAAAAAAAAUASQAAAABAAAAAAAVASQAAAACAAAAAAAXASQAAAAEAAAAAAAYASQAAAAFAAAAAAAZASQAAAAAAAAAAAAaASQAAAABAAAAAAAbASQAAAACAAAAAAAdASQAAAAEAAAAAAAeASQAAAAFAAAAAAAZASUAAAAAAAAAAAAaASUAAAABAAAAAAAbASUAAAACAAAAAAAdASUAAAAEAAAAAAAeASUAAAAFAAAAAAAZASYAAAAAAAAAAAAaASYAAAABAAAAAAAbASYAAAACAAAAAAAdASYAAAAEAAAAAAAeASYAAAAFAAAAAAAZAScAAgADAAAAAAAaAScAAAABAAAAAAAbAScAAAACAAAAAAAdAScAAAAEAAAAAAAeAScAAAAFAAAAAAAZASgAAAAAAAAAAAAaASgAAAABAAAAAAAbASgAAAACAAAAAAAdASgAAAAEAAAAAAAeASgAAAAFAAAAAAAZASkAAAAAAAAAAAAaASkAAAABAAAAAAAbASkAAAACAAAAAAAdASkAAAAEAAAAAAAeASkAAAAFAAAAAAAiAScAAAAAAAAAAAAjAScAAAABAAAAAAAkAScAAAACAAAAAAAmAScAAAAEAAAAAAAnAScAAAAFAAAAAAAiASgAAAAAAAAAAAAjASgAAAABAAAAAAAkASgAAAACAAAAAAAmASgAAAAEAAAAAAAnASgAAAAFAAAAAAAiASkAAAAAAAAAAAAjASkAAAABAAAAAAAkASkAAAACAAAAAAAmASkAAAAEAAAAAAAnASkAAAAFAAAAAAAiASoAAAAAAAAAAAAjASoAAAABAAAAAAAkASoAAAACAAAAAAAmASoAAAAEAAAAAAAnASoAAAAFAAAAAAAWASUAAgADAAAAAAAlASMAAgABAAAAAAAmASMAAgACAAAAAAAnASMAAgADAAAAAAAdASAAAgABAAAAAAAeASAAAgACAAAAAAAfASAAAgADAAAAAAAuASoAAgABAAAAAAAvASoAAgACAAAAAAAwASoAAgADAAAAAAA3ASsAAgABAAAAAAA4ASsAAgACAAAAAAA5ASsAAgADAAAAAAAxASYAAgABAAAAAAAyASYAAgACAAAAAAAzASYAAgADAAAAAABKASsAAgABAAAAAABLASsAAgACAAAAAABMASsAAgADAAAAAABFASoAAgABAAAAAABGASoAAgACAAAAAABHASoAAgADAAAAAAA9ASUAAgABAAAAAAA+ASUAAgACAAAAAAA/ASUAAgADAAAAAAA9ASoAAgABAAAAAAA+ASoAAgACAAAAAAA/ASoAAgADAAAAAACoACcAAgABAAAAAACpACcAAgACAAAAAACqACcAAgADAAAAAACiACkAAgABAAAAAACjACkAAgACAAAAAACkACkAAgADAAAAAAB5AB8AAgABAAAAAAB6AB8AAgACAAAAAAB7AB8AAgADAAAAAABVASgAAgACAAAAAABVASkAAgACAAEAAABWASgAAgADAAAAAABWASkAAgADAAEAAABXASgAAgAEAAAAAABXASkAAgAEAAEAAABYASgAAgACAAAAAABYASkAAgACAAEAAABZASgAAgADAAAAAABZASkAAgADAAEAAABaASgAAgAEAAAAAABaASkAAgAEAAEAAABjASsAAgACAAAAAABjASwAAgACAAEAAABkASsAAgADAAAAAABkASwAAgADAAEAAABlASsAAgAEAAAAAABlASwAAgAEAAEAAAB5ASsAAQABAAAAAAB5ASwAAQABAAEAAAB5AS0AAQABAAIAAAB6ASsAAQACAAAAAAB6ASwAAQACAAEAAAB6AS0AAQACAAIAAAB7ASsAAQADAAAAAAB7ASwAAQADAAEAAAB7AS0AAQADAAIAAAB8ASsAAQAEAAAAAAB8ASwAAQAEAAEAAAB8AS0AAQAEAAIAAACFASsAAQABAAAAAACFASwAAQABAAEAAACFAS0AAQABAAIAAACGASsAAQACAAAAAACGASwAAQACAAEAAACGAS0AAQACAAIAAACHASsAAQADAAAAAACHASwAAQADAAEAAACHAS0AAQADAAIAAACIASsAAQAEAAAAAACIASwAAQAEAAEAAACIAS0AAQAEAAIAAADXASgAAQABAAAAAADXASkAAQABAAEAAADXASoAAQABAAIAAADYASgAAQACAAAAAADYASkAAQACAAEAAADYASoAAQACAAIAAADZASgAAQADAAAAAADZASkAAQADAAEAAADZASoAAQADAAIAAADaASgAAQAEAAAAAADaASkAAQAEAAEAAADaASoAAQAEAAIAAADpASoAAQABAAAAAADpASsAAQABAAEAAADpASwAAQABAAIAAADqASoAAQACAAAAAADqASsAAQACAAEAAADqASwAAQACAAIAAADrASoAAQADAAAAAADrASsAAQADAAEAAADrASwAAQADAAIAAADsASoAAQAEAAAAAADsASsAAQAEAAEAAADsASwAAQAEAAIAAADtASoAAQABAAAAAADtASsAAQABAAEAAADtASwAAQABAAIAAADuASoAAQACAAAAAADuASsAAQACAAEAAADuASwAAQACAAIAAADvASoAAQADAAAAAADvASsAAQADAAEAAADvASwAAQADAAIAAADwASoAAQAEAAAAAADwASsAAQAEAAEAAADwASwAAQAEAAIAAAD6ASgAAQABAAAAAAD6ASkAAQABAAEAAAD6ASoAAQABAAIAAAD7ASgAAQACAAAAAAD7ASkAAQACAAEAAAD7ASoAAQACAAIAAAD8ASgAAQADAAAAAAD8ASkAAQADAAEAAAD8ASoAAQADAAIAAAD9ASgAAQAEAAAAAAD9ASkAAQAEAAEAAAD9ASoAAQAEAAIAAAAOAigAAQABAAAAAAAOAikAAQABAAEAAAAOAioAAQABAAIAAAAPAigAAQACAAAAAAAPAikAAQACAAEAAAAPAioAAQACAAIAAAAQAigAAQADAAAAAAAQAikAAQADAAEAAAAQAioAAQADAAIAAAARAigAAQAEAAAAAAARAikAAQAEAAEAAAARAioAAQAEAAIAAAAOAisAAQABAAAAAAAOAiwAAQABAAEAAAAOAi0AAQABAAIAAAAPAisAAQACAAAAAAAPAiwAAQACAAEAAAAPAi0AAQACAAIAAAAQAisAAQADAAAAAAAQAiwAAQADAAEAAAAQAi0AAQADAAIAAAARAisAAQAEAAAAAAARAiwAAQAEAAEAAAARAi0AAQAEAAIAAAAqAigAAQABAAAAAAAqAikAAAAAAAAAAAAqAioAAQABAAIAAAArAigAAQACAAAAAAArAikAAAABAAAAAAArAioAAAABAAEAAAAsAigAAQADAAAAAAAsAikAAAACAAAAAAAsAioAAQADAAIAAAAtAigAAQAEAAAAAAAtAikAAQAEAAEAAAAtAioAAAADAAEAAABCAioAAQABAAAAAABCAisAAQABAAEAAABCAiwAAQABAAIAAABDAioAAQACAAAAAABDAisAAQACAAEAAABDAiwAAQACAAIAAABEAioAAQADAAAAAABEAisAAQADAAEAAABEAiwAAQADAAIAAABFAioAAQAEAAAAAABFAisAAQAEAAEAAABFAiwAAQAEAAIAAAA+AioAAQABAAAAAAA+AisAAQABAAEAAAA+AiwAAQABAAIAAAA/AioAAQACAAAAAAA/AisAAQACAAEAAAA/AiwAAQACAAIAAABAAioAAQADAAAAAABAAisAAQADAAEAAABAAiwAAQADAAIAAABBAioAAQAEAAAAAABBAisAAQAEAAEAAABBAiwAAQAEAAIAAABYAikAAQABAAAAAABYAioAAQABAAEAAABYAisAAQABAAIAAABZAikAAQACAAAAAABZAioAAQACAAEAAABZAisAAQACAAIAAABaAikAAQADAAAAAABaAioAAQADAAEAAABaAisAAQADAAIAAABbAikAAQAEAAAAAABbAioAAQAEAAEAAABbAisAAQAEAAIAAABYAiYAAQABAAAAAABYAicAAQABAAEAAABYAigAAQABAAIAAABZAiYAAQACAAAAAABZAicAAQACAAEAAABZAigAAQACAAIAAABaAiYAAQADAAAAAABaAicAAQADAAEAAABaAigAAQADAAIAAABbAiYAAQAEAAAAAABbAicAAQAEAAEAAABbAigAAQAEAAIAAABjAikAAAAAAAAAAABkAikAAAABAAAAAABkAioAAAABAAEAAABlAikAAAACAAAAAABmAioAAAADAAEAAABnAikAAAAEAAAAAABoAikAAAAFAAAAAABoAioAAAAFAAEAAABdAikAAAAAAAAAAABeAikAAAABAAAAAABeAioAAAABAAEAAABfAikAAAACAAAAAABgAioAAAADAAEAAABhAikAAAAEAAAAAABiAikAAAAFAAAAAABiAioAAAAFAAEAAABOAikAAAAAAAAAAABPAikAAAABAAAAAABPAioAAAABAAEAAABQAikAAAACAAAAAABRAioAAAADAAEAAABSAikAAAAEAAAAAABTAikAAAAFAAAAAABTAioAAAAFAAEAAABIAikAAAAAAAAAAABJAikAAAABAAAAAABJAioAAAABAAEAAABKAikAAAACAAAAAABLAioAAAADAAEAAABMAikAAAAEAAAAAABNAikAAAAFAAAAAABNAioAAAAFAAEAAABIAicAAAAAAAAAAABJAicAAAABAAAAAABJAigAAAABAAEAAABKAicAAAACAAAAAABLAigAAAADAAEAAABMAicAAAAEAAAAAABNAicAAAAFAAAAAABNAigAAAAFAAEAAAAwAikAAAAAAAAAAAAxAikAAAABAAAAAAAxAioAAAABAAEAAAAyAikAAAACAAAAAAAzAioAAAADAAEAAAA0AikAAAAEAAAAAAA1AikAAAAFAAAAAAA1AioAAAAFAAEAAAAuAikAAAAEAAAAAAAvAikAAAAFAAAAAAAvAioAAAAFAAEAAAAqAisAAAAAAAAAAAArAisAAAABAAAAAAArAiwAAAABAAEAAAAsAisAAAACAAAAAAAtAiwAAAADAAEAAAAuAisAAAAEAAAAAAAvAisAAAAFAAAAAAAvAiwAAAAFAAEAAAAaAisAAAAAAAAAAAAbAisAAAABAAAAAAAbAiwAAAABAAEAAAAcAisAAAACAAAAAAAdAiwAAAADAAEAAAAeAisAAAAEAAAAAAAfAisAAAAFAAAAAAAfAiwAAAAFAAEAAAAaAikAAAAAAAAAAAAbAikAAAABAAAAAAAbAioAAAABAAEAAAAcAikAAAACAAAAAAAdAioAAAADAAEAAAAeAikAAAAEAAAAAAAfAikAAAAFAAAAAAAfAioAAAAFAAEAAABqAisAAAAAAAAAAABrAisAAAABAAAAAABrAiwAAAABAAEAAABsAisAAAACAAAAAABtAiwAAAADAAEAAABuAisAAAAEAAAAAABvAisAAAAFAAAAAABvAiwAAAAFAAEAAABqAikAAAAAAAAAAABrAikAAAABAAAAAABrAioAAAABAAEAAABsAikAAAACAAAAAABtAioAAAADAAEAAABuAikAAAAEAAAAAABvAikAAAAFAAAAAABvAioAAAAFAAEAAABwAicAAAAAAAAAAABxAicAAAABAAAAAABxAigAAAABAAEAAAByAicAAAACAAAAAABzAigAAAADAAEAAAB0AicAAAAEAAAAAAB1AicAAAAFAAAAAAB1AigAAAAFAAEAAAB1AisAAgACAAEAAABrAigAAgACAAEAAAAuAx8AAgAEAAEAAAAhAxoAAgAEAAEAAAAoAxkAAgAEAAEAAAA0AxgAAgAEAAEAAABCAxcAAgAEAAEAAABDAxgAAgAEAAEAAABEAxkAAgAEAAEAAABFAxkAAgAEAAEAAABGAxoAAgAEAAEAAABOAxEAAgAAAAAAAABOAxIAAgAAAAEAAABPAxEAAgABAAAAAABPAxIAAgABAAEAAABQAxEAAgACAAAAAABQAxIAAgACAAEAAABPAxgAAgAAAAAAAABPAxkAAgAAAAEAAABQAxgAAgABAAAAAABQAxkAAgABAAEAAABRAxgAAgACAAAAAABRAxkAAgACAAEAAABDAx4AAgAAAAAAAABDAx8AAgAAAAEAAABEAx4AAgABAAAAAABEAx8AAgABAAEAAABFAx4AAgACAAAAAABFAx8AAgACAAEAAAA6AxMAAgAAAAAAAAA6AxQAAgAAAAEAAAA7AxMAAgABAAAAAAA7AxQAAgABAAEAAAA8AxMAAgACAAAAAAA8AxQAAgACAAEAAABkAxYAAgAAAAAAAABkAxcAAgAAAAEAAABlAxYAAgABAAAAAABlAxcAAgABAAEAAABmAxYAAgACAAAAAABmAxcAAgACAAEAAABZAxAAAgAAAAAAAABZAxEAAgAAAAEAAABaAxAAAgABAAAAAABaAxEAAgABAAEAAABbAxAAAgACAAAAAABbAxEAAgACAAEAAABWAxwAAgAAAAAAAABWAx0AAgAAAAEAAABXAxwAAgABAAAAAABXAx0AAgABAAEAAABYAxwAAgACAAAAAABYAx0AAgACAAEAAABsAxcAAgAAAAAAAABsAxgAAgAAAAEAAABtAxcAAgABAAAAAABtAxgAAgABAAEAAABuAxcAAgACAAAAAABuAxgAAgACAAEAAABsAxkAAgAAAAAAAABsAxoAAgAAAAEAAABtAxkAAgABAAAAAABtAxoAAgABAAEAAABuAxkAAgACAAAAAABuAxoAAgACAAEAAABiAx8AAgAAAAAAAABiAyAAAgAAAAEAAABjAx8AAgABAAAAAABjAyAAAgABAAEAAABkAx8AAgACAAAAAABkAyAAAgACAAEAAAB+Aw8AAgAAAAAAAAB+AxAAAgAAAAEAAAB/Aw8AAgABAAAAAAB/AxAAAgABAAEAAACAAw8AAgACAAAAAACAAxAAAgACAAEAAAB+AxEAAgAAAAAAAAB+AxIAAgAAAAEAAAB/AxEAAgABAAAAAAB/AxIAAgABAAEAAACAAxEAAgACAAAAAACAAxIAAgACAAEAAACPAxUAAgAAAAAAAACPAxYAAgAAAAEAAACQAxUAAgABAAAAAACQAxYAAgABAAEAAACRAxUAAgACAAAAAACRAxYAAgACAAEAAACMAxcAAgAAAAAAAACMAxgAAgAAAAEAAACNAxcAAgABAAAAAACNAxgAAgABAAEAAACOAxcAAgACAAAAAACOAxgAAgACAAEAAACMAxkAAgAAAAAAAACMAxoAAgAAAAEAAACNAxkAAgABAAAAAACNAxoAAgABAAEAAACOAxkAAgACAAAAAACOAxoAAgACAAEAAACJAxsAAgAAAAAAAACJAxwAAgAAAAEAAACKAxsAAgABAAAAAACKAxwAAgABAAEAAACLAxsAAgACAAAAAACLAxwAAgACAAEAAACJAx0AAgAAAAAAAACJAx4AAgAAAAEAAACKAx0AAgABAAAAAACKAx4AAgABAAEAAACLAx0AAgACAAAAAACLAx4AAgACAAEAAAB8AxsAAgAAAAAAAAB8AxwAAgAAAAEAAAB9AxsAAgABAAAAAAB9AxwAAgABAAEAAAB+AxsAAgACAAAAAAB+AxwAAgACAAEAAAB5AxsAAgAAAAAAAAB5AxwAAgAAAAEAAAB6AxsAAgABAAAAAAB6AxwAAgABAAEAAAB7AxsAAgACAAAAAAB7AxwAAgACAAEAAAB5AxkAAgAAAAAAAAB5AxoAAgAAAAEAAAB6AxkAAgABAAAAAAB6AxoAAgABAAEAAAB7AxkAAgACAAAAAAB7AxoAAgACAAEAAAB2AxkAAgAAAAAAAAB2AxoAAgAAAAEAAAB3AxkAAgABAAAAAAB3AxoAAgABAAEAAAB4AxkAAgACAAAAAAB4AxoAAgACAAEAAABzAxMAAgAAAAAAAABzAxQAAgAAAAEAAAB0AxMAAgABAAAAAAB0AxQAAgABAAEAAAB1AxMAAgACAAAAAAB1AxQAAgACAAEAAABzAxEAAgAAAAAAAABzAxIAAgAAAAEAAAB0AxEAAgABAAAAAAB0AxIAAgABAAEAAAB1AxEAAgACAAAAAAB1AxIAAgACAAEAAABwAw8AAgAAAAAAAABwAxAAAgAAAAEAAABxAw8AAgABAAAAAABxAxAAAgABAAEAAAByAw8AAgACAAAAAAByAxAAAgACAAEAAABwAw0AAgAAAAAAAABwAw4AAgAAAAEAAABxAw0AAgABAAAAAABxAw4AAgABAAEAAAByAw0AAgACAAAAAAByAw4AAgACAAEAAABtAw0AAgAAAAAAAABtAw4AAgAAAAEAAABuAw0AAgABAAAAAABuAw4AAgABAAEAAABvAw0AAgACAAAAAABvAw4AAgACAAEAAACoAw8AAgAAAAAAAACoAxAAAgAAAAEAAACpAw8AAgABAAAAAACpAxAAAgABAAEAAACqAw8AAgACAAAAAACqAxAAAQAAAAAAAACoAxEAAgAAAAAAAACoAxIAAgAAAAEAAACpAxEAAgABAAAAAACpAxIAAgABAAEAAACqAxEAAQAAAAEAAACqAxIAAgACAAEAAAChAxsAAgAAAAAAAAChAxwAAgAAAAEAAACiAxsAAgABAAAAAACiAxwAAgABAAEAAACjAxsAAgACAAAAAACjAxwAAgACAAEAAACeAxsAAgAAAAAAAACeAxwAAgAAAAEAAACfAxsAAgABAAAAAACfAxwAAgABAAEAAACgAxsAAgACAAAAAACgAxwAAgACAAEAAACeAxkAAgAAAAAAAACeAxoAAgAAAAEAAACfAxkAAgABAAAAAACfAxoAAgABAAEAAACgAxkAAgACAAAAAACgAxoAAgACAAEAAACdAxIAAQABAAEAAACdAxMAAQABAAIAAACeAxIAAQACAAEAAACeAxMAAQACAAIAAACfAxIAAQADAAEAAACfAxMAAQADAAIAAACdAxAAAQABAAEAAACdAxEAAQABAAIAAACeAxAAAQACAAEAAACeAxEAAQACAAIAAACfAxAAAQADAAEAAACfAxEAAQADAAIAAACaAxAAAgAAAAAAAACaAxEAAgAAAAEAAACbAxAAAgABAAAAAACbAxEAAgABAAEAAACcAxAAAgACAAAAAACcAxEAAgACAAEAAACyAxwAAQAAAAAAAACyAx0AAQAAAAEAAACzAxwAAQABAAAAAACzAx0AAQABAAEAAAC0AxwAAQACAAAAAAC0Ax0AAQACAAEAAAC1AxwAAQADAAAAAAC1Ax0AAQADAAEAAAC2AxwAAQAEAAAAAAC2Ax0AAQAEAAEAAACtAxwAAQAAAAAAAACtAx0AAQAAAAEAAACuAxwAAQABAAAAAACuAx0AAQABAAEAAACvAxwAAQACAAAAAACvAx0AAQACAAEAAACwAxwAAQADAAAAAACwAx0AAQADAAEAAACxAxwAAQAEAAAAAACxAx0AAQAEAAEAAACtAxoAAQACAAEAAACtAxsAAQACAAIAAACuAxoAAQADAAEAAACuAxsAAQADAAIAAACvAxoAAQAEAAEAAACvAxsAAQAEAAIAAACwAxoAAQADAAAAAACwAxsAAQADAAEAAACxAxoAAQAEAAAAAACxAxsAAQAEAAEAAAC0AxIAAQAAAAAAAAC0AxMAAQAAAAEAAAC1AxIAAQABAAEAAAC1AxMAAQABAAIAAAC2AxIAAQACAAEAAAC2AxMAAQACAAIAAAC3AxIAAQADAAEAAAC3AxMAAQADAAIAAAC4AxIAAQAEAAEAAAC4AxMAAQAEAAIAAACvAxIAAQAAAAAAAACvAxMAAQAAAAEAAACwAxIAAQABAAAAAACwAxMAAQABAAEAAACxAxIAAQACAAAAAACxAxMAAQACAAEAAACyAxIAAQADAAAAAACyAxMAAQADAAEAAACzAxIAAQAEAAAAAACzAxMAAQAEAAEAAACvAxAAAQAAAAAAAACvAxEAAQAAAAEAAACwAxAAAQABAAAAAACwAxEAAQABAAEAAACxAxAAAQACAAAAAACxAxEAAQACAAEAAACyAxAAAQADAAAAAACyAxEAAQADAAEAAACzAxAAAQAEAAAAAACzAxEAAQAEAAEAAACrAxAAAQABAAAAAACrAxEAAQABAAEAAACsAxAAAQACAAAAAACsAxEAAQACAAEAAACtAxAAAQADAAAAAACtAxEAAQADAAEAAACuAxAAAQAEAAAAAACuAxEAAQAEAAEAAACQAw4AAQAAAAAAAACQAw8AAQAAAAEAAACRAw4AAQABAAAAAACRAw8AAQABAAEAAACSAw4AAQACAAAAAACSAw8AAQACAAEAAACTAw4AAQADAAAAAACTAw8AAQADAAEAAACUAw4AAQABAAIAAACUAw8AAQAEAAEAAACLAw4AAQAAAAAAAACLAw8AAQAAAAEAAACMAw4AAQABAAAAAACMAw8AAQABAAEAAACNAw4AAQACAAAAAACNAw8AAQACAAEAAACOAw4AAQADAAAAAACOAw8AAQADAAEAAACPAw4AAQAEAAAAAACPAw8AAQAEAAEAAACLAxAAAQAAAAAAAACLAxEAAQAAAAEAAACMAxAAAQABAAAAAACMAxEAAQABAAEAAACNAxAAAQACAAAAAACNAxEAAQACAAEAAACOAxAAAQADAAAAAACOAxEAAQADAAEAAACPAxAAAQAEAAAAAACPAxEAAQAEAAEAAACGAxAAAQAAAAAAAACGAxEAAQAAAAEAAACHAxAAAQABAAAAAACHAxEAAQABAAEAAACIAxAAAQACAAAAAACIAxEAAQACAAEAAACJAxAAAQADAAAAAACJAxEAAQADAAEAAACKAxAAAQAEAAAAAACKAxEAAQAEAAEAAACEAxgAAQAAAAAAAACEAxkAAQAAAAEAAACFAxgAAQABAAAAAACFAxkAAQABAAEAAACGAxgAAQACAAAAAACGAxkAAQACAAEAAACHAxgAAQADAAAAAACHAxkAAQADAAEAAACIAxgAAQAEAAAAAACIAxkAAQAEAAEAAACEAxoAAQAAAAAAAACEAxsAAQAAAAEAAACFAxoAAQABAAAAAACFAxsAAQABAAEAAACGAxoAAQACAAAAAACGAxsAAQACAAEAAACHAxoAAQADAAAAAACHAxsAAQADAAEAAACIAxoAAQAEAAAAAACIAxsAAQAEAAEAAACEAxwAAQAAAAAAAACEAx0AAQAAAAEAAACFAxwAAQABAAAAAACFAx0AAQABAAEAAACGAxwAAQACAAAAAACGAx0AAQACAAEAAACHAxwAAQADAAAAAACHAx0AAQADAAEAAACIAxwAAQAEAAAAAACIAx0AAQAEAAEAAACUAxwAAQAAAAAAAACUAx0AAQAAAAEAAACVAxwAAQABAAAAAACVAx0AAQABAAEAAACWAxwAAQACAAAAAACWAx0AAQACAAEAAACXAxwAAQADAAAAAACXAx0AAQADAAEAAACYAxwAAQAEAAAAAACYAx0AAQAEAAEAAACZAxwAAQAAAAAAAACZAx0AAQAAAAEAAACaAxwAAQABAAAAAACaAx0AAQABAAEAAACbAxwAAQACAAAAAACbAx0AAQACAAEAAACcAxwAAQADAAAAAACcAx0AAQADAAEAAACdAxwAAQAEAAAAAACdAx0AAQAEAAEAAADAAx0AAQAAAAAAAADAAx4AAQAAAAEAAADBAx0AAQABAAAAAADBAx4AAQABAAEAAADCAx0AAQACAAAAAADCAx4AAQACAAEAAADDAx0AAQADAAAAAADDAx4AAQADAAEAAADEAx0AAQAEAAAAAADEAx4AAQAEAAEAAADAAxsAAQAAAAAAAADAAxwAAQAAAAEAAADBAxsAAQABAAAAAADBAxwAAQABAAEAAADCAxsAAQACAAAAAADCAxwAAQACAAEAAADDAxsAAQADAAAAAADDAxwAAQADAAEAAADEAxsAAQAEAAAAAADEAxwAAQAEAAEAAADAAxkAAQAAAAAAAADAAxoAAQAAAAEAAADBAxkAAQABAAAAAADBAxoAAQABAAEAAADCAxkAAQACAAAAAADCAxoAAQACAAEAAADDAxkAAQADAAAAAADDAxoAAQADAAEAAADEAxkAAQAEAAAAAADEAxoAAQAEAAEAAADAAxcAAAACAAAAAADAAxgAAAACAAAAAADBAxcAAQABAAAAAADBAxgAAAABAAAAAADCAxcAAQACAAAAAADCAxgAAAACAAAAAADDAxcAAQADAAAAAADDAxgAAQADAAEAAADEAxcAAQAEAAAAAADEAxgAAQAEAAEAAADAAxUAAAACAAAAAADAAxYAAAACAAAAAADBAxUAAQABAAAAAADBAxYAAQABAAEAAADCAxUAAQACAAAAAADCAxYAAQACAAEAAADDAxUAAQADAAAAAADDAxYAAQADAAEAAADEAxUAAQAEAAAAAADEAxYAAQAEAAEAAADAAxMAAQABAAIAAADAAxQAAQAAAAEAAADBAxMAAQACAAIAAADBAxQAAAAAAAAAAADCAxMAAQADAAIAAADCAxQAAAABAAAAAADDAxMAAQAEAAIAAADDAxQAAAACAAAAAADEAxMAAQAEAAAAAADEAxQAAQAEAAEAAADAAwwAAAAAAAAAAADBAwwAAAABAAAAAADCAwwAAAACAAAAAAC9Aw0AAAAAAAAAAAC+Aw0AAAABAAAAAAC/Aw0AAAACAAAAAAC9Aw4AAAAAAAAAAAC+Aw4AAAABAAAAAAC/Aw4AAAACAAAAAAC9Aw8AAAAAAAAAAAC+Aw8AAAABAAAAAAC/Aw8AAAACAAAAAAC9AxAAAQABAAEAAAC+AxAAAQACAAEAAAC/AxAAAQADAAEAAAC9AxEAAQABAAIAAAC+AxEAAQACAAIAAAC/AxEAAQADAAIAAAC6AxIAAAAAAAAAAAC7AxIAAAABAAAAAAC8AxIAAQABAAEAAAC6AxMAAAAAAAAAAAC7AxMAAAABAAAAAAC8AxMAAQABAAIAAAC6AxQAAQADAAEAAAC7AxQAAQAEAAEAAAC8AxQAAAACAAAAAAC6AxUAAQADAAIAAAC7AxUAAQAEAAIAAAC8AxUAAAACAAAAAAC6AxYAAAAAAAAAAAC7AxYAAAABAAAAAAC8AxYAAAACAAAAAAC9AxcAAAAAAAAAAAC+AxcAAAAAAAAAAAC/AxcAAAABAAAAAAC9AxgAAAAAAAAAAAC+AxgAAAAAAAAAAAC/AxgAAAABAAAAAAC+AxUAAAAAAAAAAAC/AxUAAAABAAAAAAC+AxYAAAAAAAAAAAC/AxYAAAABAAAAAACzAxgAAQAEAAEAAAC0AxgAAAABAAAAAAC1AxgAAAACAAAAAACwAxgAAQABAAEAAACxAxgAAQACAAEAAACyAxgAAQADAAEAAACtAxgAAQACAAEAAACuAxgAAQADAAEAAACvAxgAAQAEAAEAAACqAxkAAQACAAIAAACrAxkAAQADAAIAAACsAxkAAQABAAIAAACyAxYAAgACAAAAAACzAxYAAgADAAAAAAC0AxYAAQABAAEAAACvAxYAAQADAAEAAACwAxYAAQAEAAEAAACxAxYAAgAEAAAAAACsAxcAAQAEAAIAAACtAxcAAQABAAIAAACuAxcAAQACAAIAAACsAxgAAQABAAEAAACpAxkAAQABAAIAAACmAxoAAgACAAAAAACnAxoAAgADAAAAAACoAxoAAgAEAAAAAACmAxsAAgACAAAAAACnAxsAAgADAAAAAACoAxsAAgAEAAAAAACkAxIAAgACAAAAAAClAxIAAgADAAAAAACmAxIAAgAEAAAAAAChAxIAAgACAAAAAACiAxIAAgADAAAAAACjAxIAAgAEAAAAAAChAxEAAgACAAAAAACiAxEAAgADAAAAAACjAxEAAgAEAAAAAACgAxEAAQAEAAIAAADAAxAAAQAEAAEAAADAAxEAAQAEAAIAAAC5AxAAAQABAAEAAAC5AxEAAQABAAIAAAC6AxAAAQACAAEAAAC6AxEAAQACAAIAAAC7AxAAAQADAAEAAAC7AxEAAQADAAIAAAC8AxAAAQAEAAEAAAC8AxEAAQAEAAIAAACxAxQAAQABAAEAAACxAxUAAQABAAIAAACyAxQAAQACAAEAAACyAxUAAQACAAIAAACzAxQAAQADAAEAAACzAxUAAQADAAIAAAC0AxQAAQAEAAEAAAC0AxUAAQAEAAIAAACtAxQAAQABAAEAAACtAxUAAQABAAIAAACuAxQAAQACAAEAAACuAxUAAQACAAIAAACvAxQAAQADAAEAAACvAxUAAQADAAIAAACwAxQAAQAEAAEAAACwAxUAAQAEAAIAAACtAxYAAQABAAEAAACuAxYAAQACAAEAAACvAxcAAQADAAIAAACwAxcAAQAEAAIAAACpAxYAAQABAAEAAACpAxcAAQABAAIAAACqAxYAAQACAAEAAACqAxcAAQACAAIAAACrAxYAAQADAAEAAACrAxcAAQADAAIAAACsAxYAAQAEAAEAAACpAxgAAQABAAEAAACqAxgAAQACAAEAAACrAxgAAQADAAEAAAClAxYAAQABAAEAAAClAxcAAQABAAIAAACmAxYAAQACAAEAAACmAxcAAQACAAIAAACnAxYAAQADAAEAAACnAxcAAQADAAIAAACoAxYAAQAEAAEAAACoAxcAAQAEAAIAAAChAxYAAQABAAEAAAChAxcAAQACAAEAAACiAxYAAQACAAEAAACiAxcAAQADAAEAAACjAxYAAQADAAEAAACjAxcAAQAEAAEAAACkAxYAAQAEAAEAAACkAxcAAQAEAAIAAACdAxQAAQABAAEAAACdAxUAAQABAAIAAACeAxQAAQACAAEAAACeAxUAAQACAAIAAACfAxQAAQADAAEAAACfAxUAAQADAAIAAACgAxQAAQAEAAEAAACgAxUAAQAEAAIAAACgAxIAAQAEAAEAAACgAxMAAQAEAAIAAACgAxAAAQAEAAEAAACUAxcAAQABAAEAAACUAxgAAQABAAIAAACVAxcAAQACAAEAAACVAxgAAQACAAIAAACWAxcAAQADAAEAAACWAxgAAQADAAIAAACXAxcAAQAEAAEAAACXAxgAAQAEAAIAAACYAxcAAQABAAEAAACYAxgAAQABAAIAAACZAxcAAQACAAEAAACZAxgAAQACAAIAAACaAxcAAQADAAEAAACaAxgAAQADAAIAAACbAxcAAQAEAAEAAACbAxgAAQAEAAIAAACcAxcAAQABAAEAAACcAxgAAQABAAIAAACdAxcAAQACAAEAAACdAxgAAQACAAIAAACeAxcAAQADAAEAAACeAxgAAQADAAIAAACfAxcAAQAEAAEAAACfAxgAAQAEAAIAAACgAxcAAQABAAEAAACgAxgAAQABAAIAAAChAxgAAQACAAIAAACiAxgAAQADAAIAAACjAxgAAQAEAAIAAACUAwsAAQABAAEAAACUAwwAAQABAAIAAACVAwsAAQACAAEAAACVAwwAAQACAAIAAACWAwsAAQADAAEAAACWAwwAAQADAAIAAACXAwsAAQAEAAEAAACXAwwAAQAEAAIAAACUAw0AAQABAAEAAACVAw0AAQACAAEAAACVAw4AAQACAAIAAACWAw0AAQADAAEAAACWAw4AAQADAAIAAACXAw0AAQAEAAEAAACXAw4AAQAEAAIAAACYAw0AAQABAAEAAACYAw4AAQABAAIAAACZAw0AAQACAAEAAACZAw4AAQACAAIAAACaAw0AAQADAAEAAACaAw4AAQADAAIAAACbAw0AAQAEAAEAAACbAw4AAQAEAAIAAACcAw0AAQABAAEAAACcAw4AAQABAAIAAACdAw0AAQACAAEAAACdAw4AAQACAAIAAACeAw0AAQADAAEAAACeAw4AAQADAAIAAACfAw0AAQAEAAEAAACfAw4AAQAEAAIAAACgAw0AAQABAAEAAACgAw4AAQABAAIAAAChAw0AAQACAAEAAAChAw4AAQACAAIAAACiAw0AAQADAAEAAACiAw4AAQADAAIAAACjAw0AAQAEAAEAAACjAw4AAQAEAAIAAACkAw0AAQABAAEAAACkAw4AAQABAAIAAAClAw0AAQACAAEAAAClAw4AAQACAAIAAACmAw0AAQADAAEAAACmAw4AAQADAAIAAACnAw0AAQAEAAEAAACnAw4AAQAEAAIAAACkAwsAAQABAAEAAACkAwwAAQABAAIAAAClAwsAAQACAAEAAAClAwwAAQACAAIAAACmAwsAAQADAAEAAACmAwwAAQADAAIAAACnAwsAAQAEAAEAAACnAwwAAQAEAAIAAACoAwsAAQABAAEAAACoAwwAAQABAAIAAACpAwsAAQACAAEAAACpAwwAAQACAAIAAACqAwsAAQADAAEAAACqAwwAAQADAAIAAACrAwsAAQAEAAEAAACrAwwAAQAEAAIAAADAAxIAAQABAAEAAADBAxIAAQACAAEAAADCAxIAAQADAAEAAADDAxIAAQAEAAEAAAC9AxIAAQACAAEAAAC9AxMAAQACAAIAAAC+AxIAAQADAAEAAAC+AxMAAQADAAIAAAC/AxIAAQAEAAEAAAC/AxMAAQAEAAIAAAC4AxQAAQABAAEAAAC4AxUAAQABAAIAAAC5AxQAAQACAAEAAAC5AxUAAQACAAIAAAC0AxcAAQABAAIAAAC1AxYAAQACAAEAAAC1AxcAAQACAAIAAAC2AxYAAQADAAEAAAC2AxcAAQADAAIAAAC3AxYAAQAEAAEAAAC3AxcAAQAEAAIAAACwAxkAAQABAAIAAACxAxkAAQACAAIAAACyAxkAAQADAAIAAACzAxkAAQAEAAIAAACtAxkAAQACAAIAAACuAxkAAQADAAIAAACvAxkAAQAEAAIAAACsAxoAAQABAAEAAACsAxsAAQABAAIAAAA=")
+tile_set = SubResource("TileSet_vqpcg")
+
+[node name="Props" type="Node2D" parent="." unique_id=322254038]
+
+[node name="Torii" type="Node2D" parent="Props" unique_id=1758284737]
+
+[node name="left" type="Sprite2D" parent="Props/Torii" unique_id=1815779036]
+position = Vector2(11919, -7.000001)
+scale = Vector2(0.37388593, 0.55503565)
+texture = ExtResource("19_d3f2h")
+
+[node name="right" type="Sprite2D" parent="Props/Torii" unique_id=56764456]
+position = Vector2(12312.616, 11)
+scale = Vector2(0.35097814, 0.48565927)
+texture = ExtResource("20_gma5f")
+
+[node name="mid" type="Sprite2D" parent="Props/Torii" unique_id=1206154184]
+position = Vector2(12116.001, 193)
+scale = Vector2(0.33652762, 0.33652762)
+texture = ExtResource("21_gma5f")
+
+[node name="Door" type="Sprite2D" parent="Props" unique_id=1492431098]
+position = Vector2(15341, -383)
+scale = Vector2(0.53522044, 0.57688767)
+texture = ExtResource("22_g47yy")
+
+[node name="roof" type="Sprite2D" parent="Props" unique_id=2002628838]
+position = Vector2(15352.999, -683.00006)
+scale = Vector2(0.6232311, 0.62323105)
+texture = ExtResource("23_1ukie")
+
+[node name="Latern" type="Node2D" parent="Props" unique_id=597054539]
+
+[node name="l_1_0" type="Sprite2D" parent="Props/Latern" unique_id=1706358318]
+modulate = Color(1, 1, 1, 0.55)
+position = Vector2(112, 512)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_2_0" type="Sprite2D" parent="Props/Latern" unique_id=1669722762]
+position = Vector2(250, 528)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_1_1" type="Sprite2D" parent="Props/Latern" unique_id=195419703]
+modulate = Color(1, 1, 1, 0.55)
+position = Vector2(739.375, 500.06253)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_2_1" type="Sprite2D" parent="Props/Latern" unique_id=373354244]
+position = Vector2(877.375, 516.0625)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_1_2" type="Sprite2D" parent="Props/Latern" unique_id=1181079986]
+modulate = Color(1, 1, 1, 0.55)
+position = Vector2(1453.375, 502.06253)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_2_2" type="Sprite2D" parent="Props/Latern" unique_id=1648819355]
+position = Vector2(1591.375, 518.0625)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_1_3" type="Sprite2D" parent="Props/Latern" unique_id=2069486058]
+modulate = Color(1, 1, 1, 0.55)
+position = Vector2(2043.375, 405.06253)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_2_3" type="Sprite2D" parent="Props/Latern" unique_id=1084399540]
+position = Vector2(2181.375, 421.0625)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_1_4" type="Sprite2D" parent="Props/Latern" unique_id=1129566309]
+modulate = Color(1, 1, 1, 0.55)
+position = Vector2(2831.375, 215.06253)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_2_4" type="Sprite2D" parent="Props/Latern" unique_id=6838377]
+position = Vector2(2969.375, 231.0625)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_1_5" type="Sprite2D" parent="Props/Latern" unique_id=62254983]
+modulate = Color(1, 1, 1, 0.55)
+position = Vector2(4274.375, 329.06253)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_2_5" type="Sprite2D" parent="Props/Latern" unique_id=484158403]
+position = Vector2(4412.375, 345.0625)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_1_6" type="Sprite2D" parent="Props/Latern" unique_id=1353955043]
+modulate = Color(1, 1, 1, 0.55)
+position = Vector2(5126.375, 526.0625)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_2_6" type="Sprite2D" parent="Props/Latern" unique_id=1114301859]
+position = Vector2(5264.375, 542.0625)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_1_7" type="Sprite2D" parent="Props/Latern" unique_id=1656994503]
+modulate = Color(1, 1, 1, 0.55)
+position = Vector2(6033.375, 344.06253)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_2_7" type="Sprite2D" parent="Props/Latern" unique_id=1352848355]
+position = Vector2(6171.375, 360.06253)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_1_8" type="Sprite2D" parent="Props/Latern" unique_id=1221490938]
+modulate = Color(1, 1, 1, 0.55)
+position = Vector2(7219.375, 245.06253)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_2_8" type="Sprite2D" parent="Props/Latern" unique_id=1134386657]
+position = Vector2(7357.375, 261.06253)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_1_9" type="Sprite2D" parent="Props/Latern" unique_id=789849983]
+modulate = Color(1, 1, 1, 0.55)
+position = Vector2(8509.375, 27.06253)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_2_9" type="Sprite2D" parent="Props/Latern" unique_id=1398710128]
+position = Vector2(8647.375, 43.06253)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_1_10" type="Sprite2D" parent="Props/Latern" unique_id=1691664024]
+modulate = Color(1, 1, 1, 0.55)
+position = Vector2(10073.375, 283.06253)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_2_10" type="Sprite2D" parent="Props/Latern" unique_id=78928488]
+position = Vector2(10211.375, 299.06253)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_1_11" type="Sprite2D" parent="Props/Latern" unique_id=198324940]
+modulate = Color(1, 1, 1, 0.55)
+position = Vector2(11272.375, 300.06253)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_2_11" type="Sprite2D" parent="Props/Latern" unique_id=629831810]
+position = Vector2(11410.375, 316.06253)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_1_12" type="Sprite2D" parent="Props/Latern" unique_id=1339994076]
+modulate = Color(1, 1, 1, 0.55)
+position = Vector2(12515.375, 204.06253)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_2_12" type="Sprite2D" parent="Props/Latern" unique_id=2000666640]
+position = Vector2(12653.375, 220.06253)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_1_13" type="Sprite2D" parent="Props/Latern" unique_id=1659503179]
+modulate = Color(1, 1, 1, 0.55)
+position = Vector2(13663.375, 10.0625305)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_2_13" type="Sprite2D" parent="Props/Latern" unique_id=426159721]
+position = Vector2(13801.375, 26.06253)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_1_14" type="Sprite2D" parent="Props/Latern" unique_id=298982645]
+modulate = Color(1, 1, 1, 0.55)
+position = Vector2(14790.375, -174.93747)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="l_2_14" type="Sprite2D" parent="Props/Latern" unique_id=1760416619]
+position = Vector2(14928.375, -158.93747)
+scale = Vector2(0.088623084, 0.088623084)
+texture = ExtResource("33_lqjsx")
+
+[node name="Foreground" type="Node2D" parent="." unique_id=2097501364]
+
+[node name="LowerFog" type="Polygon2D" parent="Foreground" unique_id=162644726]
+color = Color(0.721569, 0.784314, 0.862745, 0.05)
+polygon = PackedVector2Array(-96, 560, 8256, 560, 8256, 720, -96, 720)
+
+[node name="DriftFogA" type="Polygon2D" parent="Foreground" unique_id=1340063201]
+color = Color(0.760784, 0.815686, 0.882353, 0.026)
+polygon = PackedVector2Array(192, 486, 2048, 486, 2176, 548, 64, 548)
+
+[node name="DriftFogB" type="Polygon2D" parent="Foreground" unique_id=1821988361]
+color = Color(0.760784, 0.815686, 0.882353, 0.024)
+polygon = PackedVector2Array(2624, 404, 5504, 404, 5632, 492, 2496, 492)
+
+[node name="DriftFogC" type="Polygon2D" parent="Foreground" unique_id=372027938]
+color = Color(0.760784, 0.815686, 0.882353, 0.022)
+polygon = PackedVector2Array(5632, 308, 8064, 308, 8192, 404, 5440, 404)
+
+[node name="Camera" type="Camera2D" parent="." unique_id=1041168162]
+position = Vector2(640, 360)
+limit_left = 0
+limit_top = 0
+limit_right = 7936
+limit_bottom = 720

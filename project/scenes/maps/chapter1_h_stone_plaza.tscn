@@ -1,0 +1,358 @@
+[gd_scene format=3 uid="uid://cvta0l5lar3q6"]
+
+[ext_resource type="Texture2D" uid="uid://j2hpcr14ary6" path="res://assets/maps/chapter1/backgrounds/mountains_0.png" id="1_biqhe"]
+[ext_resource type="Texture2D" uid="uid://cpk7q527c0hkl" path="res://assets/maps/chapter1/ground/stone1.png" id="2_stone1"]
+[ext_resource type="Texture2D" uid="uid://cgu54cfmdbpys" path="res://assets/maps/chapter1/backgrounds/moon.png" id="2_yblr1"]
+[ext_resource type="Texture2D" uid="uid://bfqk6slxehlm6" path="res://assets/maps/chapter1/backgrounds/forest_bamboo_1.png" id="3_biqhe"]
+[ext_resource type="Texture2D" uid="uid://co8fm718tr7st" path="res://assets/maps/chapter1/ground/stone2.png" id="3_stone2"]
+[ext_resource type="Texture2D" uid="uid://jt1tvi0x36h0" path="res://assets/maps/chapter1/ground/stone3.png" id="4_stone3"]
+[ext_resource type="Texture2D" uid="uid://dp4ool7c17xme" path="res://assets/maps/chapter1/props/lantern.png" id="7_xxx5r"]
+[ext_resource type="Texture2D" uid="uid://cmgi6nhylti3a" path="res://assets/maps/chapter1/structures/shrine_facade.png" id="8_6lmym"]
+[ext_resource type="Texture2D" uid="uid://dmpimxksau067" path="res://assets/maps/chapter1/props/shimenawa_curtain.png" id="9_hh8eg"]
+
+[node name="root" type="Node2D" unique_id=506673559]
+
+[node name="BackgroundFar" type="Node2D" parent="." unique_id=1049019642]
+
+[node name="NightSky" type="Polygon2D" parent="BackgroundFar" unique_id=839787389]
+position = Vector2(129.03705, 0)
+scale = Vector2(0.9612269, 1)
+color = Color(0.0431373, 0.054902, 0.101961, 1)
+polygon = PackedVector2Array(-128, -96, 3328, -96, 3328, 960, -128, 960)
+
+[node name="MountainSprite" type="Sprite2D" parent="BackgroundFar" unique_id=77684399]
+modulate = Color(0.9, 0.95, 1, 0.96)
+position = Vector2(1968.9998, 226.99998)
+scale = Vector2(1.62, 1.62)
+texture = ExtResource("1_biqhe")
+
+[node name="MoonSprite" type="Sprite2D" parent="BackgroundFar" unique_id=469563030]
+position = Vector2(1268, 24)
+scale = Vector2(1.2194922, 1.2194922)
+texture = ExtResource("2_yblr1")
+
+[node name="BackgroundMid" type="Node2D" parent="." unique_id=1268008693]
+
+[node name="MidForestSprite" type="Sprite2D" parent="BackgroundMid" unique_id=2022060047]
+modulate = Color(0.9, 0.96, 1, 0.78)
+position = Vector2(1664, 382)
+scale = Vector2(1.62, 1.62)
+texture = ExtResource("3_biqhe")
+
+[node name="MistBand" type="Polygon2D" parent="BackgroundMid" unique_id=477424942]
+visible = false
+color = Color(0.678431, 0.737255, 0.835294, 0.08)
+polygon = PackedVector2Array(-96, 296, 3264, 296, 3264, 460, -96, 460)
+
+[node name="Gameplay" type="Node2D" parent="." unique_id=518507943]
+
+[node name="StoneGround" type="Node2D" parent="Gameplay" unique_id=526265468]
+
+[node name="Floor_00" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1818968259]
+position = Vector2(64, 592)
+texture = ExtResource("2_stone1")
+
+[node name="Floor_01" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=621664013]
+position = Vector2(192, 592)
+texture = ExtResource("3_stone2")
+
+[node name="Floor_02" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1918315028]
+position = Vector2(320, 592)
+texture = ExtResource("4_stone3")
+
+[node name="Floor_03" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=445804045]
+position = Vector2(448, 592)
+texture = ExtResource("2_stone1")
+
+[node name="Floor_04" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=2131641160]
+position = Vector2(576, 592)
+texture = ExtResource("3_stone2")
+
+[node name="Floor_05" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=2136426160]
+position = Vector2(704, 592)
+texture = ExtResource("4_stone3")
+
+[node name="Floor_06" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1579386656]
+position = Vector2(832, 592)
+texture = ExtResource("2_stone1")
+
+[node name="Floor_07" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=632300706]
+position = Vector2(960, 592)
+texture = ExtResource("3_stone2")
+
+[node name="Floor_08" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1720311064]
+position = Vector2(1088, 592)
+texture = ExtResource("4_stone3")
+
+[node name="Floor_09" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=51724872]
+position = Vector2(1216, 592)
+texture = ExtResource("2_stone1")
+
+[node name="Floor_10" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=494549867]
+position = Vector2(1344, 592)
+texture = ExtResource("3_stone2")
+
+[node name="Floor_11" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=332818107]
+position = Vector2(1472, 592)
+texture = ExtResource("4_stone3")
+
+[node name="Floor_12" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=920147345]
+position = Vector2(1600, 592)
+texture = ExtResource("2_stone1")
+
+[node name="Floor_13" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=618844225]
+position = Vector2(1728, 592)
+texture = ExtResource("3_stone2")
+
+[node name="Floor_14" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1246422221]
+position = Vector2(1856, 592)
+texture = ExtResource("4_stone3")
+
+[node name="Floor_15" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1890167906]
+position = Vector2(1984, 592)
+texture = ExtResource("2_stone1")
+
+[node name="Floor_16" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=756643634]
+position = Vector2(2112, 592)
+texture = ExtResource("3_stone2")
+
+[node name="Floor_17" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1252164469]
+position = Vector2(2240, 592)
+texture = ExtResource("4_stone3")
+
+[node name="Floor_18" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=854790214]
+position = Vector2(2368, 592)
+texture = ExtResource("2_stone1")
+
+[node name="Floor_19" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1566759093]
+position = Vector2(2496, 592)
+texture = ExtResource("3_stone2")
+
+[node name="Floor_20" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1946301980]
+position = Vector2(2624, 592)
+texture = ExtResource("4_stone3")
+
+[node name="Floor_21" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1198919088]
+position = Vector2(2752, 592)
+texture = ExtResource("2_stone1")
+
+[node name="Floor_22" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1503808099]
+position = Vector2(2880, 592)
+texture = ExtResource("3_stone2")
+
+[node name="Floor_23" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=743936429]
+position = Vector2(3008, 592)
+texture = ExtResource("4_stone3")
+
+[node name="FloorLower_00" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1339693262]
+position = Vector2(65, 719)
+texture = ExtResource("3_stone2")
+
+[node name="FloorLower_01" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=2024811307]
+position = Vector2(193, 719)
+texture = ExtResource("4_stone3")
+
+[node name="FloorLower_02" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1844581567]
+position = Vector2(321, 719)
+texture = ExtResource("2_stone1")
+
+[node name="FloorLower_03" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=2051401532]
+position = Vector2(449, 719)
+texture = ExtResource("3_stone2")
+
+[node name="FloorLower_04" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=2002490871]
+position = Vector2(577, 719)
+texture = ExtResource("4_stone3")
+
+[node name="FloorLower_05" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=645404255]
+position = Vector2(705, 719)
+texture = ExtResource("2_stone1")
+
+[node name="FloorLower_06" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=567469756]
+position = Vector2(833, 719)
+texture = ExtResource("3_stone2")
+
+[node name="FloorLower_07" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1195060337]
+position = Vector2(961, 719)
+texture = ExtResource("4_stone3")
+
+[node name="FloorLower_08" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1862587875]
+position = Vector2(1089, 719)
+texture = ExtResource("2_stone1")
+
+[node name="FloorLower_09" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=2108844919]
+position = Vector2(1217, 719)
+texture = ExtResource("3_stone2")
+
+[node name="FloorLower_10" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1163353716]
+position = Vector2(1345, 719)
+texture = ExtResource("4_stone3")
+
+[node name="FloorLower_11" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=2129390518]
+position = Vector2(1473, 719)
+texture = ExtResource("2_stone1")
+
+[node name="FloorLower_12" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=366659476]
+position = Vector2(1601, 719)
+texture = ExtResource("3_stone2")
+
+[node name="FloorLower_13" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1396280096]
+position = Vector2(1729, 719)
+texture = ExtResource("4_stone3")
+
+[node name="FloorLower_14" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1730019313]
+position = Vector2(1857, 719)
+texture = ExtResource("2_stone1")
+
+[node name="FloorLower_15" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1403595895]
+position = Vector2(1985, 719)
+texture = ExtResource("3_stone2")
+
+[node name="FloorLower_16" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=2098236177]
+position = Vector2(2113, 719)
+texture = ExtResource("4_stone3")
+
+[node name="FloorLower_17" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1560837068]
+position = Vector2(2241, 719)
+texture = ExtResource("2_stone1")
+
+[node name="FloorLower_18" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1498454954]
+position = Vector2(2369, 719)
+texture = ExtResource("3_stone2")
+
+[node name="FloorLower_19" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1841577177]
+position = Vector2(2497, 719)
+texture = ExtResource("4_stone3")
+
+[node name="FloorLower_20" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1020377294]
+position = Vector2(2625, 719)
+texture = ExtResource("2_stone1")
+
+[node name="FloorLower_21" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1159770936]
+position = Vector2(2753, 719)
+texture = ExtResource("3_stone2")
+
+[node name="FloorLower_22" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=1597613885]
+position = Vector2(2881, 719)
+texture = ExtResource("4_stone3")
+
+[node name="FloorLower_23" type="Sprite2D" parent="Gameplay/StoneGround" unique_id=853010795]
+position = Vector2(3009, 719)
+texture = ExtResource("2_stone1")
+
+[node name="Props" type="Node2D" parent="." unique_id=678607024]
+
+[node name="LanternEntry" type="Sprite2D" parent="Props" unique_id=846380230]
+modulate = Color(0.94, 0.96, 1, 0.9)
+position = Vector2(612, 450)
+scale = Vector2(0.16, 0.16)
+texture = ExtResource("7_xxx5r")
+
+[node name="LanternEntryBack" type="Sprite2D" parent="Props" unique_id=1658533407]
+modulate = Color(0.88, 0.92, 1, 0.58)
+position = Vector2(444, 438)
+scale = Vector2(0.14, 0.14)
+texture = ExtResource("7_xxx5r")
+
+[node name="LanternMid" type="Sprite2D" parent="Props" unique_id=1630750090]
+modulate = Color(0.96, 0.96, 1, 0.92)
+position = Vector2(1708, 438)
+scale = Vector2(0.17, 0.17)
+texture = ExtResource("7_xxx5r")
+
+[node name="LanternMidBack" type="Sprite2D" parent="Props" unique_id=130392948]
+modulate = Color(0.9, 0.92, 1, 0.62)
+position = Vector2(1460, 426)
+scale = Vector2(0.15, 0.15)
+texture = ExtResource("7_xxx5r")
+
+[node name="LanternForecourt" type="Sprite2D" parent="Props" unique_id=1183464452]
+modulate = Color(1, 0.98, 1, 0.94)
+position = Vector2(2352, 420)
+scale = Vector2(0.18, 0.18)
+texture = ExtResource("7_xxx5r")
+
+[node name="LanternForecourtBack" type="Sprite2D" parent="Props" unique_id=1966690556]
+modulate = Color(0.92, 0.94, 1, 0.66)
+position = Vector2(2087, 430)
+scale = Vector2(0.15, 0.15)
+texture = ExtResource("7_xxx5r")
+
+[node name="ShrineFacade" type="Sprite2D" parent="Props" unique_id=1875827115]
+modulate = Color(1, 0.98, 1, 0.98)
+position = Vector2(2825.16, 245.44)
+scale = Vector2(0.62, 0.62)
+texture = ExtResource("8_6lmym")
+
+[node name="ShimenawaCurtain" type="Sprite2D" parent="Props" unique_id=1691325307]
+modulate = Color(1, 0.98, 1, 0.96)
+position = Vector2(2825.16, 257.44)
+scale = Vector2(0.28, 0.28)
+texture = ExtResource("9_hh8eg")
+
+[node name="StoneMarkerA_Base" type="Sprite2D" parent="Props" unique_id=85372712]
+position = Vector2(960, 592)
+scale = Vector2(0.56, 0.56)
+texture = ExtResource("2_stone1")
+
+[node name="StoneMarkerA_Top" type="Sprite2D" parent="Props" unique_id=1923943644]
+position = Vector2(960, 520)
+scale = Vector2(0.4, 0.7)
+texture = ExtResource("3_stone2")
+
+[node name="StoneMarkerB_Base" type="Sprite2D" parent="Props" unique_id=1007047369]
+position = Vector2(1824, 592)
+scale = Vector2(0.56, 0.56)
+texture = ExtResource("2_stone1")
+
+[node name="StoneMarkerB_Top" type="Sprite2D" parent="Props" unique_id=63334283]
+position = Vector2(1824, 520)
+scale = Vector2(0.4, 0.7)
+texture = ExtResource("3_stone2")
+
+[node name="OfferingStoneA" type="Sprite2D" parent="Props" unique_id=562072746]
+position = Vector2(1408, 602)
+scale = Vector2(0.82, 0.42)
+texture = ExtResource("4_stone3")
+
+[node name="OfferingStoneB" type="Sprite2D" parent="Props" unique_id=1185631775]
+position = Vector2(2192, 602)
+scale = Vector2(0.82, 0.42)
+texture = ExtResource("4_stone3")
+
+[node name="OfferingPlateA" type="Sprite2D" parent="Props" unique_id=769845790]
+position = Vector2(1408, 568)
+scale = Vector2(0.32, 0.18)
+texture = ExtResource("3_stone2")
+
+[node name="OfferingPlateB" type="Sprite2D" parent="Props" unique_id=1994882475]
+position = Vector2(2192, 568)
+scale = Vector2(0.32, 0.18)
+texture = ExtResource("3_stone2")
+
+[node name="Foreground" type="Node2D" parent="." unique_id=21231647]
+
+[node name="LowerFog" type="Polygon2D" parent="Foreground" unique_id=1269273194]
+position = Vector2(106.85714, 0)
+scale = Vector2(0.9672619, 1)
+color = Color(0.721569, 0.784314, 0.862745, 0.05)
+polygon = PackedVector2Array(-96, 544, 3264, 544, 3264, 720, 80.539154, 720, -96, 720)
+
+[node name="DriftFogA" type="Polygon2D" parent="Foreground" unique_id=1040113453]
+color = Color(0.760784, 0.815686, 0.882353, 0.035)
+polygon = PackedVector2Array(128, 504, 736, 504, 832, 552, 64, 552)
+
+[node name="DriftFogB" type="Polygon2D" parent="Foreground" unique_id=1943163012]
+color = Color(0.760784, 0.815686, 0.882353, 0.03)
+polygon = PackedVector2Array(1096, 492, 1824, 492, 1904, 548, 1016, 548)
+
+[node name="DriftFogC" type="Polygon2D" parent="Foreground" unique_id=977426684]
+color = Color(0.760784, 0.815686, 0.882353, 0.04)
+polygon = PackedVector2Array(2032, 476, 2864, 476, 2960, 544, 1936, 544)
+
+[node name="Camera" type="Camera2D" parent="." unique_id=91364107]
+position = Vector2(640, 360)
+limit_left = 0
+limit_top = 0
+limit_right = 3040
+limit_bottom = 720
