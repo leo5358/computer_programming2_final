@@ -9,6 +9,13 @@
 [ext_resource type="Texture2D" uid="uid://dp4ool7c17xme" path="res://assets/maps/chapter1/props/lantern.png" id="7_xxx5r"]
 [ext_resource type="Texture2D" uid="uid://cmgi6nhylti3a" path="res://assets/maps/chapter1/structures/shrine_facade.png" id="8_6lmym"]
 [ext_resource type="Texture2D" uid="uid://dmpimxksau067" path="res://assets/maps/chapter1/props/shimenawa_curtain.png" id="9_hh8eg"]
+[ext_resource type="Script" uid="uid://dauwr7kxq7rjl" path="res://scripts/camera_shake.gd" id="10_camera_shake"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yblr1"]
+size = Vector2(3066.5, 249.5)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_30jat"]
+size = Vector2(140, 1165.75)
 
 [node name="root" type="Node2D" unique_id=506673559]
 
@@ -356,3 +363,28 @@ limit_left = 0
 limit_top = 0
 limit_right = 3040
 limit_bottom = 720
+script = ExtResource("10_camera_shake")
+follow_target_path = NodePath("../../Player")
+follow_offset = Vector2(210, -48)
+follow_smoothing_speed = 7.0
+horizontal_deadzone = 32.0
+vertical_deadzone = 120.0
+vertical_follow_ratio = 0.2
+lookahead_distance = 120.0
+lookahead_smoothing_speed = 5.0
+
+[node name="Collision" type="Node2D" parent="." unique_id=706042389]
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Collision" unique_id=2104340551]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Collision/StaticBody2D" unique_id=1007067958]
+position = Vector2(1534.75, 655.25)
+shape = SubResource("RectangleShape2D_yblr1")
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Collision/StaticBody2D" unique_id=1366982123]
+position = Vector2(-65, 198)
+shape = SubResource("RectangleShape2D_30jat")
+
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="Collision/StaticBody2D" unique_id=897666344]
+position = Vector2(3140, 204)
+shape = SubResource("RectangleShape2D_30jat")

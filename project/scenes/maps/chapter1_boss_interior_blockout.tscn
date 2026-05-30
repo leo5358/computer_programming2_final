@@ -10,7 +10,14 @@
 [ext_resource type="Texture2D" uid="uid://cs824ep4bt18q" path="res://assets/maps/chapter1/boss_interior/props/chapter1_boss_offering_stand_v01.png" id="8_offering"]
 [ext_resource type="Texture2D" uid="uid://biftibqqce1dm" path="res://assets/maps/chapter1/boss_interior/props/chapter1_boss_heart_drum_idol_v01.png" id="9_idol"]
 [ext_resource type="Texture2D" uid="uid://yr53j6ej8gwk" path="res://assets/maps/chapter1/boss_interior/props/chapter1_boss_ritual_brazier_v01.png" id="10_brazier"]
+[ext_resource type="Script" uid="uid://dauwr7kxq7rjl" path="res://scripts/camera_shake.gd" id="11_camera_shake"]
 [ext_resource type="Texture2D" uid="uid://bcl50ixmk4jjq" path="res://assets/maps/chapter1/boss_interior/preview/player_idle_preview_frame0.png" id="11_player"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pporw"]
+size = Vector2(2049, 129)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_t413k"]
+size = Vector2(107.5, 772.5)
 
 [node name="root" type="Node2D" unique_id=858961773]
 
@@ -302,3 +309,28 @@ limit_left = 0
 limit_top = 0
 limit_right = 2048
 limit_bottom = 720
+script = ExtResource("11_camera_shake")
+follow_target_path = NodePath("../../Player")
+follow_offset = Vector2(210, -48)
+follow_smoothing_speed = 7.0
+horizontal_deadzone = 32.0
+vertical_deadzone = 120.0
+vertical_follow_ratio = 0.2
+lookahead_distance = 120.0
+lookahead_smoothing_speed = 5.0
+
+[node name="Collision" type="Node2D" parent="." unique_id=1744292005]
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Collision" unique_id=1102682358]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Collision/StaticBody2D" unique_id=279378197]
+position = Vector2(1024.5, 705)
+shape = SubResource("RectangleShape2D_pporw")
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Collision/StaticBody2D" unique_id=1742829290]
+position = Vector2(-55.25, 383.75)
+shape = SubResource("RectangleShape2D_t413k")
+
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="Collision/StaticBody2D" unique_id=2058255067]
+position = Vector2(2101, 389)
+shape = SubResource("RectangleShape2D_t413k")
