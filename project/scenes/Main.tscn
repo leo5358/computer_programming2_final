@@ -1,37 +1,37 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene format=3 uid="uid://b8rwq6wf3mjr0"]
 
 [ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="1_player_scene"]
-[ext_resource type="Script" path="res://scripts/enemy_test_spawner.gd" id="2_spawner_script"]
-[ext_resource type="Script" path="res://scripts/combat_ui.gd" id="4_ui_script"]
-[ext_resource type="Script" path="res://scripts/debug_overlay.gd" id="5_debug_script"]
-[ext_resource type="Script" path="res://scripts/combat_runtime.gd" id="6_runtime_script"]
-[ext_resource type="Script" path="res://scripts/camera_shake.gd" id="7_camera_shake"]
-[ext_resource type="Script" path="res://scripts/bgm_player.gd" id="9_bgm_script"]
-[ext_resource type="Script" path="res://scripts/hurtbox_debug_overlay.gd" id="10_hurtbox_debug"]
-[ext_resource type="PackedScene" path="res://scenes/TrainingDummy.tscn" id="11_training_dummy"]
-[ext_resource type="Script" path="res://scripts/combat_autopilot.gd" id="12_autopilot"]
+[ext_resource type="Script" uid="uid://bngp7vm33f111" path="res://scripts/enemy_test_spawner.gd" id="2_spawner_script"]
+[ext_resource type="Script" uid="uid://b2mlj22s5g2ik" path="res://scripts/combat_ui.gd" id="4_ui_script"]
+[ext_resource type="Script" uid="uid://052x7qqitt38" path="res://scripts/debug_overlay.gd" id="5_debug_script"]
+[ext_resource type="Script" uid="uid://bpb032ovxi47n" path="res://scripts/combat_runtime.gd" id="6_runtime_script"]
+[ext_resource type="Script" uid="uid://dauwr7kxq7rjl" path="res://scripts/camera_shake.gd" id="7_camera_shake"]
+[ext_resource type="Script" uid="uid://crqrkukqrfh5r" path="res://scripts/bgm_player.gd" id="9_bgm_script"]
+[ext_resource type="Script" uid="uid://cp0o0aeh424hc" path="res://scripts/hurtbox_debug_overlay.gd" id="10_hurtbox_debug"]
+[ext_resource type="PackedScene" uid="uid://b1lufco7xhjkb" path="res://scenes/maps/chapter1_ab_foothill_stairs.tscn" id="11_chapter1_map"]
+[ext_resource type="Script" uid="uid://4r5sqpspbi1" path="res://scripts/combat_autopilot.gd" id="12_autopilot"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
-size = Vector2(7680, 48)
+size = Vector2(1762, 48)
 
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node2D" unique_id=462585444]
 script = ExtResource("2_spawner_script")
 
-[node name="BgmPlayer" type="AudioStreamPlayer" parent="."]
+[node name="BgmPlayer" type="AudioStreamPlayer" parent="." unique_id=1935915305]
 process_mode = 3
-autoplay = true
 volume_db = -10.0
+autoplay = true
 script = ExtResource("9_bgm_script")
 
-[node name="CombatRuntime" type="Node" parent="." groups=["combat_runtime"]]
+[node name="CombatRuntime" type="Node" parent="." unique_id=134997180 groups=["combat_runtime"]]
 script = ExtResource("6_runtime_script")
 
-[node name="CombatAutopilot" type="Node" parent="."]
+[node name="CombatAutopilot" type="Node" parent="." unique_id=2096328716]
 script = ExtResource("12_autopilot")
 
-[node name="AutopilotStatus" type="CanvasLayer" parent="CombatAutopilot"]
+[node name="AutopilotStatus" type="CanvasLayer" parent="CombatAutopilot" unique_id=1322986303]
 
-[node name="StatusLabel" type="Label" parent="CombatAutopilot/AutopilotStatus"]
+[node name="StatusLabel" type="Label" parent="CombatAutopilot/AutopilotStatus" unique_id=1298156572]
 visible = false
 offset_left = 16.0
 offset_top = 198.0
@@ -40,93 +40,107 @@ offset_bottom = 224.0
 theme_override_font_sizes/font_size = 18
 text = "AUTOPILOT ON"
 
-[node name="HurtboxDebugOverlay" type="Node" parent="."]
+[node name="HurtboxDebugOverlay" type="Node" parent="." unique_id=1580236426]
 script = ExtResource("10_hurtbox_debug")
 
-[node name="Player" parent="." instance=ExtResource("1_player_scene")]
-position = Vector2(160, 360)
+[node name="Chapter1Map" parent="." unique_id=1473745095 instance=ExtResource("11_chapter1_map")]
 
-[node name="TrainingDummy" parent="." instance=ExtResource("11_training_dummy")]
-position = Vector2(240, 360)
+[node name="Player" parent="." unique_id=373840920 instance=ExtResource("1_player_scene")]
+position = Vector2(430, 408)
+scale = Vector2(1.75, 1.75)
 
-[node name="Floor" type="StaticBody2D" parent="."]
-position = Vector2(1920, 432)
+[node name="Camera2D" type="Camera2D" parent="Player" unique_id=114530701]
+position = Vector2(120, -27.4286)
+limit_left = 1
+limit_top = -69
+limit_right = 7937
+limit_bottom = 651
+script = ExtResource("7_camera_shake")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
+[node name="Floor" type="StaticBody2D" parent="." unique_id=454804928]
+position = Vector2(5600, 432)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor" unique_id=1952280001]
+position = Vector2(-4722, 163)
 shape = SubResource("RectangleShape2D_floor")
 
-[node name="Visual" type="ColorRect" parent="Floor"]
-offset_left = -3840.0
+[node name="Visual" type="ColorRect" parent="Floor" unique_id=2069603259]
+visible = false
+offset_left = -8000.0
 offset_top = -24.0
-offset_right = 3840.0
+offset_right = 8000.0
 offset_bottom = 24.0
 color = Color(0.18, 0.18, 0.18, 1)
 
-[node name="Camera2D" type="Camera2D" parent="Player"]
-position = Vector2(120, -80)
-enabled = true
-script = ExtResource("7_camera_shake")
-
-[node name="CombatUI" type="CanvasLayer" parent="."]
+[node name="CombatUI" type="CanvasLayer" parent="." unique_id=246716013]
 script = ExtResource("4_ui_script")
 
-[node name="Panel" type="PanelContainer" parent="CombatUI"]
+[node name="Panel" type="PanelContainer" parent="CombatUI" unique_id=1191158034]
 offset_left = 16.0
 offset_top = 16.0
 offset_right = 360.0
 offset_bottom = 194.0
 
-[node name="VBox" type="VBoxContainer" parent="CombatUI/Panel"]
+[node name="VBox" type="VBoxContainer" parent="CombatUI/Panel" unique_id=375548468]
+layout_mode = 2
 
-[node name="Message" type="Label" parent="CombatUI/Panel/VBox"]
+[node name="Message" type="Label" parent="CombatUI/Panel/VBox" unique_id=2141977713]
+layout_mode = 2
 text = "A/D move  Space jump  J attack  K block/parry  L dash/dodge"
 
-[node name="HealthLabel" type="Label" parent="CombatUI/Panel/VBox"]
+[node name="HealthLabel" type="Label" parent="CombatUI/Panel/VBox" unique_id=1969146803]
+layout_mode = 2
 text = "HP"
 
-[node name="HealthBar" type="ProgressBar" parent="CombatUI/Panel/VBox"]
-max_value = 100.0
+[node name="HealthBar" type="ProgressBar" parent="CombatUI/Panel/VBox" unique_id=138660558]
+layout_mode = 2
 value = 100.0
 show_percentage = false
 
-[node name="PostureLabel" type="Label" parent="CombatUI/Panel/VBox"]
+[node name="PostureLabel" type="Label" parent="CombatUI/Panel/VBox" unique_id=980992449]
+layout_mode = 2
 text = "Posture"
 
-[node name="PostureBar" type="ProgressBar" parent="CombatUI/Panel/VBox"]
-max_value = 100.0
+[node name="PostureBar" type="ProgressBar" parent="CombatUI/Panel/VBox" unique_id=1081782733]
+layout_mode = 2
 show_percentage = false
 
-[node name="HeartbeatLabel" type="Label" parent="CombatUI/Panel/VBox"]
+[node name="HeartbeatLabel" type="Label" parent="CombatUI/Panel/VBox" unique_id=2072233957]
+layout_mode = 2
 text = "Heartbeat"
 
-[node name="HeartbeatBar" type="ProgressBar" parent="CombatUI/Panel/VBox"]
+[node name="HeartbeatBar" type="ProgressBar" parent="CombatUI/Panel/VBox" unique_id=1985753782]
+layout_mode = 2
 min_value = 65.0
 max_value = 120.0
 value = 65.0
 show_percentage = false
 
-[node name="EnemyPostureLabel" type="Label" parent="CombatUI/Panel/VBox"]
+[node name="EnemyPostureLabel" type="Label" parent="CombatUI/Panel/VBox" unique_id=2046653289]
+layout_mode = 2
 text = "Enemy Posture"
 
-[node name="EnemyPostureBar" type="ProgressBar" parent="CombatUI/Panel/VBox"]
-max_value = 100.0
+[node name="EnemyPostureBar" type="ProgressBar" parent="CombatUI/Panel/VBox" unique_id=2138739300]
+layout_mode = 2
 show_percentage = false
 
-[node name="BossPostureLabel" type="Label" parent="CombatUI/Panel/VBox"]
+[node name="BossPostureLabel" type="Label" parent="CombatUI/Panel/VBox" unique_id=1376058486]
+layout_mode = 2
 text = "Boss Posture"
 
-[node name="BossPostureBar" type="ProgressBar" parent="CombatUI/Panel/VBox"]
-max_value = 100.0
+[node name="BossPostureBar" type="ProgressBar" parent="CombatUI/Panel/VBox" unique_id=509067052]
+layout_mode = 2
 show_percentage = false
 
-[node name="DebugOverlay" type="CanvasLayer" parent="."]
+[node name="DebugOverlay" type="CanvasLayer" parent="." unique_id=285414813]
 script = ExtResource("5_debug_script")
 
-[node name="Panel" type="PanelContainer" parent="DebugOverlay"]
+[node name="Panel" type="PanelContainer" parent="DebugOverlay" unique_id=1755764899]
 offset_left = 760.0
 offset_top = 16.0
 offset_right = 1100.0
 offset_bottom = 280.0
 
-[node name="Label" type="Label" parent="DebugOverlay/Panel"]
+[node name="Label" type="Label" parent="DebugOverlay/Panel" unique_id=777054122]
+layout_mode = 2
 text = "DEBUG COMBAT"

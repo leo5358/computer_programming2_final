@@ -15,9 +15,12 @@ func _initialize() -> void:
 		push_error("Enemy test field should start without default Boss")
 		quit(1)
 		return
-	var training_dummy: Node = main.get_node_or_null("TrainingDummy")
-	if training_dummy == null:
-		push_error("Enemy test field should include a default TrainingDummy as a knockback reference")
+	if main.get_node_or_null("TrainingDummy") != null:
+		push_error("Enemy test field should not include the old default TrainingDummy")
+		quit(1)
+		return
+	if main.get_node_or_null("Chapter1Map") == null:
+		push_error("Enemy test field should include the chapter 1 foothill stairs map")
 		quit(1)
 		return
 
@@ -55,8 +58,8 @@ func _initialize() -> void:
 		push_error("Reset should clear all spawned enemies and bosses")
 		quit(1)
 		return
-	if main.get_node_or_null("TrainingDummy") == null:
-		push_error("Reset should keep the default TrainingDummy reference object")
+	if main.get_node_or_null("TrainingDummy") != null:
+		push_error("Reset should not recreate the removed TrainingDummy reference object")
 		quit(1)
 		return
 
