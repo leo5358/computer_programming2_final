@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bwv2xhtdirxd5"
-path="res://.godot/imported/chapter1_hi_shrine_facade_v01.png-cbce606374bbcb522bdf8c27f347c939.ctex"
+uid="uid://d1hwooufxg8wc"
+path="res://.godot/imported/moss2.png-e400d97e9f74d4a2f21372bda44dbe78.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/maps/chapter1/exterior/hi/structures/chapter1_hi_shrine_facade_v01.png"
-dest_files=["res://.godot/imported/chapter1_hi_shrine_facade_v01.png-cbce606374bbcb522bdf8c27f347c939.ctex"]
+source_file="res://assets/maps/chapter1/ground/moss2.png"
+dest_files=["res://.godot/imported/moss2.png-e400d97e9f74d4a2f21372bda44dbe78.ctex"]
 
 [params]
 

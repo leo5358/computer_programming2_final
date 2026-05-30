@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dmfar5nkuv25c"
-path="res://.godot/imported/chapter1_hi_mid_forest_v02.png-9a6979d3bd33251bcc33b0802161799b.ctex"
+uid="uid://dp4ool7c17xme"
+path="res://.godot/imported/lantern.png-04f898288471936814beaa80331819f0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/maps/chapter1/exterior/hi/backgrounds/chapter1_hi_mid_forest_v02.png"
-dest_files=["res://.godot/imported/chapter1_hi_mid_forest_v02.png-9a6979d3bd33251bcc33b0802161799b.ctex"]
+source_file="res://assets/maps/chapter1/props/lantern.png"
+dest_files=["res://.godot/imported/lantern.png-04f898288471936814beaa80331819f0.ctex"]
 
 [params]
 

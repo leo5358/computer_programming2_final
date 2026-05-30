@@ -1,33 +1,35 @@
 [gd_scene format=3 uid="uid://cvta0l5lar3q6"]
 
-[ext_resource type="Texture2D" uid="uid://bwv2xhtdirxd5" path="res://assets/maps/chapter1/exterior/hi/structures/chapter1_hi_shrine_facade_v01.png" id="1_hi_facade"]
+[ext_resource type="Texture2D" uid="uid://j2hpcr14ary6" path="res://assets/maps/chapter1/backgrounds/mountains_0.png" id="1_biqhe"]
 [ext_resource type="Texture2D" uid="uid://cpk7q527c0hkl" path="res://assets/maps/chapter1/ground/stone1.png" id="2_stone1"]
+[ext_resource type="Texture2D" uid="uid://cgu54cfmdbpys" path="res://assets/maps/chapter1/backgrounds/moon.png" id="2_yblr1"]
+[ext_resource type="Texture2D" uid="uid://bfqk6slxehlm6" path="res://assets/maps/chapter1/backgrounds/forest_bamboo_1.png" id="3_biqhe"]
 [ext_resource type="Texture2D" uid="uid://co8fm718tr7st" path="res://assets/maps/chapter1/ground/stone2.png" id="3_stone2"]
 [ext_resource type="Texture2D" uid="uid://jt1tvi0x36h0" path="res://assets/maps/chapter1/ground/stone3.png" id="4_stone3"]
-[ext_resource type="Texture2D" uid="uid://b7322tsdso20a" path="res://assets/maps/chapter1/exterior/hi/props/chapter1_hi_lantern_post_v01.png" id="5_hi_lantern"]
-[ext_resource type="Texture2D" uid="uid://bgo037wa317ss" path="res://assets/maps/chapter1/exterior/hi/props/chapter1_hi_shimenawa_curtain_v01.png" id="6_hi_shimenawa"]
-[ext_resource type="Texture2D" uid="uid://dyggk5efq4fel" path="res://assets/maps/chapter1/exterior/hi/backgrounds/chapter1_hi_far_mountains_v02.png" id="7_hi_mountains"]
-[ext_resource type="Texture2D" uid="uid://dmfar5nkuv25c" path="res://assets/maps/chapter1/exterior/hi/backgrounds/chapter1_hi_mid_forest_v02.png" id="8_hi_mid_forest"]
-[ext_resource type="Texture2D" uid="uid://cum2c3qevge10" path="res://assets/maps/chapter1/exterior/hi/backgrounds/chapter1_hi_moon_v02.png" id="9_hi_moon"]
+[ext_resource type="Texture2D" uid="uid://dp4ool7c17xme" path="res://assets/maps/chapter1/props/lantern.png" id="7_xxx5r"]
+[ext_resource type="Texture2D" uid="uid://cmgi6nhylti3a" path="res://assets/maps/chapter1/structures/shrine_facade.png" id="8_6lmym"]
+[ext_resource type="Texture2D" uid="uid://dmpimxksau067" path="res://assets/maps/chapter1/props/shimenawa_curtain.png" id="9_hh8eg"]
 
 [node name="root" type="Node2D" unique_id=506673559]
 
 [node name="BackgroundFar" type="Node2D" parent="." unique_id=1049019642]
 
 [node name="NightSky" type="Polygon2D" parent="BackgroundFar" unique_id=839787389]
+position = Vector2(129.03705, 0)
+scale = Vector2(0.9612269, 1)
 color = Color(0.0431373, 0.054902, 0.101961, 1)
 polygon = PackedVector2Array(-128, -96, 3328, -96, 3328, 960, -128, 960)
 
 [node name="MountainSprite" type="Sprite2D" parent="BackgroundFar" unique_id=77684399]
 modulate = Color(0.9, 0.95, 1, 0.96)
-position = Vector2(1664, 356)
+position = Vector2(1968.9998, 226.99998)
 scale = Vector2(1.62, 1.62)
-texture = ExtResource("7_hi_mountains")
+texture = ExtResource("1_biqhe")
 
 [node name="MoonSprite" type="Sprite2D" parent="BackgroundFar" unique_id=469563030]
-position = Vector2(836, 15.999992)
+position = Vector2(1268, 24)
 scale = Vector2(1.2194922, 1.2194922)
-texture = ExtResource("9_hi_moon")
+texture = ExtResource("2_yblr1")
 
 [node name="BackgroundMid" type="Node2D" parent="." unique_id=1268008693]
 
@@ -35,7 +37,7 @@ texture = ExtResource("9_hi_moon")
 modulate = Color(0.9, 0.96, 1, 0.78)
 position = Vector2(1664, 382)
 scale = Vector2(1.62, 1.62)
-texture = ExtResource("8_hi_mid_forest")
+texture = ExtResource("3_biqhe")
 
 [node name="MistBand" type="Polygon2D" parent="BackgroundMid" unique_id=477424942]
 visible = false
@@ -244,49 +246,49 @@ texture = ExtResource("2_stone1")
 modulate = Color(0.94, 0.96, 1, 0.9)
 position = Vector2(612, 450)
 scale = Vector2(0.16, 0.16)
-texture = ExtResource("5_hi_lantern")
+texture = ExtResource("7_xxx5r")
 
 [node name="LanternEntryBack" type="Sprite2D" parent="Props" unique_id=1658533407]
 modulate = Color(0.88, 0.92, 1, 0.58)
 position = Vector2(444, 438)
 scale = Vector2(0.14, 0.14)
-texture = ExtResource("5_hi_lantern")
+texture = ExtResource("7_xxx5r")
 
 [node name="LanternMid" type="Sprite2D" parent="Props" unique_id=1630750090]
 modulate = Color(0.96, 0.96, 1, 0.92)
 position = Vector2(1708, 438)
 scale = Vector2(0.17, 0.17)
-texture = ExtResource("5_hi_lantern")
+texture = ExtResource("7_xxx5r")
 
 [node name="LanternMidBack" type="Sprite2D" parent="Props" unique_id=130392948]
 modulate = Color(0.9, 0.92, 1, 0.62)
 position = Vector2(1460, 426)
 scale = Vector2(0.15, 0.15)
-texture = ExtResource("5_hi_lantern")
+texture = ExtResource("7_xxx5r")
 
 [node name="LanternForecourt" type="Sprite2D" parent="Props" unique_id=1183464452]
 modulate = Color(1, 0.98, 1, 0.94)
 position = Vector2(2352, 420)
 scale = Vector2(0.18, 0.18)
-texture = ExtResource("5_hi_lantern")
+texture = ExtResource("7_xxx5r")
 
 [node name="LanternForecourtBack" type="Sprite2D" parent="Props" unique_id=1966690556]
 modulate = Color(0.92, 0.94, 1, 0.66)
 position = Vector2(2087, 430)
 scale = Vector2(0.15, 0.15)
-texture = ExtResource("5_hi_lantern")
+texture = ExtResource("7_xxx5r")
 
 [node name="ShrineFacade" type="Sprite2D" parent="Props" unique_id=1875827115]
 modulate = Color(1, 0.98, 1, 0.98)
 position = Vector2(2825.16, 245.44)
 scale = Vector2(0.62, 0.62)
-texture = ExtResource("1_hi_facade")
+texture = ExtResource("8_6lmym")
 
 [node name="ShimenawaCurtain" type="Sprite2D" parent="Props" unique_id=1691325307]
 modulate = Color(1, 0.98, 1, 0.96)
 position = Vector2(2825.16, 257.44)
 scale = Vector2(0.28, 0.28)
-texture = ExtResource("6_hi_shimenawa")
+texture = ExtResource("9_hh8eg")
 
 [node name="StoneMarkerA_Base" type="Sprite2D" parent="Props" unique_id=85372712]
 position = Vector2(960, 592)
@@ -331,6 +333,8 @@ texture = ExtResource("3_stone2")
 [node name="Foreground" type="Node2D" parent="." unique_id=21231647]
 
 [node name="LowerFog" type="Polygon2D" parent="Foreground" unique_id=1269273194]
+position = Vector2(106.85714, 0)
+scale = Vector2(0.9672619, 1)
 color = Color(0.721569, 0.784314, 0.862745, 0.05)
 polygon = PackedVector2Array(-96, 544, 3264, 544, 3264, 720, 80.539154, 720, -96, 720)
 

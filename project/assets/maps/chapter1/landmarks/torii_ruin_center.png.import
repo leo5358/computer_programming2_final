@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dyggk5efq4fel"
-path="res://.godot/imported/chapter1_hi_far_mountains_v02.png-7a1c103c1dfa5f7c6159b87785fce887.ctex"
+uid="uid://dijyqb4ahd2kd"
+path="res://.godot/imported/torii_ruin_center.png-b37fb0ee056c189e866599ce0175ffa9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/maps/chapter1/exterior/hi/backgrounds/chapter1_hi_far_mountains_v02.png"
-dest_files=["res://.godot/imported/chapter1_hi_far_mountains_v02.png-7a1c103c1dfa5f7c6159b87785fce887.ctex"]
+source_file="res://assets/maps/chapter1/landmarks/torii_ruin_center.png"
+dest_files=["res://.godot/imported/torii_ruin_center.png-b37fb0ee056c189e866599ce0175ffa9.ctex"]
 
 [params]
 

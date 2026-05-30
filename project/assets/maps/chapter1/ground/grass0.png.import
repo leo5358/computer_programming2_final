@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b7322tsdso20a"
-path="res://.godot/imported/chapter1_hi_lantern_post_v01.png-7e6c3529d30aa37d758d3cb6c1c77a0c.ctex"
+uid="uid://b2rl85nygnjrq"
+path="res://.godot/imported/grass0.png-d65c0f681a4396a4e05c50384cc6e154.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/maps/chapter1/exterior/hi/props/chapter1_hi_lantern_post_v01.png"
-dest_files=["res://.godot/imported/chapter1_hi_lantern_post_v01.png-7e6c3529d30aa37d758d3cb6c1c77a0c.ctex"]
+source_file="res://assets/maps/chapter1/ground/grass0.png"
+dest_files=["res://.godot/imported/grass0.png-d65c0f681a4396a4e05c50384cc6e154.ctex"]
 
 [params]
 

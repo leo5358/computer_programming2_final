@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cum2c3qevge10"
-path="res://.godot/imported/chapter1_hi_moon_v02.png-885242b8b93dd913fc0a99d5f49c9e54.ctex"
+uid="uid://cgayroi1x2gae"
+path="res://.godot/imported/cedar_pillar_1.png-edbf6946c2487f7156ca53fbd6253a6f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/maps/chapter1/exterior/hi/backgrounds/chapter1_hi_moon_v02.png"
-dest_files=["res://.godot/imported/chapter1_hi_moon_v02.png-885242b8b93dd913fc0a99d5f49c9e54.ctex"]
+source_file="res://assets/maps/chapter1/props/cedar_pillar_1.png"
+dest_files=["res://.godot/imported/cedar_pillar_1.png-edbf6946c2487f7156ca53fbd6253a6f.ctex"]
 
 [params]
 
