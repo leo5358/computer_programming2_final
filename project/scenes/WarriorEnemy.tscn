@@ -9,6 +9,7 @@ size = Vector2(44, 72)
 size = Vector2(76, 48)
 
 [node name="WarriorEnemy" type="CharacterBody2D"]
+z_index = 100
 scale = Vector2(1.75, 1.75)
 script = ExtResource("1_script")
 

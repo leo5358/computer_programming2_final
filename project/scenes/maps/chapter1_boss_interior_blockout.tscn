@@ -14,7 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://bcl50ixmk4jjq" path="res://assets/maps/chapter1/boss_interior/preview/player_idle_preview_frame0.png" id="11_player"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pporw"]
-size = Vector2(2049, 129)
+size = Vector2(2049, 240.5)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_t413k"]
 size = Vector2(107.5, 772.5)
@@ -325,7 +325,7 @@ lookahead_smoothing_speed = 5.0
 [node name="StaticBody2D" type="StaticBody2D" parent="Collision" unique_id=1102682358]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Collision/StaticBody2D" unique_id=279378197]
-position = Vector2(1024.5, 705)
+position = Vector2(1024.5, 649.25)
 shape = SubResource("RectangleShape2D_pporw")
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="Collision/StaticBody2D" unique_id=1742829290]

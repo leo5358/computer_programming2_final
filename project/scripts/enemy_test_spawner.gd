@@ -10,9 +10,9 @@ const AB_EXIT_START_X := 15250.0
 const AB_EXIT_END_X := 15750.0
 const H_STONE_PLAZA_EXIT_START_X := 2700.0
 const H_STONE_PLAZA_EXIT_END_X := 3200.0
-const H_STONE_PLAZA_SPAWN := Vector2(220, 408)
-const BOSS_INTERIOR_SPAWN := Vector2(220, 595)
-const BOSS_INTERIOR_BOSS_SPAWN := Vector2(1050, 595)
+const H_STONE_PLAZA_SPAWN := Vector2(220, 530.5)
+const BOSS_INTERIOR_SPAWN := Vector2(220, 640.5)
+const BOSS_INTERIOR_BOSS_SPAWN := Vector2(1050, 640.5)
 const TRANSITION_FADE_TIME := 0.45
 
 var spawn_offsets: Dictionary = {
@@ -65,7 +65,9 @@ func _input(event: InputEvent) -> void:
 			_debug_warp_to_boss_interior()
 			get_viewport().set_input_as_handled()
 		KEY_F:
-			if _can_use_ab_exit():
+			if _activate_nearest_checkpoint():
+				get_viewport().set_input_as_handled()
+			elif _can_use_ab_exit():
 				_transition_ab_to_h_stone_plaza()
 				get_viewport().set_input_as_handled()
 			elif _can_use_h_stone_plaza_exit():
@@ -96,7 +98,42 @@ func _spawn_enemy(scene: PackedScene, spawn_position: Vector2) -> void:
 			instance.spawn_position = spawn_position
 
 func _update_map_interaction_prompt() -> void:
-	interaction_prompt.visible = _can_use_ab_exit() or _can_use_h_stone_plaza_exit()
+	interaction_prompt.visible = _can_activate_checkpoint() or _can_use_ab_exit() or _can_use_h_stone_plaza_exit()
+
+func _can_activate_checkpoint() -> bool:
+	return _nearest_checkpoint() != null
+
+func _activate_nearest_checkpoint() -> bool:
+	var checkpoint := _nearest_checkpoint()
+	if checkpoint == null:
+		return false
+	var player := _get_player()
+	if player == null:
+		return false
+	if checkpoint.has_method("activate"):
+		checkpoint.activate(player)
+		return true
+	return false
+
+func _nearest_checkpoint() -> Node:
+	var player := _get_player()
+	if player == null or current_map_id != "ab_foothill":
+		return null
+	var nearest: Node = null
+	var nearest_distance := INF
+	for checkpoint in get_tree().get_nodes_in_group("checkpoint"):
+		if checkpoint == null or not checkpoint.has_method("is_player_in_range"):
+			continue
+		if not checkpoint.is_player_in_range(player):
+			continue
+		var checkpoint_node := checkpoint as Node2D
+		if checkpoint_node == null:
+			continue
+		var distance := player.global_position.distance_to(checkpoint_node.global_position)
+		if distance < nearest_distance:
+			nearest = checkpoint
+			nearest_distance = distance
+	return nearest
 
 func _can_use_ab_exit() -> bool:
 	if is_transitioning or current_map_id != "ab_foothill":
@@ -123,11 +160,16 @@ func _transition_ab_to_h_stone_plaza() -> void:
 
 func _transition_h_stone_plaza_to_boss_interior() -> void:
 	await _run_map_transition(BOSS_INTERIOR_SCENE, "boss_interior", BOSS_INTERIOR_SPAWN)
+	_spawn_boss_for_boss_interior()
 
 func _debug_warp_to_boss_interior() -> void:
 	clear_test_enemies()
 	await _run_map_transition(BOSS_INTERIOR_SCENE, "boss_interior", BOSS_INTERIOR_SPAWN)
-	_spawn_enemy(BOSS_SCENE, BOSS_INTERIOR_BOSS_SPAWN)
+	_spawn_boss_for_boss_interior()
+
+func _spawn_boss_for_boss_interior() -> void:
+	if get_tree().get_nodes_in_group("boss").is_empty():
+		_spawn_enemy(BOSS_SCENE, BOSS_INTERIOR_BOSS_SPAWN)
 
 func _run_map_transition(next_scene: PackedScene, next_map_id: String, player_spawn: Vector2) -> void:
 	is_transitioning = true

@@ -73,7 +73,7 @@ color = Color(0, 0, 0, 0)
 script = ExtResource("13_item_ui")
 
 [node name="Player" parent="." unique_id=373840920 instance=ExtResource("1_player_scene")]
-position = Vector2(430, 408)
+position = Vector2(430, 571)
 scale = Vector2(1.75, 1.75)
 
 [node name="Floor" type="StaticBody2D" parent="." unique_id=454804928]

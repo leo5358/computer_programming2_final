@@ -16,6 +16,17 @@ func _initialize() -> void:
 			push_error("Start page should include menu node: %s" % node_path)
 			quit(1)
 			return
+	var selector: CanvasItem = start_page.get_node("menu_selector")
+	var selector_glow: CanvasItem = start_page.get_node("menu_selector_glow")
+	if selector.visible or selector_glow.visible:
+		push_error("Start page should not show a selected button before mouse or keyboard input")
+		quit(1)
+		return
+	var clear_color: Color = ProjectSettings.get_setting("rendering/environment/defaults/default_clear_color", Color(0.3, 0.3, 0.3, 1.0))
+	if clear_color != Color.BLACK:
+		push_error("Project clear color should be black to hide the default grey frame during scene transitions")
+		quit(1)
+		return
 	var start_bgm: AudioStreamPlayer = start_page.get_node("StartPageBgm")
 	if start_bgm.stream == null:
 		push_error("Start page should have BGM stream")
@@ -54,6 +65,19 @@ func _initialize() -> void:
 	start_page._on_menu_mouse_entered(2)
 	if start_page._selected_index != 2:
 		push_error("Mouse hover should update selected menu item")
+		quit(1)
+		return
+	if not selector.visible or not selector_glow.visible:
+		push_error("Mouse hover should reveal the selected button effect")
+		quit(1)
+		return
+	if not start_page.has_method("_on_menu_mouse_exited"):
+		push_error("Start page should support clearing mouse hover selection")
+		quit(1)
+		return
+	start_page._on_menu_mouse_exited(2)
+	if selector.visible or selector_glow.visible or start_page._selected_index != -1:
+		push_error("Mouse exit should clear all selected button effects")
 		quit(1)
 		return
 	start_page._selected_index = 1

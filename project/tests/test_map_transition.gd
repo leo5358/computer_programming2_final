@@ -17,6 +17,10 @@ func _initialize() -> void:
 		push_error("Main scene should include player and map transition prompt")
 		quit(1)
 		return
+	if player.global_position.distance_to(Vector2(430, 571)) > 1.0:
+		push_error("Player should start grounded on AB foothill")
+		quit(1)
+		return
 
 	player.global_position.x = 15300.0
 	await process_frame
@@ -40,7 +44,7 @@ func _initialize() -> void:
 		push_error("Next map should provide an active map camera")
 		quit(1)
 		return
-	if player.global_position.distance_to(Vector2(220, 408)) > 1.0:
+	if player.global_position.distance_to(Vector2(220, 530.5)) > 1.0:
 		push_error("Player should spawn at H stone plaza entrance")
 		quit(1)
 		return
@@ -67,8 +71,12 @@ func _initialize() -> void:
 		push_error("Boss interior should provide an active map camera")
 		quit(1)
 		return
-	if player.global_position.distance_to(Vector2(220, 595)) > 1.0:
+	if player.global_position.distance_to(Vector2(220, 640.5)) > 1.0:
 		push_error("Player should spawn at boss interior entrance")
+		quit(1)
+		return
+	if get_nodes_in_group("boss").size() != 1:
+		push_error("Entering boss interior through the normal F transition should spawn exactly one Boss")
 		quit(1)
 		return
 
@@ -99,7 +107,7 @@ func _initialize() -> void:
 		push_error("Debug boss warp should place Boss on the right side of the arena")
 		quit(1)
 		return
-	if player.global_position.distance_to(Vector2(220, 595)) > 1.0:
+	if player.global_position.distance_to(Vector2(220, 640.5)) > 1.0:
 		push_error("Debug boss warp should place player at boss interior entrance")
 		quit(1)
 		return

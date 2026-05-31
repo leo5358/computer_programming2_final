@@ -9,6 +9,7 @@ size = Vector2(54, 96)
 size = Vector2(124, 78)
 
 [node name="Boss" type="CharacterBody2D"]
+z_index = 100
 scale = Vector2(2, 2)
 script = ExtResource("1_boss_script")
 

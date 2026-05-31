@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/checkpoint.gd" id="1_checkpoint_script"]
+[ext_resource type="Texture2D" uid="uid://cvmho0fy7i4wt" path="res://assets/items/checkpoint/checkpoint.png" id="2_checkpoint"]
+[ext_resource type="Texture2D" uid="uid://dgeviyn3jvb3r" path="res://assets/items/checkpoint/checkpoint_unable.png" id="3_checkpoint_unable"]
+
+[node name="Checkpoint" type="Node2D"]
+z_index = 80
+script = ExtResource("1_checkpoint_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(0, -241.2)
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("3_checkpoint_unable")

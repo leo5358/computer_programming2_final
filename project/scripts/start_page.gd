@@ -22,7 +22,7 @@ const PRESS_DURATION := 0.06
 var _menu_nodes: Array[Sprite2D] = []
 var _selector_offset := Vector2.ZERO
 var _selector_glow_offset := Vector2.ZERO
-var _selected_index := 0
+var _selected_index := -1
 var _selector_base_scale := Vector2.ONE
 var _selector_glow_base_scale := Vector2.ONE
 var _press_tween: Tween
@@ -37,10 +37,11 @@ func _ready() -> void:
 	_selector_glow_offset = menu_selector_glow.position - _menu_nodes[0].position
 	_selector_base_scale = menu_selector.scale
 	_selector_glow_base_scale = menu_selector_glow.scale
+	menu_selector.visible = false
+	menu_selector_glow.visible = false
 	fade_rect.visible = false
 	fade_rect.color = Color(0, 0, 0, 0)
 	_setup_mouse_hit_areas()
-	_apply_selection()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -63,7 +64,16 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _move_selection(direction: int) -> void:
-	_selected_index = wrapi(_selected_index + direction, 0, _menu_nodes.size())
+	if _selected_index < 0:
+		_set_selection(0 if direction >= 0 else _menu_nodes.size() - 1)
+	else:
+		_set_selection(wrapi(_selected_index + direction, 0, _menu_nodes.size()))
+
+
+func _set_selection(index: int) -> void:
+	_selected_index = clampi(index, 0, _menu_nodes.size() - 1)
+	menu_selector.visible = true
+	menu_selector_glow.visible = true
 	_apply_selection()
 
 
@@ -75,7 +85,7 @@ func _apply_selection() -> void:
 
 
 func _confirm_selection() -> void:
-	if _is_confirming:
+	if _is_confirming or _selected_index < 0:
 		return
 
 	_play_confirm_press()
@@ -136,6 +146,7 @@ func _setup_mouse_hit_areas() -> void:
 		hit_area.name = "%s_mouse_area" % MENU_NODE_NAMES[index]
 		hit_area.input_pickable = true
 		hit_area.mouse_entered.connect(_on_menu_mouse_entered.bind(index))
+		hit_area.mouse_exited.connect(_on_menu_mouse_exited.bind(index))
 		hit_area.input_event.connect(_on_menu_input_event.bind(index))
 		menu_node.add_child(hit_area)
 
@@ -152,16 +163,22 @@ func _setup_mouse_hit_areas() -> void:
 func _on_menu_mouse_entered(index: int) -> void:
 	if _is_confirming:
 		return
-	_selected_index = index
-	_apply_selection()
+	_set_selection(index)
+
+
+func _on_menu_mouse_exited(index: int) -> void:
+	if _is_confirming or _selected_index != index:
+		return
+	_selected_index = -1
+	menu_selector.visible = false
+	menu_selector_glow.visible = false
 
 
 func _on_menu_input_event(_viewport: Node, event: InputEvent, _shape_idx: int, index: int) -> void:
 	if _is_confirming:
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		_selected_index = index
-		_apply_selection()
+		_set_selection(index)
 		_mark_input_handled()
 		_confirm_selection()
 
