@@ -107,6 +107,8 @@ enum PlayerState {
 @export var wall_stick_speed := 35.0
 @export var max_health := 100.0
 @export var max_posture := 100.0
+@export var world_death_bounds_enabled := true
+@export var world_death_bounds := Rect2(-1024.0, -2048.0, 22000.0, 4096.0)
 @export var base_attack_damage := 16.0
 @export var attack_posture_damage := 18.0
 @export var block_posture_damage := 14.0
@@ -268,6 +270,7 @@ func _physics_process(delta: float) -> void:
 	_update_combat(delta)
 
 	move_and_slide()
+	_check_world_death_bounds()
 	_update_visuals()
 	stats_changed.emit()
 
@@ -817,6 +820,17 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 	if health <= 0.0:
 		_enter_dead()
 		died.emit()
+
+func _check_world_death_bounds() -> void:
+	if not world_death_bounds_enabled:
+		return
+	if state == PlayerState.DEAD:
+		return
+	if world_death_bounds.has_point(global_position):
+		return
+	_enter_dead()
+	stats_changed.emit()
+	died.emit()
 
 func begin_local_hitstop(duration: float, resume_velocity: Vector2 = Vector2.INF) -> void:
 	if state == PlayerState.DEAD:

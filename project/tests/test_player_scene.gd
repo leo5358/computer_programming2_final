@@ -341,6 +341,18 @@ func _initialize() -> void:
 		return
 
 	player.reset_combat_state()
+	player.global_position = Vector2(0.0, player.world_death_bounds.position.y + player.world_death_bounds.size.y + 16.0)
+	player._physics_process(0.016)
+	if player.state != player.PlayerState.DEAD:
+		push_error("Player should die after falling outside the world death bounds")
+		quit(1)
+		return
+	if player.current_animation != "death":
+		push_error("World bounds death should use the normal death animation")
+		quit(1)
+		return
+
+	player.reset_combat_state()
 	if player.state != player.PlayerState.IDLE:
 		push_error("Reset should recover player from death")
 		quit(1)
