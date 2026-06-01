@@ -100,6 +100,11 @@ func get_main_scene_path() -> String:
 
 func _handle_menu_option(option_name: String) -> void:
 	match option_name:
+		"continue":
+			if has_node("/root/SaveManager") and get_node("/root/SaveManager").has_save():
+				_is_confirming = true
+				get_tree().set_meta("load_from_save", true)
+				_play_new_game_transition()
 		"new_game":
 			_start_new_game()
 		"quit":

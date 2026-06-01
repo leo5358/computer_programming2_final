@@ -33,8 +33,39 @@ func _ready() -> void:
 	fade_rect.visible = false
 	fade_rect.color = Color(0, 0, 0, 0)
 	_play_start_page_fade_in_if_needed()
+	_check_for_saved_game_load()
 	if _should_spawn_default_boss_for_current_run():
 		_spawn_enemy(BOSS_SCENE, spawn_offsets[KEY_0])
+
+func _check_for_saved_game_load() -> void:
+	if not get_tree().has_meta("load_from_save"):
+		return
+	
+	get_tree().remove_meta("load_from_save")
+	if not has_node("/root/SaveManager"):
+		return
+		
+	var sm = get_node("/root/SaveManager")
+	if not sm.has_save():
+		return
+		
+	var saved_map = sm.get_saved_map()
+	var saved_pos = sm.get_saved_position()
+	var saved_health = sm.get_saved_health()
+	
+	# Handle map loading if not the default one
+	if saved_map == "h_stone_plaza":
+		_switch_map(H_STONE_PLAZA_SCENE, "h_stone_plaza", saved_pos)
+	elif saved_map == "boss_interior":
+		_switch_map(BOSS_INTERIOR_SCENE, "boss_interior", saved_pos)
+	else:
+		# Default map (ab_foothill), just position the player
+		var player := _get_player()
+		if player != null:
+			player.global_position = saved_pos
+			player.spawn_position = saved_pos
+			if "health" in player:
+				player.health = saved_health
 
 func _process(_delta: float) -> void:
 	_update_map_interaction_prompt()
@@ -112,6 +143,9 @@ func _activate_nearest_checkpoint() -> bool:
 		return false
 	if checkpoint.has_method("activate"):
 		checkpoint.activate(player)
+		if has_node("/root/SaveManager"):
+			var sm = get_node("/root/SaveManager")
+			sm.save_game(current_map_id, player.spawn_position, player.health)
 		return true
 	return false
 
