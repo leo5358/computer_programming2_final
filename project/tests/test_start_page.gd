@@ -10,6 +10,11 @@ func _initialize() -> void:
 	var start_page: Node = scene.instantiate()
 	get_root().add_child(start_page)
 	await process_frame
+	var save_manager: Node = get_root().get_node_or_null("SaveManager")
+	if save_manager == null:
+		push_error("SaveManager autoload should exist")
+		quit(1)
+		return
 
 	for node_path in ["menu_continue", "menu_new_game", "menu_quit", "menu_selector", "menu_selector_glow", "StartPageBgm", "FadeLayer/FadeRect"]:
 		if start_page.get_node_or_null(node_path) == null:
@@ -30,6 +35,14 @@ func _initialize() -> void:
 	var start_bgm: AudioStreamPlayer = start_page.get_node("StartPageBgm")
 	if start_bgm.stream == null:
 		push_error("Start page should have BGM stream")
+		quit(1)
+		return
+	if start_bgm.stream.resource_path != "res://assets/audio/BGMs/start_page_music.mp3":
+		push_error("Start page should use assets/audio/BGMs/start_page_music.mp3")
+		quit(1)
+		return
+	if "loop" in start_bgm.stream and not bool(start_bgm.stream.loop):
+		push_error("Start page BGM should loop")
 		quit(1)
 		return
 
@@ -80,9 +93,18 @@ func _initialize() -> void:
 		push_error("Mouse exit should clear all selected button effects")
 		quit(1)
 		return
+	save_manager.save_game("h_stone_plaza", Vector2(2850, 530.5), 50.0)
+	if not save_manager.has_save():
+		push_error("Test should create an existing save before New Game")
+		quit(1)
+		return
 	start_page._selected_index = 1
 	start_page._confirm_selection()
 	await process_frame
+	if save_manager.has_save():
+		push_error("New Game should clear existing checkpoint save")
+		quit(1)
+		return
 	if start_page.get_tree() == null:
 		push_error("New game should wait before changing scenes")
 		quit(1)

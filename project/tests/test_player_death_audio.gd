@@ -26,6 +26,7 @@ func _initialize() -> void:
 	get_root().add_child(player)
 	await process_frame
 
+	player.lives = 1
 	player.receive_enemy_attack(999.0, 0.0, null)
 	if bgm.fade_calls != 1:
 		push_error("Player death should fade out BGM exactly once")
@@ -43,6 +44,12 @@ func _initialize() -> void:
 	player._physics_process(0.1)
 	if is_equal_approx(player.sprite.speed_scale, 0.0):
 		push_error("Player death animation should not be frozen by hitstop applied after the killing blow")
+		quit(1)
+		return
+	player.reset_combat_state()
+	player.force_death_for_debug()
+	if player.health > 0.0:
+		push_error("Debug death helper should force player HP to zero")
 		quit(1)
 		return
 

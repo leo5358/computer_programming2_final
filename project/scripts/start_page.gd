@@ -18,6 +18,7 @@ const PRESS_DURATION := 0.06
 @onready var menu_selector: Sprite2D = $menu_selector
 @onready var menu_selector_glow: Sprite2D = $menu_selector_glow
 @onready var fade_rect: ColorRect = $FadeLayer/FadeRect
+@onready var start_bgm: AudioStreamPlayer = $StartPageBgm
 
 var _menu_nodes: Array[Sprite2D] = []
 var _selector_offset := Vector2.ZERO
@@ -41,6 +42,8 @@ func _ready() -> void:
 	menu_selector_glow.visible = false
 	fade_rect.visible = false
 	fade_rect.color = Color(0, 0, 0, 0)
+	if start_bgm.stream != null and "loop" in start_bgm.stream:
+		start_bgm.stream.loop = true
 	_setup_mouse_hit_areas()
 
 
@@ -114,6 +117,9 @@ func _handle_menu_option(option_name: String) -> void:
 
 
 func _start_new_game() -> void:
+	_clear_saved_game()
+	if get_tree().has_meta("load_from_save"):
+		get_tree().remove_meta("load_from_save")
 	_is_confirming = true
 	call_deferred("_play_new_game_transition")
 
@@ -127,6 +133,13 @@ func _play_new_game_transition() -> void:
 
 func _change_to_main_scene() -> void:
 	get_tree().change_scene_to_file(MAIN_SCENE_PATH)
+
+
+func _clear_saved_game() -> void:
+	if has_node("/root/SaveManager"):
+		var save_manager = get_node("/root/SaveManager")
+		if save_manager.has_method("delete_save"):
+			save_manager.delete_save()
 
 
 func _quit_game() -> void:

@@ -9,7 +9,10 @@
 [ext_resource type="Script" uid="uid://cp0o0aeh424hc" path="res://scripts/hurtbox_debug_overlay.gd" id="10_hurtbox_debug"]
 [ext_resource type="PackedScene" uid="uid://b1lufco7xhjkb" path="res://scenes/maps/chapter1_ab_foothill_stairs.tscn" id="11_chapter1_map"]
 [ext_resource type="Script" uid="uid://4r5sqpspbi1" path="res://scripts/combat_autopilot.gd" id="12_autopilot"]
-[ext_resource type="Script" path="res://scripts/item_ui.gd" id="13_item_ui"]
+[ext_resource type="Script" uid="uid://br8ww2sjvclqu" path="res://scripts/item_ui.gd" id="13_item_ui"]
+[ext_resource type="Script" path="res://scripts/death_overlay.gd" id="14_death_overlay"]
+[ext_resource type="Script" uid="uid://df53ccqrr0fiv" path="res://scripts/player_posture_hud.gd" id="15_posture_hud"]
+[ext_resource type="Script" path="res://scripts/player_vitals_hud.gd" id="16_vitals_hud"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(1762, 48)
@@ -69,8 +72,17 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 0)
 
-[node name="ItemUI" type="CanvasLayer" parent="."]
+[node name="ItemUI" type="CanvasLayer" parent="." unique_id=1033738818]
 script = ExtResource("13_item_ui")
+
+[node name="PlayerPostureHud" type="CanvasLayer" parent="." unique_id=1538299828]
+script = ExtResource("15_posture_hud")
+
+[node name="PlayerVitalsHud" type="CanvasLayer" parent="."]
+script = ExtResource("16_vitals_hud")
+
+[node name="DeathOverlay" type="CanvasLayer" parent="." unique_id=1820423079]
+script = ExtResource("14_death_overlay")
 
 [node name="Player" parent="." unique_id=373840920 instance=ExtResource("1_player_scene")]
 position = Vector2(430, 571)
@@ -92,6 +104,7 @@ offset_bottom = 24.0
 color = Color(0.18, 0.18, 0.18, 1)
 
 [node name="CombatUI" type="CanvasLayer" parent="." unique_id=246716013]
+visible = false
 script = ExtResource("4_ui_script")
 
 [node name="Panel" type="PanelContainer" parent="CombatUI" unique_id=1191158034]

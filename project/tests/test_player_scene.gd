@@ -210,6 +210,48 @@ func _initialize() -> void:
 		push_error("Wall contact without jump should cap downward slide speed")
 		quit(1)
 		return
+	if player.auto_step_max_height < 24.0:
+		push_error("Player should expose enough auto-step height for small stair collisions")
+		quit(1)
+		return
+	player.auto_step_enabled = true
+	player.coyote_timer = 0.08
+	if not player._should_prefer_auto_step_over_climb():
+		push_error("Recently grounded player should prefer auto-step over wall climb")
+		quit(1)
+		return
+	player.coyote_timer = 0.0
+	if player._should_prefer_auto_step_over_climb():
+		push_error("Fully airborne player should still be allowed to wall climb")
+		quit(1)
+		return
+	if not player.wall_climb_requires_jump:
+		push_error("Wall climb should require intentional jump input by default")
+		quit(1)
+		return
+	player._set_state(player.PlayerState.JUMP)
+	Input.action_release("jump")
+	if player._has_wall_climb_input():
+		push_error("Pressing into a wall without jump should not start wall climb")
+		quit(1)
+		return
+	Input.action_press("jump")
+	if not player._has_wall_climb_input():
+		push_error("Holding jump should allow intentional wall climb")
+		quit(1)
+		return
+	player.wall_climb_lockout_timer = 0.2
+	player._set_state(player.PlayerState.JUMP)
+	if not player._should_defer_wall_climb_for_jump():
+		push_error("Fresh normal jump should defer wall climb so medium ledges can be jumped onto")
+		quit(1)
+		return
+	player.wall_climb_lockout_timer = 0.0
+	if player._should_defer_wall_climb_for_jump():
+		push_error("Wall climb should become available again after the jump-first lockout")
+		quit(1)
+		return
+	Input.action_release("jump")
 
 	player.posture = 99.0
 	player.receive_enemy_attack(0.0, 10.0)
@@ -218,8 +260,8 @@ func _initialize() -> void:
 		quit(1)
 		return
 	player._update_visuals()
-	if player.current_animation != "stunned_death_forward":
-		push_error("Posture break should start by playing death animation forward as a knockdown")
+	if player.current_animation != "posture_knockdown_forward":
+		push_error("Posture break should start by playing the first three death frames forward")
 		quit(1)
 		return
 	if player.action_timer < 1.19:
@@ -234,8 +276,8 @@ func _initialize() -> void:
 	player._update_action_state(0.61)
 	player._update_visuals()
 	if player.state == player.PlayerState.STUNNED:
-		if player.current_animation != "stunned_death_reverse":
-			push_error("Posture break should reverse death animation for recovery stand-up")
+		if player.current_animation != "posture_knockdown_reverse":
+			push_error("Posture break should reverse the first three death frames for recovery stand-up")
 			quit(1)
 			return
 		if player.sprite.speed_scale >= 1.0:
@@ -324,8 +366,26 @@ func _initialize() -> void:
 	player.health = 1.0
 	player.velocity = Vector2(120.0, -40.0)
 	player.receive_enemy_attack(10.0, 0.0)
+	if player.state != player.PlayerState.STUNNED:
+		push_error("Player should enter life knockdown when one HP bar is depleted while lives remain")
+		quit(1)
+		return
+	if player.lives != player.max_lives - 1 or player.health != player.max_health:
+		push_error("Depleting HP with lives remaining should consume one life and refill HP")
+		quit(1)
+		return
+	if player.current_animation != "life_knockdown_forward":
+		push_error("Life loss should play the full death animation as a heavier knockdown")
+		quit(1)
+		return
+
+	player.reset_combat_state()
+	player.lives = 1
+	player.health = 1.0
+	player.velocity = Vector2(120.0, -40.0)
+	player.receive_enemy_attack(10.0, 0.0)
 	if player.state != player.PlayerState.DEAD:
-		push_error("Player should enter dead state when health reaches zero")
+		push_error("Player should enter dead state when final life reaches zero")
 		quit(1)
 		return
 	if player.current_animation != "death":

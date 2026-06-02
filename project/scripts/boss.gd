@@ -43,10 +43,10 @@ const ATTACK_PROFILES_BOSS := {
 		"perilous": false,
 	},
 	"chop": {
-		"durations": [0.16, 0.24, 0.42, 0.06, 0.045, 0.12, 0.20],
-		"cue_start": 0.70,
-		"hit_start": 0.82,
-		"hit_end": 0.93,
+		"durations": [0.36, 0.42, 0.32, 0.26, 0.18, 0.055, 0.07, 0.10, 0.10, 0.14, 0.18],
+		"cue_start": 1.32,
+		"hit_start": 1.54,
+		"hit_end": 1.665,
 		"damage": 28.0,
 		"posture_damage": 42.0,
 		"attack_type": 0, # NORMAL
@@ -128,6 +128,10 @@ const ANIMATION_FRAME_SPECS_BOSS := {
 		[CHOP_PATH_BOSS, 535, 0, 127, 128],
 		[CHOP_PATH_BOSS, 687, 0, 132, 128],
 		[CHOP_PATH_BOSS, 811, 0, 129, 128],
+		[CHOP_PATH_BOSS, 811, 0, 129, 128],
+		[CHOP_PATH_BOSS, 687, 0, 132, 128],
+		[CHOP_PATH_BOSS, 135, 0, 127, 128],
+		[CHOP_PATH_BOSS, 940, 0, 84, 128],
 	],
 	"thrust": [
 		[THRUST_PATH_BOSS, 0, 0, 128, 128],
@@ -196,12 +200,16 @@ const FRAME_BOTTOM_GAPS_BOSS := {
 	"walk": [6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0],
 	"attack": [8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0],
 	"thrust": [7.0, 9.0, 10.0, 10.0, 10.0, 10.0, 10.0, 7.0],
-	"chop": [5.0, 7.0, 18.0, 22.0, 23.0, 7.0, 7.0],
+	"chop": [5.0, 7.0, 18.0, 22.0, 23.0, 7.0, 7.0, 7.0, 7.0, 7.0, 5.0],
 	"deflect1": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
 	"deflect2": [7.0, 7.0, 7.0, 7.0, 7.0, 7.0, 7.0, 7.0],
 	"hurt": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
 	"death": [10.0, 10.0, 10.0, 10.0, 9.0, 5.0, 5.0, 5.0],
 	"jump": [6.0, 6.0, 7.0, 19.0, 26.0, 21.0, 7.0, 6.0],
+}
+
+const FRAME_VERTICAL_LIFTS_BOSS := {
+	"chop": [0.0, -18.0, -92.0, -128.0, -106.0, -36.0, 0.0, 0.0, -12.0, -6.0, 0.0],
 }
 
 const FRAME_CENTER_X_BOSS := {
@@ -222,6 +230,12 @@ const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 @export var spacing_retreat_speed_boss := 72.0
 @export var gap_close_thrust_min_distance_boss := 130.0
 @export var gap_close_thrust_max_distance_boss := 190.0
+@export var chop_gap_close_min_distance_boss := 118.0
+@export var chop_gap_close_max_distance_boss := 340.0
+@export var chop_lunge_start_boss := 0.78
+@export var chop_lunge_end_boss := 1.54
+@export var chop_lunge_speed_boss := 330.0
+@export var chop_lunge_stop_distance_boss := 52.0
 @export var attack_step_distance_boss := 24.0
 @export var attack_step_time_boss := 0.16
 @export var thrust_lunge_start_boss := 0.76
@@ -248,9 +262,14 @@ const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 @export var deflect_feedback_time_boss := 0.28
 @export var perfect_deflect_feedback_time_boss := 0.50
 @export var forced_counter_deflect_window_boss := 0.95
+@export var debug_fixed_attack_profile_boss := ""
 @export var minimum_health_from_player_attack_boss := 1.0
 @export var attack_recovery_time_boss := 0.58
 @export var attack_pressure_commit_time_boss := 0.45
+@export var chop_parry_hitstop_time_boss := 0.20
+@export var chop_parry_boss_rebound_speed_boss := 520.0
+@export var chop_parry_recoil_time_boss := 0.34
+@export var chop_parry_camera_shake_boss := 42.0
 
 # --- Boss State ---
 var current_animation_boss := "idle"
@@ -274,6 +293,7 @@ var forced_counter_profile_boss := ""
 var consecutive_guard_count_boss := 0
 var forced_counter_timer_boss := 0.0
 var attack_pressure_timer_boss := 0.0
+var is_chop_parried_recovery_boss := false
 
 var attack_pressure_timer: float:
 	get:
@@ -490,7 +510,9 @@ func _physics_process(delta: float) -> void:
 		hitstop_timer_boss = max(0.0, hitstop_timer_boss - delta)
 		if hitstop_timer_boss <= 0.0 and sprite != null:
 			sprite.speed_scale = 0.0 if current_animation_boss == current_attack_animation else 1.0
-		velocity = Vector2.ZERO
+			velocity = stored_velocity_boss
+		else:
+			velocity = Vector2.ZERO
 		align_sprite_to_ground_boss()
 		return
 		
@@ -503,7 +525,7 @@ func _physics_process(delta: float) -> void:
 		velocity.x = 0.0
 	elif hit_recoil_timer > 0.0:
 		pass
-	elif is_attack_winding_up_boss or is_attack_active_boss or is_attack_recovering_boss:
+	elif is_attack_winding_up_boss or is_attack_active_boss or is_attack_recovering_boss or is_chop_parried_recovery_boss:
 		_update_attack_state_boss_internal(delta)
 	else:
 		_update_pressure_and_posture(delta)
@@ -595,7 +617,7 @@ func align_sprite_to_ground_boss() -> void:
 		return
 	sprite.offset = Vector2(
 		_horizontal_anchor_for_frame_boss(current_animation_boss, sprite.frame),
-		_bottom_gap_for_frame_boss(current_animation_boss, sprite.frame)
+		_bottom_gap_for_frame_boss(current_animation_boss, sprite.frame) + _vertical_lift_for_frame_boss(current_animation_boss, sprite.frame)
 	)
 
 func receive_player_attack(damage: float, posture_damage: float) -> Variant:
@@ -671,12 +693,26 @@ func _guard_player_attack_boss_internal() -> void:
 	stats_changed.emit()
 
 func receive_block_feedback(_perfect: bool) -> void:
+	_receive_block_feedback_boss_internal(_perfect)
+
+func receive_block_feedback_from_player(_perfect: bool, _defender: Node) -> void:
+	_receive_block_feedback_boss_internal(_perfect)
+
+func _receive_block_feedback_boss_internal(_perfect: bool) -> void:
 	if defeated_flag or posture_broken:
 		return
 	has_engaged_player_boss = true
 	_mark_combat_pressure()
 	var perfect := _perfect
 	posture = clamp(posture + (normal_attack_parry_posture_damage_boss if perfect else normal_attack_block_posture_damage_boss), 0.0, max_posture)
+	if posture >= max_posture:
+		_break_posture_boss_internal()
+		stats_changed.emit()
+		return
+	if perfect and current_attack_animation == "chop" and (is_attack_winding_up_boss or is_attack_active_boss):
+		_start_chop_parried_recovery_boss_internal()
+		stats_changed.emit()
+		return
 	_interrupt_attack_boss_internal()
 	if perfect:
 		guard_pressure_count_boss = 0
@@ -688,8 +724,6 @@ func receive_block_feedback(_perfect: bool) -> void:
 	feedback_timer_boss = perfect_deflect_feedback_time_boss if perfect else deflect_feedback_time_boss
 	if perfect:
 		_begin_local_hitstop(parry_clash_hitstop_time_boss)
-	if posture >= max_posture:
-		_break_posture_boss_internal()
 	stats_changed.emit()
 
 func reset_combat_state() -> void:
@@ -705,6 +739,7 @@ func reset_combat_state() -> void:
 	is_attack_winding_up_boss = false
 	is_attack_active_boss = false
 	is_attack_recovering_boss = false
+	is_chop_parried_recovery_boss = false
 	attack_has_connected = false
 	attack_timer_boss = 0.0
 	attack_elapsed = 0.0
@@ -784,11 +819,15 @@ func is_current_attack_perilous() -> bool:
 	return bool(profile.get("perilous", false))
 
 func _choose_attack_profile_boss() -> String:
+	if not debug_fixed_attack_profile_boss.is_empty() and ATTACK_PROFILES_BOSS.has(debug_fixed_attack_profile_boss):
+		return debug_fixed_attack_profile_boss
 	if not forced_counter_profile_boss.is_empty():
 		var profile := forced_counter_profile_boss
 		forced_counter_profile_boss = ""
 		forced_counter_timer_boss = 0.0
 		return profile
+	if _should_use_chop_gap_close_boss_internal():
+		return "chop"
 	if guard_pressure_count_boss >= guard_pressure_chop_threshold_boss:
 		guard_pressure_count_boss = 0
 		return "chop"
@@ -845,6 +884,15 @@ func _bottom_gap_for_frame_boss(animation: String, frame: int) -> float:
 		return 0.0
 	var index: int = clamp(frame, 0, gaps.size() - 1)
 	return float(gaps[index])
+
+func _vertical_lift_for_frame_boss(animation: String, frame: int) -> float:
+	if not FRAME_VERTICAL_LIFTS_BOSS.has(animation):
+		return 0.0
+	var lifts: Array = FRAME_VERTICAL_LIFTS_BOSS[animation]
+	if lifts.is_empty():
+		return 0.0
+	var index: int = clamp(frame, 0, lifts.size() - 1)
+	return float(lifts[index])
 
 func _horizontal_anchor_for_frame_boss(animation: String, frame: int) -> float:
 	if not FRAME_CENTER_X_BOSS.has(animation):
@@ -939,8 +987,31 @@ func _should_start_attack_boss_internal() -> bool:
 	if absf(offset.x) > 8.0:
 		facing = sign(offset.x)
 	var distance := absf(offset.x)
+	if _can_start_chop_gap_close_from_distance_boss_internal(distance):
+		return true
 	var max_start_distance := 112.0 if not forced_counter_profile_boss.is_empty() else attack_start_distance_boss
 	return distance >= close_spacing_distance_boss and distance <= max_start_distance
+
+func _can_start_chop_gap_close_from_distance_boss_internal(distance: float) -> bool:
+	if distance < chop_gap_close_min_distance_boss or distance > chop_gap_close_max_distance_boss:
+		return false
+	if debug_fixed_attack_profile_boss == "chop" or forced_counter_profile_boss == "chop":
+		return true
+	if guard_pressure_count_boss >= guard_pressure_chop_threshold_boss:
+		return true
+	return _should_use_chop_gap_close_boss_internal()
+
+func _should_use_chop_gap_close_boss_internal() -> bool:
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player == null:
+		return false
+	var offset: Vector2 = player.global_position - global_position
+	if abs(offset.y) > 56.0:
+		return false
+	var distance := absf(offset.x)
+	if distance < chop_gap_close_min_distance_boss or distance > chop_gap_close_max_distance_boss:
+		return false
+	return true
 
 func _update_attack_pressure_boss_internal(delta: float) -> bool:
 	if attack_pressure_timer_boss > 0.0:
@@ -975,6 +1046,19 @@ func _should_start_gap_close_thrust_boss_internal() -> bool:
 	var distance := absf(offset.x)
 	return distance >= gap_close_thrust_min_distance_boss and distance <= gap_close_thrust_max_distance_boss
 
+func _apply_chop_lunge_boss_internal() -> void:
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player == null:
+		velocity.x = facing * chop_lunge_speed_boss
+		return
+	var offset_x: float = player.global_position.x - global_position.x
+	if absf(offset_x) > 8.0:
+		facing = sign(offset_x)
+	if absf(offset_x) > chop_lunge_stop_distance_boss:
+		velocity.x = facing * chop_lunge_speed_boss
+	else:
+		velocity.x = 0.0
+
 func _start_normal_attack_boss_internal(profile_name: String = "", combo_followup: bool = false) -> void:
 	var selected_profile := _choose_attack_profile_boss() if profile_name.is_empty() else profile_name
 	if profile_name == forced_counter_profile_boss:
@@ -988,6 +1072,7 @@ func _start_normal_attack_boss_internal(profile_name: String = "", combo_followu
 	is_attack_winding_up_boss = true
 	is_attack_active_boss = false
 	is_attack_recovering_boss = false
+	is_chop_parried_recovery_boss = false
 	attack_has_connected = false
 	attack_elapsed = 0.0
 	attack_timer_boss = attack_animation_total_time_boss
@@ -1003,6 +1088,20 @@ func _start_normal_attack_boss_internal(profile_name: String = "", combo_followu
 
 func _update_attack_state_boss_internal(delta: float) -> void:
 	velocity.x = 0.0
+	if is_chop_parried_recovery_boss:
+		attack_elapsed += delta
+		attack_timer_boss = max(0.0, attack_animation_total_time_boss - attack_elapsed)
+		if current_animation_boss != current_attack_animation:
+			play_boss_animation(current_attack_animation)
+		_sync_attack_animation_frame_boss_internal()
+		_update_attack_visual_boss_internal(false, false)
+		if attack_elapsed >= attack_animation_total_time_boss:
+			is_chop_parried_recovery_boss = false
+			attack_chain_count_boss = 0
+			attack_cooldown = perfect_parry_cooldown_boss
+			play_boss_animation("walk")
+		return
+
 	if is_attack_winding_up_boss and attack_step_timer_boss > 0.0:
 		attack_step_timer_boss = max(0.0, attack_step_timer_boss - delta)
 		velocity.x = facing * (attack_step_distance_boss / max(attack_step_time_boss, 0.001))
@@ -1016,6 +1115,8 @@ func _update_attack_state_boss_internal(delta: float) -> void:
 		is_attack_active_boss = attack_elapsed >= attack_hit_time_boss and attack_elapsed <= attack_hit_window_end_boss
 		if current_attack_animation == "thrust" and attack_elapsed >= thrust_lunge_start_boss and attack_elapsed <= thrust_lunge_end_boss:
 			velocity.x = facing * thrust_lunge_speed_boss
+		elif current_attack_animation == "chop" and attack_elapsed >= chop_lunge_start_boss and attack_elapsed <= chop_lunge_end_boss:
+			_apply_chop_lunge_boss_internal()
 		_update_attack_visual_boss_internal(true, is_attack_active_boss)
 		if is_attack_active_boss:
 			_connect_normal_attack_boss_internal()
@@ -1150,6 +1251,7 @@ func _interrupt_attack_boss_internal() -> void:
 	is_attack_winding_up_boss = false
 	is_attack_active_boss = false
 	is_attack_recovering_boss = false
+	is_chop_parried_recovery_boss = false
 	attack_has_connected = false
 	attack_chain_count_boss = 0
 	pending_combo_followup_boss = false
@@ -1180,6 +1282,40 @@ func _is_forced_counter_protected_boss() -> bool:
 
 func _can_chain_deflect_during_feedback_boss() -> bool:
 	return not forced_counter_profile_boss.is_empty() and not is_attack_winding_up_boss and not is_attack_active_boss
+
+func _start_chop_parried_recovery_boss_internal() -> void:
+	guard_pressure_count_boss = 0
+	is_attack_winding_up_boss = false
+	is_attack_active_boss = false
+	is_attack_recovering_boss = false
+	is_chop_parried_recovery_boss = true
+	attack_has_connected = true
+	pending_combo_followup_boss = false
+	attack_chain_count_boss = 0
+	_apply_attack_profile_boss_internal("chop")
+	attack_elapsed = _chop_recovery_start_time_boss_internal()
+	attack_timer_boss = max(0.0, attack_animation_total_time_boss - attack_elapsed)
+	attack_step_timer_boss = 0.0
+	play_boss_animation("chop")
+	_sync_attack_animation_frame_boss_internal()
+	_update_attack_visual_boss_internal(false, false)
+	_begin_local_hitstop(chop_parry_hitstop_time_boss)
+	stored_velocity_boss = Vector2(-facing * chop_parry_boss_rebound_speed_boss, velocity.y)
+	hit_recoil_timer = max(hit_recoil_timer, chop_parry_hitstop_time_boss + chop_parry_recoil_time_boss)
+	hit_spark_timer = max(hit_spark_timer, hit_spark_time_boss)
+	hit_flash_timer = max(hit_flash_timer, hit_flash_time_boss)
+	if hit_spark != null:
+		hit_spark.position.x = 18.0 * facing
+		hit_spark.visible = true
+	_shake_camera_boss_internal(chop_parry_camera_shake_boss, chop_parry_hitstop_time_boss)
+
+func _chop_recovery_start_time_boss_internal() -> float:
+	var profile: Dictionary = ATTACK_PROFILES_BOSS["chop"]
+	var durations: Array = profile["durations"]
+	var total := 0.0
+	for index in range(min(7, durations.size())):
+		total += float(durations[index])
+	return min(total + 0.001, attack_animation_total_time_boss)
 
 func _begin_local_hitstop(duration: float) -> void:
 	hitstop_timer_boss = max(hitstop_timer_boss, duration)
@@ -1223,7 +1359,7 @@ func _update_visuals_boss_internal() -> void:
 		next_animation = "death"
 	elif feedback_timer_boss > 0.0:
 		next_animation = "hurt"
-	elif is_attack_winding_up_boss or is_attack_active_boss or is_attack_recovering_boss:
+	elif is_attack_winding_up_boss or is_attack_active_boss or is_attack_recovering_boss or is_chop_parried_recovery_boss:
 		next_animation = current_attack_animation
 	elif abs(velocity.x) > 1.0:
 		next_animation = "walk"

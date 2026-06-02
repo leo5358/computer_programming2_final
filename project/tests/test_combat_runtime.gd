@@ -64,6 +64,7 @@ func _initialize() -> void:
 		return
 
 	player.health = 1.0
+	player.lives = 1
 	player.receive_enemy_attack(10.0, 0.0)
 	if player.state != player.PlayerState.DEAD:
 		push_error("Test setup should kill player before input reset check")

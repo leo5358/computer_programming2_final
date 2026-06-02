@@ -12,6 +12,8 @@ const PLAYER_SHEET_PATHS := [
 	"res://assets/sprites/player/player_sheet.png",
 ]
 const PLAYER_STRIP_CELL_SIZE := 96
+const DEFAULT_SPRITE_SCALE := Vector2.ONE
+const WALK_SPRITE_SCALE := Vector2(1.1, 1.1)
 const PLAYER_STRIP_PATHS := {
 	"idle": "res://assets/sprites/player/idle.png",
 	"walk": "res://assets/sprites/player/walk.png",
@@ -35,6 +37,7 @@ const DEFAULT_ITEM_COUNTS := {
 	"capsule": 10,
 	"ash_balls": 10,
 }
+const ITEM_ORDER: Array[String] = ["gourd", "kunai", "pill", "capsule", "ash_balls"]
 const EAT_ITEM_IDS := {
 	"gourd": true,
 	"pill": true,
@@ -50,6 +53,16 @@ const PLAYER_STRIP_FRAME_REGIONS := {
 		[487, 0, 109, 96],
 		[596, 0, 96, 96],
 		[692, 0, 96, 96],
+	],
+	"hurt": [
+		[0, 0, 106, 96],
+		[106, 0, 101, 96],
+		[207, 0, 96, 96],
+		[303, 0, 96, 96],
+		[399, 0, 92, 96],
+		[491, 0, 96, 96],
+		[587, 0, 91, 96],
+		[678, 0, 90, 96],
 	],
 }
 const HIT_IMPACT_SHEET_PATH := "res://assets/sprites/vfx/hit_impact_sheet.png"
@@ -105,8 +118,15 @@ enum PlayerState {
 @export var wall_climb_speed := 130.0
 @export var wall_slide_speed := 80.0
 @export var wall_stick_speed := 35.0
+@export var auto_step_enabled := true
+@export var auto_step_max_height := 32.0
+@export var auto_step_probe_distance := 14.0
+@export var auto_step_increment := 4.0
+@export var wall_climb_requires_jump := true
+@export var jump_to_ledge_climb_lockout := 0.28
 @export var max_health := 100.0
 @export var max_posture := 100.0
+@export var max_lives := 3
 @export var world_death_bounds_enabled := true
 @export var world_death_bounds := Rect2(-1024.0, -2048.0, 22000.0, 4096.0)
 @export var base_attack_damage := 16.0
@@ -145,6 +165,8 @@ enum PlayerState {
 @export var hurt_time := 1.0
 @export var stunned_time := 1.2
 @export var posture_break_animation_speed := 0.72
+@export var life_loss_stunned_time := 1.65
+@export var life_loss_animation_speed := 0.55
 @export var impact_flash_time := 0.20
 @export var attack_hitstop_time := 0.078
 @export var chop_hitstop_time := 0.12
@@ -158,10 +180,15 @@ enum PlayerState {
 @export var hurt_knockback := 480.0
 @export var hurt_slide_friction := 1100.0
 @export var parry_rebound := 120.0
+@export var heavy_parry_rebound := 520.0
+@export var heavy_parry_hitstop_time := 0.20
+@export var heavy_parry_recoil_time := 0.26
+@export var heavy_parry_camera_shake := 42.0
 
 var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
 var health := max_health
 var posture := 0.0
+var lives := max_lives
 var heartbeat: float = CombatMathScript.MIN_HEARTBEAT
 var state := PlayerState.IDLE
 var previous_state := PlayerState.IDLE
@@ -181,6 +208,7 @@ var action_timer := 0.0
 var dash_timer := 0.0
 var dash_direction := 1.0
 var wall_climb_direction := 0.0
+var wall_climb_lockout_timer := 0.0
 var attack_elapsed := 0.0
 var attack_buffer_timer := 0.0
 var attack_buffer_queued := false
@@ -199,11 +227,16 @@ var perfect_dodge_timer := 0.0
 var hit_impact_vfx_timer := 0.0
 var hitstop_timer := 0.0
 var stored_velocity := Vector2.ZERO
+var heavy_parry_recoil_timer := 0.0
+var heavy_parry_recoil_velocity := Vector2.ZERO
+var stunned_animation: StringName = &"posture_knockdown"
+var stunned_animation_speed := 0.72
 var combat_runtime: Node
 var spawn_position := Vector2.ZERO
 var sprite_sheet_layout: Dictionary = {}
 var item_counts: Dictionary = DEFAULT_ITEM_COUNTS.duplicate()
 var item_hotkeys_down: Dictionary = {}
+var selected_item_index := 0
 var ai_move_axis := 0.0
 var ai_attack_requested := false
 var ai_parry_requested := false
@@ -258,11 +291,24 @@ func _physics_process(delta: float) -> void:
 		_update_visuals()
 		return
 
+	if heavy_parry_recoil_timer > 0.0:
+		heavy_parry_recoil_timer = max(0.0, heavy_parry_recoil_timer - delta)
+		velocity.x = heavy_parry_recoil_velocity.x
+		if not is_on_floor():
+			velocity.y += gravity * delta
+		else:
+			velocity.y = 0.0
+		move_and_slide()
+		_update_visuals()
+		stats_changed.emit()
+		return
+
 	if not is_on_floor():
 		velocity.y += gravity * delta
 		coyote_timer -= delta
 	else:
 		coyote_timer = coyote_time
+	wall_climb_lockout_timer = max(0.0, wall_climb_lockout_timer - delta)
 
 	_update_inputs()
 	_update_movement(delta)
@@ -302,6 +348,7 @@ func _update_inputs() -> void:
 		_register_combat_input(CombatServerScript.InputType.JUMP)
 		velocity.y = jump_velocity
 		coyote_timer = 0.0
+		wall_climb_lockout_timer = jump_to_ledge_climb_lockout
 		_set_state(PlayerState.JUMP)
 	_clear_ai_action_intents()
 
@@ -326,7 +373,10 @@ func _update_movement(delta: float) -> void:
 	var direction := _read_move_axis()
 	is_running = direction != 0.0 and Input.is_key_pressed(KEY_SHIFT)
 
-	if _can_wall_interact() and _is_pressing_into_wall(direction):
+	if direction != 0.0:
+		_try_auto_step(direction)
+
+	if _should_use_wall_climb(direction):
 		_apply_wall_climb(direction)
 		attack_area.position.x = 34.0 * facing
 		return
@@ -391,6 +441,47 @@ func _combat_target_is_defeated(target: Node) -> bool:
 
 func _can_wall_interact() -> bool:
 	return is_on_wall() and not is_on_floor() and _can_jump()
+
+func _should_use_wall_climb(direction: float) -> bool:
+	return (
+		_can_wall_interact()
+		and _is_pressing_into_wall(direction)
+		and _has_wall_climb_input()
+		and not _should_prefer_auto_step_over_climb()
+		and not _should_defer_wall_climb_for_jump()
+	)
+
+func _has_wall_climb_input() -> bool:
+	return not wall_climb_requires_jump or Input.is_action_pressed("jump") or state == PlayerState.WALL_CLIMB
+
+func _should_defer_wall_climb_for_jump() -> bool:
+	return wall_climb_lockout_timer > 0.0 and state != PlayerState.WALL_CLIMB
+
+func _should_prefer_auto_step_over_climb() -> bool:
+	return auto_step_enabled and (is_on_floor() or coyote_timer > 0.0)
+
+func _try_auto_step(direction: float) -> bool:
+	if not _can_attempt_auto_step(direction):
+		return false
+	var step_direction: float = sign(direction)
+	var horizontal_motion := Vector2(step_direction * auto_step_probe_distance, 0.0)
+	if not test_move(global_transform, horizontal_motion):
+		return false
+
+	var step_height: float = auto_step_increment
+	while step_height <= auto_step_max_height:
+		var probe_transform: Transform2D = global_transform
+		probe_transform.origin += Vector2(0.0, -step_height)
+		if not test_move(probe_transform, horizontal_motion):
+			global_position.y -= step_height
+			velocity.y = min(velocity.y, 0.0)
+			coyote_timer = coyote_time
+			return true
+		step_height += auto_step_increment
+	return false
+
+func _can_attempt_auto_step(direction: float) -> bool:
+	return auto_step_enabled and direction != 0.0 and _should_prefer_auto_step_over_climb() and _can_jump()
 
 func _is_pressing_into_wall(direction: float) -> bool:
 	var wall_direction := _wall_direction()
@@ -500,19 +591,43 @@ func _start_attack() -> void:
 	attack_has_cut_projectile = false
 
 func _try_use_item_hotkey() -> bool:
-	if _item_hotkey_just_pressed(KEY_3, "gourd"):
-		return use_item("gourd")
-	if _item_hotkey_just_pressed(KEY_4, "pill"):
-		return use_item("pill")
-	if _item_hotkey_just_pressed(KEY_5, "capsule"):
-		return use_item("capsule")
+	if _item_select_key_just_pressed(KEY_1, 0):
+		return true
+	if _item_select_key_just_pressed(KEY_2, 1):
+		return true
+	if _item_select_key_just_pressed(KEY_3, 2):
+		return true
+	if _item_select_key_just_pressed(KEY_4, 3):
+		return true
+	if _item_select_key_just_pressed(KEY_5, 4):
+		return true
+	if Input.is_key_pressed(KEY_F) and _is_map_interaction_prompt_visible():
+		item_hotkeys_down["use_selected"] = true
+		return false
+	if _item_use_key_just_pressed():
+		return use_selected_item()
 	return false
 
-func _item_hotkey_just_pressed(key: Key, item_id: String) -> bool:
+func _item_select_key_just_pressed(key: Key, index: int) -> bool:
 	var pressed := Input.is_key_pressed(key)
-	var was_pressed := bool(item_hotkeys_down.get(item_id, false))
-	item_hotkeys_down[item_id] = pressed
+	var key_name := "select_%d" % index
+	var was_pressed := bool(item_hotkeys_down.get(key_name, false))
+	item_hotkeys_down[key_name] = pressed
+	if pressed and not was_pressed:
+		selected_item_index = clampi(index, 0, DEFAULT_ITEM_COUNTS.size() - 1)
+		stats_changed.emit()
+		return true
+	return false
+
+func _item_use_key_just_pressed() -> bool:
+	var pressed := Input.is_key_pressed(KEY_F)
+	var was_pressed := bool(item_hotkeys_down.get("use_selected", false))
+	item_hotkeys_down["use_selected"] = pressed
 	return pressed and not was_pressed
+
+func _is_map_interaction_prompt_visible() -> bool:
+	var prompt := get_tree().root.find_child("PromptLabel", true, false) as CanvasItem
+	return prompt != null and prompt.visible
 
 func _read_move_axis() -> float:
 	var keyboard_axis := Input.get_axis("move_left", "move_right")
@@ -564,6 +679,13 @@ func get_item_count(item_id: String) -> int:
 
 func get_item_counts() -> Dictionary:
 	return item_counts.duplicate()
+
+func get_selected_item_id() -> String:
+	var index := clampi(selected_item_index, 0, ITEM_ORDER.size() - 1)
+	return ITEM_ORDER[index]
+
+func use_selected_item() -> bool:
+	return use_item(get_selected_item_id())
 
 func use_item(item_id: String) -> bool:
 	if not EAT_ITEM_IDS.has(item_id):
@@ -787,11 +909,18 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 		var perfect := perfect_parry
 		posture = math.add_posture(posture, 5.0 if perfect else posture_damage * 2.0)
 		heartbeat = math.add_heartbeat(heartbeat, 4.0 if perfect else 5.0)
-		if attacker != null and attacker.has_method("receive_block_feedback"):
+		var heavy_chop_parry := perfect and _is_attacker_chop_attack(attacker)
+		if attacker != null and attacker.has_method("receive_block_feedback_from_player"):
+			attacker.receive_block_feedback_from_player(perfect, self)
+		elif attacker != null and attacker.has_method("receive_block_feedback"):
 			attacker.receive_block_feedback(perfect)
 		if perfect:
 			_play_sfx(parry_sfx)
-			_trigger_parry_feedback()
+			if heavy_chop_parry:
+				_trigger_parry_feedback(_knockback_direction_from_attacker(attacker), heavy_parry_rebound, heavy_parry_hitstop_time, heavy_parry_camera_shake, 0.16)
+				_trigger_parry_impact_vfx(attacker)
+			else:
+				_trigger_parry_feedback()
 		else:
 			_play_sfx(block_sfx)
 			_trigger_block_feedback()
@@ -800,9 +929,8 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 		posture = math.add_posture(posture, posture_damage * 1.35)
 		heartbeat = math.add_heartbeat(heartbeat, 20.0)
 		if health <= 0.0:
-			_enter_dead()
+			_handle_health_depleted()
 			stats_changed.emit()
-			died.emit()
 			return
 		else:
 			_play_sfx(hurt_sfx)
@@ -818,8 +946,7 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 
 	stats_changed.emit()
 	if health <= 0.0:
-		_enter_dead()
-		died.emit()
+		_handle_health_depleted()
 
 func _check_world_death_bounds() -> void:
 	if not world_death_bounds_enabled:
@@ -830,6 +957,16 @@ func _check_world_death_bounds() -> void:
 		return
 	_enter_dead()
 	stats_changed.emit()
+	died.emit()
+
+func _handle_health_depleted() -> void:
+	if lives > 1:
+		lives -= 1
+		health = max_health
+		posture = 0.0
+		_enter_stunned(&"life_knockdown", life_loss_stunned_time, life_loss_animation_speed, false)
+		return
+	_enter_dead()
 	died.emit()
 
 func begin_local_hitstop(duration: float, resume_velocity: Vector2 = Vector2.INF) -> void:
@@ -847,10 +984,13 @@ func _set_state(next_state: int) -> void:
 	previous_state = state
 	state = next_state
 
-func _enter_stunned() -> void:
+func _enter_stunned(animation_name: StringName = &"posture_knockdown", duration := -1.0, animation_speed := -1.0, keep_posture_at_break := true) -> void:
 	_set_state(PlayerState.STUNNED)
-	posture = 100.0
-	action_timer = stunned_time
+	stunned_animation = animation_name
+	stunned_animation_speed = posture_break_animation_speed if animation_speed < 0.0 else animation_speed
+	if keep_posture_at_break:
+		posture = max_posture
+	action_timer = stunned_time if duration < 0.0 else duration
 	is_blocking = false
 	is_attacking = false
 	is_parrying = false
@@ -859,11 +999,15 @@ func _enter_stunned() -> void:
 	is_perfect_dodging = false
 	is_invulnerable = true
 	wall_climb_direction = 0.0
+	wall_climb_lockout_timer = 0.0
 	hitstop_timer = 0.0
 	stored_velocity = Vector2.ZERO
+	heavy_parry_recoil_timer = 0.0
+	heavy_parry_recoil_velocity = Vector2.ZERO
 	velocity = Vector2.ZERO
 	sprite.speed_scale = 1.0
 	current_animation = ""
+	_update_visuals()
 
 func _can_start_action() -> bool:
 	return state in [PlayerState.IDLE, PlayerState.MOVE, PlayerState.JUMP, PlayerState.WALL_CLIMB, PlayerState.BLOCK]
@@ -914,6 +1058,8 @@ func _setup_sprite_frames() -> void:
 		_add_strip_animation(frames, "mudra", 10.0, false)
 		_add_strip_animation(frames, "hurt", 8.0, false)
 		_add_strip_animation(frames, "death", 7.0, false)
+		_add_derived_animation(frames, &"posture_knockdown", &"death", 3, 8.0, false)
+		_add_derived_animation(frames, &"life_knockdown", &"death", -1, 7.0, false)
 	else:
 		player_sheet = _load_first_available_player_sheet()
 		if player_sheet == null:
@@ -933,8 +1079,11 @@ func _setup_sprite_frames() -> void:
 		_add_layout_animation(frames, "mudra", "idle")
 		_add_layout_animation(frames, "hurt")
 		_add_layout_animation(frames, "death")
+		_add_derived_animation(frames, &"posture_knockdown", &"death", 3, 8.0, false)
+		_add_derived_animation(frames, &"life_knockdown", &"death", -1, 7.0, false)
 	sprite.sprite_frames = frames
 	sprite.position = Vector2(0, -float(sprite_sheet_layout["cell_size"]) * 0.5)
+	_apply_animation_sprite_scale("idle")
 	sprite.play("idle")
 
 func _setup_hit_impact_vfx() -> void:
@@ -1096,6 +1245,17 @@ func _add_sheet_animation(frames: SpriteFrames, animation: StringName, row: int,
 		texture.region = Rect2(column * cell_size, row * cell_size, cell_size, cell_size)
 		frames.add_frame(animation, texture)
 
+func _add_derived_animation(frames: SpriteFrames, animation: StringName, source_animation: StringName, frame_limit: int, fps: float, loop: bool) -> void:
+	if not frames.has_animation(source_animation):
+		return
+	frames.add_animation(animation)
+	frames.set_animation_speed(animation, fps)
+	frames.set_animation_loop(animation, loop)
+	var source_count: int = frames.get_frame_count(source_animation)
+	var copy_count: int = source_count if frame_limit < 0 else min(frame_limit, source_count)
+	for index in copy_count:
+		frames.add_frame(animation, frames.get_frame_texture(source_animation, index))
+
 func _play_state_animation() -> void:
 	var next_animation := "idle"
 	match state:
@@ -1127,17 +1287,24 @@ func _play_state_animation() -> void:
 
 	if current_animation != next_animation:
 		current_animation = next_animation
+		_apply_animation_sprite_scale(next_animation)
 		sprite.play(next_animation)
 
 func _force_play_animation(animation: StringName) -> void:
 	current_animation = animation
 	if sprite == null:
 		return
+	_apply_animation_sprite_scale(String(animation))
 	sprite.speed_scale = 1.0
 	sprite.stop()
 	sprite.frame = 0
 	sprite.frame_progress = 0.0
 	sprite.play(animation)
+
+func _apply_animation_sprite_scale(animation: String) -> void:
+	if sprite == null:
+		return
+	sprite.scale = WALK_SPRITE_SCALE if animation == "walk" else DEFAULT_SPRITE_SCALE
 
 func _animation_duration(animation: StringName) -> float:
 	if sprite == null or sprite.sprite_frames == null or not sprite.sprite_frames.has_animation(animation):
@@ -1149,25 +1316,31 @@ func _animation_duration(animation: StringName) -> float:
 	return max(0.1, float(frame_count) / fps)
 
 func _play_stunned_animation() -> void:
-	var recovery_started := action_timer <= stunned_time * 0.5
-	var next_animation := "stunned_death_reverse" if recovery_started else "stunned_death_forward"
+	var total_time := life_loss_stunned_time if stunned_animation == &"life_knockdown" else stunned_time
+	var recovery_started := action_timer <= total_time * 0.5
+	var next_animation := "%s_reverse" % String(stunned_animation) if recovery_started else "%s_forward" % String(stunned_animation)
 	if current_animation == next_animation:
 		return
 	current_animation = next_animation
-	sprite.speed_scale = posture_break_animation_speed
+	sprite.speed_scale = stunned_animation_speed
 	if recovery_started:
-		sprite.play_backwards("death")
+		sprite.play_backwards(stunned_animation)
 	else:
-		sprite.play("death")
+		sprite.play(stunned_animation)
 
-func _trigger_parry_feedback() -> void:
+func _trigger_parry_feedback(knockback_direction := INF, rebound := -1.0, hitstop_duration := -1.0, shake_amount := 18.0, shake_duration := 0.11) -> void:
 	parry_flash_timer = parry_flash_time
 	action_timer = min(action_timer, parry_success_recovery_time)
-	hitstop_timer = parry_hitstop_time
-	stored_velocity = Vector2(-facing * parry_rebound, velocity.y)
+	hitstop_timer = parry_hitstop_time if hitstop_duration < 0.0 else hitstop_duration
+	var direction := -facing if knockback_direction == INF else float(knockback_direction)
+	var final_rebound := parry_rebound if rebound < 0.0 else rebound
+	stored_velocity = Vector2(direction * final_rebound, velocity.y)
+	if rebound >= heavy_parry_rebound:
+		heavy_parry_recoil_timer = heavy_parry_recoil_time
+		heavy_parry_recoil_velocity = stored_velocity
 	velocity = Vector2.ZERO
 	sprite.speed_scale = 0.0
-	_shake_camera(18.0, 0.11)
+	_shake_camera(shake_amount, shake_duration)
 
 func _trigger_block_feedback() -> void:
 	block_flash_timer = impact_flash_time
@@ -1186,6 +1359,11 @@ func _knockback_direction_from_attacker(attacker: Node) -> float:
 		if direction != 0.0:
 			return direction
 	return -facing
+
+func _is_attacker_chop_attack(attacker: Node) -> bool:
+	if attacker == null:
+		return false
+	return String(attacker.get("current_attack_animation")) == "chop"
 
 func _receive_attack_deflected() -> void:
 	is_attacking = false
@@ -1225,6 +1403,20 @@ func _trigger_hit_impact_vfx(is_chop: bool) -> void:
 	if hit_impact_vfx.sprite_frames != null:
 		hit_impact_vfx.play("chop" if is_chop else "hit")
 
+func _trigger_parry_impact_vfx(attacker: Node) -> void:
+	if hit_impact_vfx == null:
+		return
+	hit_impact_vfx_timer = max(hit_impact_vfx_time, heavy_parry_hitstop_time)
+	hit_impact_vfx.visible = true
+	if attacker is Node2D:
+		var attacker_position := (attacker as Node2D).global_position
+		hit_impact_vfx.global_position = global_position.lerp(attacker_position, 0.5) + Vector2(0.0, -58.0)
+	else:
+		hit_impact_vfx.position = attack_area.position + Vector2(20.0 * facing, -18.0)
+	hit_impact_vfx.flip_h = facing < 0.0
+	if hit_impact_vfx.sprite_frames != null:
+		hit_impact_vfx.play("chop")
+
 func _shake_camera(amount: float, duration: float) -> void:
 	var camera := get_tree().get_first_node_in_group("feedback_camera")
 	if camera != null and camera.has_method("shake"):
@@ -1232,6 +1424,7 @@ func _shake_camera(amount: float, duration: float) -> void:
 
 func _enter_dead() -> void:
 	health = 0.0
+	lives = 0
 	posture = min(posture, max_posture)
 	is_blocking = false
 	is_attacking = false
@@ -1244,6 +1437,8 @@ func _enter_dead() -> void:
 	attack_has_hit = false
 	hitstop_timer = 0.0
 	velocity = Vector2.ZERO
+	heavy_parry_recoil_timer = 0.0
+	heavy_parry_recoil_velocity = Vector2.ZERO
 	sprite.speed_scale = 1.0
 	var bgm_player = get_tree().get_first_node_in_group("bgm_player")
 	if bgm_player != null and bgm_player.has_method("fade_out_bgm"):
@@ -1251,6 +1446,13 @@ func _enter_dead() -> void:
 	_fade_in_sfx(death_sfx, 1.0)
 	_set_state(PlayerState.DEAD)
 	_update_visuals()
+
+func force_death_for_debug() -> void:
+	if state == PlayerState.DEAD:
+		return
+	_enter_dead()
+	stats_changed.emit()
+	died.emit()
 
 func _fade_in_sfx(player: AudioStreamPlayer2D, duration: float) -> void:
 	if player == null:
@@ -1313,6 +1515,7 @@ func _register_combat_input(input_type: int) -> void:
 
 func reset_combat_state() -> void:
 	health = max_health
+	lives = max_lives
 	posture = 0.0
 	heartbeat = CombatMathScript.MIN_HEARTBEAT
 	state = PlayerState.IDLE
@@ -1330,6 +1533,7 @@ func reset_combat_state() -> void:
 	dash_timer = 0.0
 	dash_direction = 1.0
 	wall_climb_direction = 0.0
+	wall_climb_lockout_timer = 0.0
 	attack_elapsed = 0.0
 	attack_buffer_timer = 0.0
 	attack_buffer_queued = false
@@ -1340,6 +1544,7 @@ func reset_combat_state() -> void:
 	current_attack_animation = "attack_a"
 	hurt_animation = "hurt"
 	item_counts = DEFAULT_ITEM_COUNTS.duplicate()
+	selected_item_index = 0
 	item_hotkeys_down.clear()
 	clear_ai_intent()
 	attack_lunge_timer = 0.0
@@ -1350,6 +1555,10 @@ func reset_combat_state() -> void:
 	hit_impact_vfx_timer = 0.0
 	hitstop_timer = 0.0
 	stored_velocity = Vector2.ZERO
+	heavy_parry_recoil_timer = 0.0
+	heavy_parry_recoil_velocity = Vector2.ZERO
+	stunned_animation = &"posture_knockdown"
+	stunned_animation_speed = posture_break_animation_speed
 	velocity = Vector2.ZERO
 	global_position = spawn_position
 	sprite.speed_scale = 1.0

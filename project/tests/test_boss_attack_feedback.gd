@@ -27,7 +27,7 @@ func _initialize() -> void:
 	boss.spawn_position = boss.global_position
 	player.global_position = boss.global_position + Vector2(-92.0, 0.0)
 	boss.attack_cooldown = 0.0
-	for frame in 8:
+	for frame in 40:
 		await physics_frame
 		if boss.is_attack_winding_up:
 			break
@@ -106,7 +106,7 @@ func _initialize() -> void:
 	boss.spawn_position = boss.global_position
 	player.global_position = boss.global_position + Vector2(-92.0, 0.0)
 	boss.attack_cooldown = 0.0
-	for frame in 8:
+	for frame in 40:
 		await physics_frame
 		if boss.is_attack_winding_up:
 			break

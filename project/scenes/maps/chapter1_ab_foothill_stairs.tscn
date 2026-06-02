@@ -341,16 +341,13 @@ size = Vector2(97.68749, 281.27344)
 [node name="Checkpoints" type="Node2D" parent="." unique_id=728204940]
 
 [node name="CheckpointFront" parent="Checkpoints" unique_id=1691290857 instance=ExtResource("checkpoint_scene")]
-z_index = 80
 position = Vector2(1200, 581)
 
 [node name="CheckpointMiddle" parent="Checkpoints" unique_id=1036156734 instance=ExtResource("checkpoint_scene")]
-z_index = 80
-position = Vector2(8563, -84)
+position = Vector2(8563, 96)
 
 [node name="CheckpointRear" parent="Checkpoints" unique_id=1957772836 instance=ExtResource("checkpoint_scene")]
-z_index = 80
-position = Vector2(13751, -101)
+position = Vector2(13751, 83)
 
 [node name="BackgroundFar" type="Node2D" parent="." unique_id=257268548]
 

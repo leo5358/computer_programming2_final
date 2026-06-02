@@ -35,19 +35,89 @@ func _initialize() -> void:
 		push_error("Forced chop profile should play chop animation")
 		quit(1)
 		return
-	if not is_equal_approx(boss.attack_animation_total_time, 1.245):
-		push_error("Chop profile should use its custom 1245ms duration timeline")
+	if not is_equal_approx(boss.attack_animation_total_time, 2.185):
+		push_error("Chop profile should use its custom 2185ms duration timeline")
 		quit(1)
 		return
-	boss.attack_elapsed = 0.819
+	boss.attack_elapsed = 1.539
 	boss._sync_attack_animation_frame()
-	if boss.sprite.frame != 2:
-		push_error("Chop should still be in the heavy charge frame before 820ms")
+	if boss.sprite.frame != 4:
+		push_error("Chop should still be airborne before the landing slash")
 		quit(1)
 		return
-	boss.attack_elapsed = 0.820
+	boss.attack_elapsed = 1.320
 	if not boss.is_attack_parry_window_open():
-		push_error("Chop should have a cue/parry window at its hit timing")
+		push_error("Chop should open the cue/parry window before landing")
+		quit(1)
+		return
+	boss.attack_elapsed = 1.540
+	boss._sync_attack_animation_frame()
+	if boss.sprite.frame != 5:
+		push_error("Chop should enter landing slash frame at hit start")
+		quit(1)
+		return
+	boss.attack_elapsed = 1.200
+	boss._sync_attack_animation_frame()
+	if boss.sprite.offset.y > -90.0:
+		push_error("Chop airborne frames should lift the Boss higher than the player")
+		quit(1)
+		return
+	boss.attack_elapsed = 1.550
+	player._start_parry()
+	player.parry_elapsed = 0.05
+	var boss_posture_before_chop_parry: float = boss.posture
+	player.receive_enemy_attack(boss.attack_damage, boss.attack_posture_damage, boss, 0)
+	if boss.posture <= boss_posture_before_chop_parry:
+		push_error("Parrying Boss chop should add Boss posture")
+		quit(1)
+		return
+	if boss.current_animation != "chop" or not bool(boss.get("is_chop_parried_recovery_boss")):
+		push_error("Parrying Boss chop should continue through chop recovery instead of switching to deflect")
+		quit(1)
+		return
+	if boss.is_attack_winding_up or boss.is_attack_active:
+		push_error("Parried Boss chop recovery should not keep the hitbox active")
+		quit(1)
+		return
+	if player.stored_velocity.x >= 0.0:
+		push_error("Parrying Boss chop should knock the player away from the Boss")
+		quit(1)
+		return
+	var hit_impact := player.get_node_or_null("HitImpactVfx") as AnimatedSprite2D
+	if hit_impact == null or not hit_impact.visible or hit_impact.animation != "chop":
+		push_error("Parrying Boss chop should show the chop hit impact VFX")
+		quit(1)
+		return
+	var parry_distance_before: float = absf(player.global_position.x - boss.global_position.x)
+	for frame in 24:
+		await physics_frame
+	var parry_distance_after: float = absf(player.global_position.x - boss.global_position.x)
+	if parry_distance_after < parry_distance_before + 90.0:
+		push_error("Parrying Boss chop should visibly knock both actors apart")
+		quit(1)
+		return
+
+	boss.reset_combat_state()
+	player.reset_combat_state()
+	boss.global_position = Vector2(520.0, 360.0)
+	boss.spawn_position = boss.global_position
+	player.global_position = boss.global_position + Vector2(-310.0, 0.0)
+	boss.facing = -1.0
+	boss.attack_cooldown = 0.0
+	await physics_frame
+	if not boss._should_start_attack():
+		push_error("Boss should be able to start chop from mid range")
+		quit(1)
+		return
+	boss._start_normal_attack()
+	if boss.current_attack_animation != "chop":
+		push_error("Boss should prefer chop as a mid-range gap closer")
+		quit(1)
+		return
+	boss.attack_elapsed = boss.chop_lunge_start_boss + 0.02
+	boss._update_attack_state(0.05)
+	if boss.velocity.x >= 0.0:
+		push_error("Boss chop airborne frames should lunge toward the player")
 		quit(1)
 		return
 

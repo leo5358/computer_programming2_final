@@ -49,7 +49,7 @@ func _initialize() -> void:
 		"attack": 8,
 		"attack2": 16,
 		"thrust": 8,
-		"chop": 7,
+		"chop": 11,
 		"deflect1": 8,
 		"deflect2": 8,
 		"hurt": 8,
@@ -95,6 +95,11 @@ func _initialize() -> void:
 		push_error("Boss chop atlas regions should match teammate settings")
 		quit(1)
 		return
+	var chop_recovery_frame: AtlasTexture = sprite.sprite_frames.get_frame_texture("chop", 10)
+	if chop_recovery_frame.region != Rect2(940.0, 0.0, 84.0, 128.0):
+		push_error("Boss chop recovery should use the final frame 8 crop")
+		quit(1)
+		return
 	var thrust_texture: AtlasTexture = sprite.sprite_frames.get_frame_texture("thrust", 4)
 	if thrust_texture.region != Rect2(0.0, 0.0, 144.0, 128.0):
 		push_error("Boss thrust atlas regions should include teammate thrust copy frames")
@@ -129,8 +134,8 @@ func _initialize() -> void:
 	boss.play_boss_animation("chop")
 	sprite.frame = 4
 	boss.align_sprite_to_ground()
-	if sprite.offset.y < 20.0:
-		push_error("Boss chop frame with bottom padding should be lowered to keep the feet grounded")
+	if sprite.offset.y > -80.0:
+		push_error("Boss chop airborne frames should visually lift the Boss well above the player")
 		quit(1)
 		return
 

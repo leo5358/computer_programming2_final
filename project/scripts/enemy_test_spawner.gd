@@ -4,8 +4,10 @@ const TORCHMAN_SCENE: PackedScene = preload("res://scenes/TorchmanEnemy.tscn")
 const WARRIOR_SCENE: PackedScene = preload("res://scenes/WarriorEnemy.tscn")
 const ARCHER_SCENE: PackedScene = preload("res://scenes/ArcherEnemy.tscn")
 const BOSS_SCENE: PackedScene = preload("res://scenes/Boss.tscn")
+const AB_FOOTHILL_SCENE: PackedScene = preload("res://scenes/maps/chapter1_ab_foothill_stairs.tscn")
 const H_STONE_PLAZA_SCENE: PackedScene = preload("res://scenes/maps/chapter1_h_stone_plaza.tscn")
 const BOSS_INTERIOR_SCENE: PackedScene = preload("res://scenes/maps/chapter1_boss_interior_blockout.tscn")
+const START_PAGE_SCENE_PATH := "res://scenes/start_page.tscn"
 const AB_EXIT_START_X := 15250.0
 const AB_EXIT_END_X := 15750.0
 const H_STONE_PLAZA_EXIT_START_X := 2700.0
@@ -26,6 +28,8 @@ var is_transitioning := false
 
 @onready var interaction_prompt: Label = $MapTransitionUI/PromptLabel
 @onready var fade_rect: ColorRect = $MapTransitionUI/FadeRect
+@onready var bgm_player: Node = get_node_or_null("BgmPlayer")
+@onready var death_overlay: CanvasLayer = get_node_or_null("DeathOverlay")
 
 func _ready() -> void:
 	add_to_group("enemy_test_spawner")
@@ -34,6 +38,9 @@ func _ready() -> void:
 	fade_rect.color = Color(0, 0, 0, 0)
 	_play_start_page_fade_in_if_needed()
 	_check_for_saved_game_load()
+	_update_map_bgm()
+	_connect_player_death_signal()
+	_connect_death_overlay()
 	if _should_spawn_default_boss_for_current_run():
 		_spawn_enemy(BOSS_SCENE, spawn_offsets[KEY_0])
 
@@ -59,13 +66,11 @@ func _check_for_saved_game_load() -> void:
 	elif saved_map == "boss_interior":
 		_switch_map(BOSS_INTERIOR_SCENE, "boss_interior", saved_pos)
 	else:
-		# Default map (ab_foothill), just position the player
-		var player := _get_player()
-		if player != null:
-			player.global_position = saved_pos
-			player.spawn_position = saved_pos
-			if "health" in player:
-				player.health = saved_health
+		current_map_id = "ab_foothill"
+	_restore_player_save_state(saved_pos, saved_health)
+	if saved_map == "boss_interior":
+		_spawn_boss_for_boss_interior()
+	_sync_checkpoints_to_saved_position(saved_map, saved_pos)
 
 func _process(_delta: float) -> void:
 	_update_map_interaction_prompt()
@@ -90,10 +95,13 @@ func _input(event: InputEvent) -> void:
 			_spawn_enemy(ARCHER_SCENE, spawn_offsets[KEY_9])
 			get_viewport().set_input_as_handled()
 		KEY_0:
-			_spawn_enemy(BOSS_SCENE, spawn_offsets[KEY_0])
+			_spawn_debug_boss()
 			get_viewport().set_input_as_handled()
 		KEY_O:
 			_debug_warp_to_boss_interior()
+			get_viewport().set_input_as_handled()
+		KEY_N:
+			_debug_kill_player()
 			get_viewport().set_input_as_handled()
 		KEY_F:
 			if _activate_nearest_checkpoint():
@@ -114,19 +122,138 @@ func reset_test_field() -> void:
 	if player != null and player.has_method("reset_combat_state"):
 		player.reset_combat_state()
 
+func _debug_kill_player() -> void:
+	var player: Node = get_tree().get_first_node_in_group("player")
+	if player != null and player.has_method("force_death_for_debug"):
+		player.force_death_for_debug()
+
+func _spawn_debug_boss() -> void:
+	var boss := _spawn_enemy(BOSS_SCENE, spawn_offsets[KEY_0])
+	if boss != null:
+		boss.set("debug_fixed_attack_profile_boss", "chop")
+
+func _connect_player_death_signal() -> void:
+	var player: Node = _get_player()
+	var callback := Callable(self, "_on_player_died")
+	if player != null and player.has_signal("died") and not player.is_connected("died", callback):
+		player.connect("died", callback)
+
+func _connect_death_overlay() -> void:
+	if death_overlay == null:
+		return
+	var retry_callback := Callable(self, "_retry_from_checkpoint")
+	var menu_callback := Callable(self, "_return_to_start_page")
+	if death_overlay.has_signal("retry_requested") and not death_overlay.is_connected("retry_requested", retry_callback):
+		death_overlay.connect("retry_requested", retry_callback)
+	if death_overlay.has_signal("main_menu_requested") and not death_overlay.is_connected("main_menu_requested", menu_callback):
+		death_overlay.connect("main_menu_requested", menu_callback)
+
+func _on_player_died() -> void:
+	_set_player_transition_locked(true)
+	if death_overlay != null and death_overlay.has_method("show_death"):
+		death_overlay.show_death()
+
+func _retry_from_checkpoint() -> void:
+	if death_overlay != null and death_overlay.has_method("hide_overlay_immediate"):
+		death_overlay.hide_overlay_immediate()
+	var respawn := _get_respawn_snapshot()
+	clear_test_enemies()
+	_switch_map(_scene_for_map_id(String(respawn["map_id"])), String(respawn["map_id"]), respawn["position"])
+	if String(respawn["map_id"]) == "boss_interior":
+		_spawn_boss_for_boss_interior()
+	_reset_player_after_respawn(respawn["position"], float(respawn["health"]))
+	_sync_checkpoints_to_saved_position(String(respawn["map_id"]), respawn["position"])
+	_restart_map_bgm(String(respawn["map_id"]))
+	_set_player_transition_locked(false)
+
+func _return_to_start_page() -> void:
+	clear_test_enemies()
+	_set_player_transition_locked(false)
+	if death_overlay != null and death_overlay.has_method("hide_overlay_immediate"):
+		death_overlay.hide_overlay_immediate()
+	if has_node("/root/SaveManager"):
+		var sm = get_node("/root/SaveManager")
+		if sm.has_method("delete_save"):
+			sm.delete_save()
+	get_tree().change_scene_to_file(START_PAGE_SCENE_PATH)
+
+func _get_respawn_snapshot() -> Dictionary:
+	var player := _get_player()
+	var spawn := Vector2(430, 571)
+	var health := 100.0
+	if player != null:
+		spawn = player.spawn_position if "spawn_position" in player else player.global_position
+		health = float(player.get("max_health")) if player.get("max_health") != null else health
+
+	if has_node("/root/SaveManager"):
+		var sm = get_node("/root/SaveManager")
+		if sm.has_save():
+			return {
+				"map_id": sm.get_saved_map(),
+				"position": sm.get_saved_position(),
+				"health": sm.get_saved_health(),
+			}
+	return {
+		"map_id": current_map_id,
+		"position": spawn,
+		"health": health,
+	}
+
+func _scene_for_map_id(map_id: String) -> PackedScene:
+	match map_id:
+		"h_stone_plaza":
+			return H_STONE_PLAZA_SCENE
+		"boss_interior":
+			return BOSS_INTERIOR_SCENE
+		_:
+			return AB_FOOTHILL_SCENE
+
+func _reset_player_after_respawn(spawn: Vector2, health: float) -> void:
+	var player := _get_player()
+	if player == null:
+		return
+	if "spawn_position" in player:
+		player.spawn_position = spawn
+	if player.has_method("reset_combat_state"):
+		player.reset_combat_state()
+	player.global_position = spawn
+	if player.get("max_health") != null:
+		health = clamp(health, 1.0, float(player.get("max_health")))
+	else:
+		health = max(1.0, health)
+	if player.get("health") != null:
+		player.set("health", health)
+	if player.get("max_lives") != null and player.get("lives") != null:
+		player.set("lives", int(player.get("max_lives")))
+	if player.has_signal("stats_changed"):
+		player.emit_signal("stats_changed")
+
+func _restore_player_save_state(spawn: Vector2, health: float) -> void:
+	var player := _get_player()
+	if player == null:
+		return
+	player.global_position = spawn
+	if "spawn_position" in player:
+		player.spawn_position = spawn
+	if player.get("health") != null:
+		player.set("health", health)
+	if player.has_signal("stats_changed"):
+		player.emit_signal("stats_changed")
+
 func clear_test_enemies() -> void:
 	for group_name in ["minor_enemy", "boss"]:
 		for node in get_tree().get_nodes_in_group(group_name):
 			if node != null and node != self:
 				node.queue_free()
 
-func _spawn_enemy(scene: PackedScene, spawn_position: Vector2) -> void:
+func _spawn_enemy(scene: PackedScene, spawn_position: Vector2) -> Node:
 	var instance: Node = scene.instantiate()
 	add_child(instance)
 	if instance is Node2D:
 		instance.global_position = spawn_position
 		if "spawn_position" in instance:
 			instance.spawn_position = spawn_position
+	return instance
 
 func _update_map_interaction_prompt() -> void:
 	interaction_prompt.visible = _can_activate_checkpoint() or _can_use_ab_exit() or _can_use_h_stone_plaza_exit()
@@ -193,6 +320,7 @@ func _transition_ab_to_h_stone_plaza() -> void:
 	await _run_map_transition(H_STONE_PLAZA_SCENE, "h_stone_plaza", H_STONE_PLAZA_SPAWN)
 
 func _transition_h_stone_plaza_to_boss_interior() -> void:
+	_save_boss_gate_checkpoint()
 	await _run_map_transition(BOSS_INTERIOR_SCENE, "boss_interior", BOSS_INTERIOR_SPAWN)
 	_spawn_boss_for_boss_interior()
 
@@ -201,9 +329,42 @@ func _debug_warp_to_boss_interior() -> void:
 	await _run_map_transition(BOSS_INTERIOR_SCENE, "boss_interior", BOSS_INTERIOR_SPAWN)
 	_spawn_boss_for_boss_interior()
 
+func _save_boss_gate_checkpoint() -> void:
+	var player := _get_player()
+	if player == null or not has_node("/root/SaveManager"):
+		return
+	var sm = get_node("/root/SaveManager")
+	sm.save_game("h_stone_plaza", player.global_position, player.health)
+
+func _sync_checkpoints_to_saved_position(map_id: String, saved_position: Vector2) -> void:
+	if map_id != "ab_foothill":
+		return
+	var player := _get_player()
+	for checkpoint in get_tree().get_nodes_in_group("checkpoint"):
+		if checkpoint == null:
+			continue
+		var should_activate := _checkpoint_matches_position(checkpoint, saved_position)
+		if should_activate and checkpoint.has_method("activate"):
+			checkpoint.activate(player)
+		elif not should_activate and checkpoint.has_method("deactivate"):
+			checkpoint.deactivate()
+
+func _checkpoint_matches_position(checkpoint: Node, saved_position: Vector2) -> bool:
+	var checkpoint_node := checkpoint as Node2D
+	if checkpoint_node == null:
+		return false
+	if checkpoint_node.global_position.distance_to(saved_position) <= 2.0:
+		return true
+	var respawn_position = checkpoint.get("respawn_position")
+	if respawn_position is Vector2 and respawn_position != Vector2.INF:
+		return (respawn_position as Vector2).distance_to(saved_position) <= 2.0
+	return false
+
 func _spawn_boss_for_boss_interior() -> void:
-	if get_tree().get_nodes_in_group("boss").is_empty():
-		_spawn_enemy(BOSS_SCENE, BOSS_INTERIOR_BOSS_SPAWN)
+	for boss in get_tree().get_nodes_in_group("boss"):
+		if boss != null and not boss.is_queued_for_deletion():
+			return
+	_spawn_enemy(BOSS_SCENE, BOSS_INTERIOR_BOSS_SPAWN)
 
 func _run_map_transition(next_scene: PackedScene, next_map_id: String, player_spawn: Vector2) -> void:
 	is_transitioning = true
@@ -249,6 +410,17 @@ func _switch_map(next_scene: PackedScene, next_map_id: String, player_spawn: Vec
 		if "spawn_position" in player:
 			player.spawn_position = player_spawn
 	current_map_id = next_map_id
+	_update_map_bgm()
+
+func _update_map_bgm() -> void:
+	if bgm_player != null and bgm_player.has_method("set_map_bgm"):
+		bgm_player.set_map_bgm(current_map_id)
+
+func _restart_map_bgm(map_id: String) -> void:
+	if bgm_player != null and bgm_player.has_method("restart_map_bgm"):
+		bgm_player.restart_map_bgm(map_id)
+	elif bgm_player != null and bgm_player.has_method("set_map_bgm"):
+		bgm_player.set_map_bgm(map_id)
 
 func _set_player_transition_locked(is_locked: bool) -> void:
 	var player: Node2D = _get_player()

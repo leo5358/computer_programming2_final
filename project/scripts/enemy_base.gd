@@ -6,6 +6,9 @@ signal stats_changed
 const CombatMathScript = preload("res://scripts/combat_math.gd")
 const CombatServerScript = preload("res://scripts/combat_server.gd")
 const DAMAGE_NUMBER_SCENE: PackedScene = preload("res://scenes/DamageNumber.tscn")
+const ENEMY_HP_FILL_COLOR := Color(0.86, 0.05, 0.045, 0.95)
+const ENEMY_POSTURE_FILL_COLOR := Color(1.0, 0.76, 0.16, 0.92)
+const ENEMY_BAR_BACK_COLOR := Color(0.04, 0.035, 0.03, 0.72)
 
 enum EnemyState {
 	PATROL,
@@ -78,6 +81,9 @@ enum EnemyState {
 @export var deflect_duration := 0.28
 @export var guard_lockout_duration := 0.45
 @export var corpse_lifetime := 5.0
+@export var overhead_bar_size := Vector2(72.0, 5.0)
+@export var overhead_bar_offset := Vector2(-36.0, -118.0)
+@export var overhead_bar_gap := 3.0
 
 var math: RefCounted = CombatMathScript.new()
 var health := max_health
@@ -119,6 +125,11 @@ var current_attack_type := CombatServerScript.AttackType.NORMAL
 var custom_animation_frames: Dictionary = {}
 var custom_animation_speeds: Dictionary = {}
 var custom_animation_loops: Dictionary = {}
+var overhead_root: Node2D
+var overhead_hp_back: ColorRect
+var overhead_hp_fill: ColorRect
+var overhead_posture_back: ColorRect
+var overhead_posture_fill: ColorRect
 
 @onready var sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
 @onready var attack_area: Area2D = get_node_or_null("AttackArea") as Area2D
@@ -146,6 +157,8 @@ func _ready() -> void:
 		execute_label.visible = false
 	if warning_label != null:
 		warning_label.visible = false
+	_setup_overhead_bars()
+	_update_overhead_bars()
 	stats_changed.emit()
 
 func _physics_process(delta: float) -> void:
@@ -176,6 +189,7 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 	_update_visuals()
+	_update_overhead_bars()
 	stats_changed.emit()
 
 func get_vision_rect() -> Rect2:
@@ -574,6 +588,42 @@ func _update_feedback(delta: float) -> void:
 		hit_spark.visible = hit_spark_timer > 0.0 or dodge_spark_timer > 0.0
 	if sprite != null:
 		sprite.modulate = Color(1.65, 1.65, 1.22, 1.0) if hit_flash_timer > 0.0 else Color.WHITE
+
+func _setup_overhead_bars() -> void:
+	if overhead_root != null:
+		return
+	overhead_root = Node2D.new()
+	overhead_root.name = "OverheadBars"
+	overhead_root.position = overhead_bar_offset
+	add_child(overhead_root)
+	overhead_hp_back = _create_overhead_bar_rect("HpBack", ENEMY_BAR_BACK_COLOR, Vector2.ZERO, overhead_bar_size)
+	overhead_hp_fill = _create_overhead_bar_rect("HpFill", ENEMY_HP_FILL_COLOR, Vector2.ZERO, overhead_bar_size)
+	var posture_position := Vector2(0.0, overhead_bar_size.y + overhead_bar_gap)
+	overhead_posture_back = _create_overhead_bar_rect("PostureBack", ENEMY_BAR_BACK_COLOR, posture_position, overhead_bar_size)
+	overhead_posture_fill = _create_overhead_bar_rect("PostureFill", ENEMY_POSTURE_FILL_COLOR, posture_position, overhead_bar_size)
+
+func _create_overhead_bar_rect(rect_name: String, color: Color, position: Vector2, size: Vector2) -> ColorRect:
+	var rect := ColorRect.new()
+	rect.name = rect_name
+	rect.color = color
+	rect.position = position
+	rect.size = size
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	overhead_root.add_child(rect)
+	return rect
+
+func _update_overhead_bars() -> void:
+	if overhead_root == null:
+		return
+	var show_bars := is_in_group("minor_enemy") and not defeated_flag
+	overhead_root.visible = show_bars
+	if not show_bars:
+		return
+	overhead_root.position = overhead_bar_offset
+	var health_ratio: float = clamp(health / max(max_health, 0.001), 0.0, 1.0)
+	var posture_ratio: float = clamp(posture / max(max_posture, 0.001), 0.0, 1.0)
+	overhead_hp_fill.size = Vector2(overhead_bar_size.x * health_ratio, overhead_bar_size.y)
+	overhead_posture_fill.size = Vector2(overhead_bar_size.x * posture_ratio, overhead_bar_size.y)
 
 func _update_visuals() -> void:
 	if sprite == null or sprite.sprite_frames == null:

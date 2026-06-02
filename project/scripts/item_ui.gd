@@ -10,9 +10,13 @@ const ITEM_ICON_PATHS := {
 }
 
 @export var icon_size := Vector2(56, 56)
+@export var slot_size := Vector2(66, 66)
+@export var right_margin := 8.0
+@export var bottom_margin := 18.0
 
 var player: Node = null
 var count_labels: Dictionary = {}
+var slot_borders: Array[ColorRect] = []
 
 func _ready() -> void:
 	layer = 12
@@ -33,14 +37,14 @@ func get_display_count(item_id: String) -> int:
 func _build_ui() -> void:
 	var root := Control.new()
 	root.name = "Root"
-	root.anchor_left = 0.0
+	root.anchor_left = 1.0
 	root.anchor_top = 1.0
-	root.anchor_right = 0.0
+	root.anchor_right = 1.0
 	root.anchor_bottom = 1.0
-	root.offset_left = 20.0
-	root.offset_top = -92.0
-	root.offset_right = 520.0
-	root.offset_bottom = -20.0
+	root.offset_left = -(slot_size.x * ITEM_ORDER.size() + 12.0 * float(ITEM_ORDER.size() - 1) + right_margin)
+	root.offset_top = -(slot_size.y + bottom_margin)
+	root.offset_right = -right_margin
+	root.offset_bottom = -bottom_margin
 	add_child(root)
 
 	var row := HBoxContainer.new()
@@ -55,7 +59,21 @@ func _build_ui() -> void:
 func _create_item_slot(item_id: String) -> Control:
 	var slot := Control.new()
 	slot.name = "%sSlot" % item_id.capitalize()
-	slot.custom_minimum_size = Vector2(64, 64)
+	slot.custom_minimum_size = slot_size
+
+	var border := ColorRect.new()
+	border.name = "Border"
+	border.color = Color(0.9, 0.82, 0.55, 0.75)
+	border.position = Vector2.ZERO
+	border.size = slot_size
+	slot.add_child(border)
+
+	var inner := ColorRect.new()
+	inner.name = "InnerMask"
+	inner.color = Color(0.0, 0.0, 0.0, 1.0)
+	inner.position = Vector2(2.0, 2.0)
+	inner.size = slot_size - Vector2(4.0, 4.0)
+	slot.add_child(inner)
 
 	var icon := TextureRect.new()
 	icon.name = "Icon"
@@ -63,7 +81,7 @@ func _create_item_slot(item_id: String) -> Control:
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.size = icon_size
-	icon.position = Vector2(0, 0)
+	icon.position = (slot_size - icon_size) * 0.5
 	slot.add_child(icon)
 
 	var count_label := Label.new()
@@ -83,6 +101,7 @@ func _create_item_slot(item_id: String) -> Control:
 	slot.add_child(count_label)
 
 	count_labels[item_id] = count_label
+	slot_borders.append(border)
 	return slot
 
 func _bind_player() -> void:
@@ -102,3 +121,17 @@ func _update_counts() -> void:
 		var label := count_labels.get(item_id) as Label
 		if label != null:
 			label.text = str(int(player.get_item_count(item_id)))
+	var selected_index := 0
+	if player.get("selected_item_index") != null:
+		selected_index = int(player.get("selected_item_index"))
+	for index in slot_borders.size():
+		var border := slot_borders[index]
+		if border == null:
+			continue
+		var selected := index == selected_index
+		border.color = Color(1.0, 0.88, 0.28, 1.0) if selected else Color(0.68, 0.62, 0.45, 0.72)
+		var thickness := 5.0 if selected else 2.0
+		var inner := border.get_parent().get_node_or_null("InnerMask") as ColorRect
+		if inner != null:
+			inner.position = Vector2(thickness, thickness)
+			inner.size = slot_size - Vector2(thickness * 2.0, thickness * 2.0)

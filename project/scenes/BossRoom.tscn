@@ -73,6 +73,7 @@ position = Vector2(24, 0)
 shape = SubResource("RectangleShape2D_wall")
 
 [node name="CombatUI" type="CanvasLayer" parent="."]
+visible = false
 script = ExtResource("4_ui_script")
 
 [node name="Panel" type="PanelContainer" parent="CombatUI"]
