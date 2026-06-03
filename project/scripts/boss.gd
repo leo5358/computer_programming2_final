@@ -465,7 +465,7 @@ func _ready() -> void:
 	add_to_group("boss")
 	remove_from_group("minor_enemy")
 	
-	display_name = "Boss"
+	display_name = "Corrupted Guardian"
 	max_health = 140.0
 	max_posture = 160.0
 	patrol_speed = 58.0

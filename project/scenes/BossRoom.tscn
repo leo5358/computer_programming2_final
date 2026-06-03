@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://scripts/camera_shake.gd" id="7_camera_shake"]
 [ext_resource type="Script" path="res://scripts/bgm_player.gd" id="9_bgm_script"]
 [ext_resource type="Script" path="res://scripts/hurtbox_debug_overlay.gd" id="10_hurtbox_debug"]
+[ext_resource type="Script" path="res://scripts/boss_hud.gd" id="11_boss_hud"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(2000, 48)
@@ -76,6 +77,9 @@ shape = SubResource("RectangleShape2D_wall")
 visible = false
 script = ExtResource("4_ui_script")
 
+[node name="BossHud" type="CanvasLayer" parent="."]
+script = ExtResource("11_boss_hud")
+
 [node name="Panel" type="PanelContainer" parent="CombatUI"]
 offset_left = 16.0
 offset_top = 16.0
@@ -122,14 +126,6 @@ layout_mode = 2
 text = "Enemy Posture"
 
 [node name="EnemyPostureBar" type="ProgressBar" parent="CombatUI/Panel/VBox"]
-layout_mode = 2
-show_percentage = false
-
-[node name="BossPostureLabel" type="Label" parent="CombatUI/Panel/VBox"]
-layout_mode = 2
-text = "Boss Posture"
-
-[node name="BossPostureBar" type="ProgressBar" parent="CombatUI/Panel/VBox"]
 layout_mode = 2
 show_percentage = false
 

@@ -47,6 +47,15 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+	player.facing = 1.0
+	Input.action_press("move_left")
+	player._start_dash()
+	Input.action_release("move_left")
+	if player.dash_direction >= 0.0:
+		push_error("Dash should use held left input instead of always moving forward")
+		quit(1)
+		return
+
 	player.queue_free()
 	await process_frame
 	quit(0)

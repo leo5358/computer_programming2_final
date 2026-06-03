@@ -13,6 +13,7 @@
 [ext_resource type="Script" path="res://scripts/death_overlay.gd" id="14_death_overlay"]
 [ext_resource type="Script" uid="uid://df53ccqrr0fiv" path="res://scripts/player_posture_hud.gd" id="15_posture_hud"]
 [ext_resource type="Script" path="res://scripts/player_vitals_hud.gd" id="16_vitals_hud"]
+[ext_resource type="Script" path="res://scripts/boss_hud.gd" id="17_boss_hud"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(1762, 48)
@@ -80,6 +81,9 @@ script = ExtResource("15_posture_hud")
 
 [node name="PlayerVitalsHud" type="CanvasLayer" parent="."]
 script = ExtResource("16_vitals_hud")
+
+[node name="BossHud" type="CanvasLayer" parent="."]
+script = ExtResource("17_boss_hud")
 
 [node name="DeathOverlay" type="CanvasLayer" parent="." unique_id=1820423079]
 script = ExtResource("14_death_overlay")
@@ -153,14 +157,6 @@ layout_mode = 2
 text = "Enemy Posture"
 
 [node name="EnemyPostureBar" type="ProgressBar" parent="CombatUI/Panel/VBox" unique_id=2138739300]
-layout_mode = 2
-show_percentage = false
-
-[node name="BossPostureLabel" type="Label" parent="CombatUI/Panel/VBox" unique_id=1376058486]
-layout_mode = 2
-text = "Boss Posture"
-
-[node name="BossPostureBar" type="ProgressBar" parent="CombatUI/Panel/VBox" unique_id=509067052]
 layout_mode = 2
 show_percentage = false
 
