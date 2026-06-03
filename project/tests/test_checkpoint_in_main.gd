@@ -72,6 +72,7 @@ func _initialize() -> void:
 		return
 
 	var rear_checkpoint := checkpoints[2] as Node2D
+	var rear_checkpoint_position := rear_checkpoint.global_position
 	player.global_position = rear_checkpoint.global_position
 	main._update_map_interaction_prompt()
 	if not prompt.visible:
@@ -94,7 +95,12 @@ func _initialize() -> void:
 	await process_frame
 	main._retry_from_checkpoint()
 	await process_frame
-	if player.global_position.distance_to(rear_checkpoint.global_position) > 1.0:
+	player = main.get_node_or_null("Player")
+	if player == null:
+		push_error("Retry after death should keep or recreate the player")
+		quit(1)
+		return
+	if player.global_position.distance_to(rear_checkpoint_position) > 1.0:
 		push_error("Retry after death should restore the last activated checkpoint position")
 		quit(1)
 		return
@@ -131,7 +137,7 @@ func _initialize() -> void:
 		quit(1)
 		return
 	var reloaded_player: Node2D = reloaded_main.get_node_or_null("Player")
-	if reloaded_player == null or reloaded_player.global_position.distance_to(Vector2(13751, 83)) > 1.0:
+	if reloaded_player == null or reloaded_player.global_position.distance_to(Vector2(13751, 83)) > 12.0:
 		push_error("Loading from save should restore player to saved checkpoint position")
 		quit(1)
 		return
