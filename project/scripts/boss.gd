@@ -294,6 +294,7 @@ var consecutive_guard_count_boss := 0
 var forced_counter_timer_boss := 0.0
 var attack_pressure_timer_boss := 0.0
 var is_chop_parried_recovery_boss := false
+var smoke_bomb_pause_timer_boss := 0.0
 
 var attack_pressure_timer: float:
 	get:
@@ -505,6 +506,16 @@ func _physics_process(delta: float) -> void:
 	guard_lockout_timer = max(0.0, guard_lockout_timer - delta)
 	
 	_update_hit_feedback_boss_internal(delta)
+
+	if smoke_bomb_pause_timer_boss > 0.0:
+		smoke_bomb_pause_timer_boss = max(0.0, smoke_bomb_pause_timer_boss - delta)
+		velocity = Vector2.ZERO
+		_update_attack_visual_boss_internal(false, false)
+		if sprite != null:
+			sprite.speed_scale = 0.0 if smoke_bomb_pause_timer_boss > 0.0 else 1.0
+		align_sprite_to_ground_boss()
+		stats_changed.emit()
+		return
 	
 	if hitstop_timer_boss > 0.0:
 		hitstop_timer_boss = max(0.0, hitstop_timer_boss - delta)
@@ -600,6 +611,20 @@ func execute() -> void:
 		play_boss_animation("death")
 		set_collision_layer_value(1, false)
 		stats_changed.emit()
+
+func receive_smoke_bomb_pause(duration: float) -> void:
+	if defeated_flag:
+		return
+	smoke_bomb_pause_timer_boss = max(smoke_bomb_pause_timer_boss, duration)
+	_interrupt_attack_boss_internal()
+	is_chop_parried_recovery_boss = false
+	attack_pressure_timer_boss = 0.0
+	attack_cooldown = max(attack_cooldown, duration * 0.35)
+	velocity = Vector2.ZERO
+	_update_attack_visual_boss_internal(false, false)
+	if sprite != null:
+		sprite.speed_scale = 0.0
+	stats_changed.emit()
 
 func _force_play_boss_animation(animation: String) -> void:
 	if sprite == null or sprite.sprite_frames == null:
@@ -763,6 +788,7 @@ func reset_combat_state() -> void:
 	forced_counter_profile_boss = ""
 	consecutive_guard_count_boss = 0
 	forced_counter_timer_boss = 0.0
+	smoke_bomb_pause_timer_boss = 0.0
 	global_position = spawn_position
 	if execute_label != null:
 		execute_label.visible = false

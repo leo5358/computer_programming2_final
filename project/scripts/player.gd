@@ -5,6 +5,8 @@ signal died
 
 const CombatMathScript = preload("res://scripts/combat_math.gd")
 const CombatServerScript = preload("res://scripts/combat_server.gd")
+const KunaiScene = preload("res://scenes/Kunai.tscn")
+const AshBallScene = preload("res://scenes/AshBall.tscn")
 const PLAYER_SHEET_PATHS := [
 	"res://assets/sprites/player/player4.png",
 	"res://assets/sprites/player/player3_spritesheet.png",
@@ -43,6 +45,11 @@ const EAT_ITEM_IDS := {
 	"pill": true,
 	"capsule": true,
 }
+const GOURD_EXPANSION_HEALTH := 20.0
+const ADRENALINE_HEARTBEAT_BOOST := 25.0
+const BLOOD_PRESSURE_HEARTBEAT_DROP := 25.0
+const SMOKE_BOMB_BOSS_PAUSE_TIME := 2.5
+const SMOKE_BOMB_MINOR_STUN_TIME := 1.25
 const PLAYER_STRIP_FRAME_REGIONS := {
 	"attack_a": [
 		[0, 0, 96, 96],
@@ -86,6 +93,7 @@ const HURT_SFX_PATH := "res://assets/sfx/player_hurt.wav"
 const DEATH_SFX_PATH := "res://assets/sfx/player_death.wav"
 const DASH_SFX_PATH := "res://assets/sfx/dodge.WAV"
 const PERFECT_DODGE_SFX_PATH := "res://assets/sfx/player_perfect_dodge.wav"
+const ATTACK_ANIMATION_FPS := 11.43
 
 enum PlayerState {
 	IDLE,
@@ -133,9 +141,9 @@ enum PlayerState {
 @export var attack_posture_damage := 18.0
 @export var block_posture_damage := 14.0
 @export var perfect_block_posture_damage := 36.0
-@export var attack_startup := 0.375
-@export var attack_active_time := 0.25
-@export var attack_recovery := 0.375
+@export var attack_startup := 0.16
+@export var attack_active_time := 0.24
+@export var attack_recovery := 0.30
 @export var attack_buffer_time := 0.16
 @export var attack_deflected_stun_time := 0.42
 @export var attack_deflected_rebound := 260.0
@@ -226,6 +234,8 @@ var hurt_flash_timer := 0.0
 var perfect_dodge_timer := 0.0
 var hit_impact_vfx_timer := 0.0
 var hitstop_timer := 0.0
+var attack_multiplier := 1.0
+var attack_buff_timer := 0.0
 var stored_velocity := Vector2.ZERO
 var heavy_parry_recoil_timer := 0.0
 var heavy_parry_recoil_velocity := Vector2.ZERO
@@ -237,6 +247,7 @@ var sprite_sheet_layout: Dictionary = {}
 var item_counts: Dictionary = DEFAULT_ITEM_COUNTS.duplicate()
 var item_hotkeys_down: Dictionary = {}
 var selected_item_index := 0
+var active_teleport_kunai: Node2D = null
 var ai_move_axis := 0.0
 var ai_attack_requested := false
 var ai_parry_requested := false
@@ -314,6 +325,11 @@ func _physics_process(delta: float) -> void:
 	_update_movement(delta)
 	_update_action_state(delta)
 	_update_combat(delta)
+
+	if attack_buff_timer > 0.0:
+		attack_buff_timer -= delta
+		if attack_buff_timer <= 0.0:
+			attack_multiplier = 1.0
 
 	move_and_slide()
 	_check_world_death_bounds()
@@ -688,14 +704,101 @@ func use_selected_item() -> bool:
 	return use_item(get_selected_item_id())
 
 func use_item(item_id: String) -> bool:
-	if not EAT_ITEM_IDS.has(item_id):
-		return false
+	if item_id == "kunai" and is_instance_valid(active_teleport_kunai):
+		return _teleport_to_active_kunai()
 	if not _can_start_action():
 		return false
 	var count := get_item_count(item_id)
 	if count <= 0:
 		return false
-	item_counts[item_id] = count - 1
+
+	if EAT_ITEM_IDS.has(item_id):
+		item_counts[item_id] = count - 1
+		is_blocking = false
+		is_attacking = false
+		is_parrying = false
+		is_dashing = false
+		is_running = false
+		is_perfect_dodging = false
+		attack_buffer_queued = false
+		attack_buffer_timer = 0.0
+		attack_has_hit = false
+		attack_has_cut_projectile = false
+		velocity = Vector2.ZERO
+		_set_state(PlayerState.EAT)
+		action_timer = _animation_duration("mudra")
+		_force_play_animation("mudra")
+		_apply_consumable_effect(item_id)
+		stats_changed.emit()
+		return true
+	elif item_id == "kunai":
+		if _use_kunai():
+			item_counts[item_id] = count - 1
+			stats_changed.emit()
+			return true
+	elif item_id == "ash_balls":
+		if _use_ash_balls():
+			item_counts[item_id] = count - 1
+			stats_changed.emit()
+			return true
+	return false
+
+func _apply_consumable_effect(item_id: String) -> void:
+	match item_id:
+		"gourd":
+			max_health += GOURD_EXPANSION_HEALTH
+			health = min(max_health, health + GOURD_EXPANSION_HEALTH)
+		"pill":
+			heartbeat = max(CombatMathScript.MIN_HEARTBEAT, heartbeat - BLOOD_PRESSURE_HEARTBEAT_DROP)
+		"capsule":
+			heartbeat = math.add_heartbeat(heartbeat, ADRENALINE_HEARTBEAT_BOOST)
+
+func _use_kunai() -> bool:
+	if not _can_start_action():
+		return false
+	_cancel_current_action_flags()
+	_set_state(PlayerState.EAT)
+	action_timer = 0.35
+	_force_play_animation("mudra")
+	
+	var kunai = KunaiScene.instantiate()
+	kunai.global_position = global_position + Vector2(25 * facing, -45)
+	kunai.setup(facing, self)
+	get_parent().add_child(kunai)
+	active_teleport_kunai = kunai
+	return true
+
+func _teleport_to_active_kunai() -> bool:
+	if state == PlayerState.DEAD:
+		return false
+	if not is_instance_valid(active_teleport_kunai):
+		active_teleport_kunai = null
+		return false
+	var target_position := active_teleport_kunai.global_position
+	active_teleport_kunai.queue_free()
+	active_teleport_kunai = null
+	_cancel_current_action_flags()
+	global_position = target_position
+	velocity = Vector2.ZERO
+	_set_state(PlayerState.IDLE)
+	stats_changed.emit()
+	return true
+
+func _use_ash_balls() -> bool:
+	if not _can_start_action():
+		return false
+	_cancel_current_action_flags()
+	_set_state(PlayerState.EAT)
+	action_timer = 0.5
+	_force_play_animation("mudra")
+
+	var ash_ball = AshBallScene.instantiate()
+	ash_ball.global_position = global_position + Vector2(25 * facing, -45)
+	ash_ball.setup(facing, self, SMOKE_BOMB_BOSS_PAUSE_TIME, SMOKE_BOMB_MINOR_STUN_TIME)
+	get_parent().add_child(ash_ball)
+	return true
+
+func _cancel_current_action_flags() -> void:
 	is_blocking = false
 	is_attacking = false
 	is_parrying = false
@@ -706,12 +809,6 @@ func use_item(item_id: String) -> bool:
 	attack_buffer_timer = 0.0
 	attack_has_hit = false
 	attack_has_cut_projectile = false
-	velocity = Vector2.ZERO
-	_set_state(PlayerState.EAT)
-	action_timer = _animation_duration("mudra")
-	_force_play_animation("mudra")
-	stats_changed.emit()
-	return true
 
 func is_action_locked() -> bool:
 	return state in [PlayerState.ATTACK, PlayerState.PARRY, PlayerState.DASH, PlayerState.EAT, PlayerState.HURT, PlayerState.STUNNED, PlayerState.DEAD]
@@ -782,7 +879,7 @@ func _has_rejected_soft_lock_target() -> bool:
 	return false
 
 func _apply_attack_hit() -> void:
-	var damage: float = math.damage_with_adrenaline(base_attack_damage, heartbeat)
+	var damage: float = math.damage_with_adrenaline(base_attack_damage * attack_multiplier, heartbeat)
 	var posture_damage: float = math.posture_damage_with_adrenaline(attack_posture_damage, heartbeat)
 	var hit_confirmed := false
 	var was_deflected := false
@@ -1047,8 +1144,8 @@ func _setup_sprite_frames() -> void:
 		_add_strip_animation(frames, "idle", 6.0, true)
 		_add_strip_animation(frames, "walk", 8.0, true)
 		_add_strip_animation(frames, "run", 12.0, true)
-		_add_strip_animation(frames, "attack_a", 8.0, false)
-		_add_strip_animation(frames, "attack_chop", 8.0, false)
+		_add_strip_animation(frames, "attack_a", ATTACK_ANIMATION_FPS, false)
+		_add_strip_animation(frames, "attack_chop", ATTACK_ANIMATION_FPS, false)
 		_add_strip_animation(frames, "deflect", 14.0, false)
 		_add_strip_animation(frames, "parry", 14.0, false)
 		_add_strip_animation(frames, "block", 8.0, true)
@@ -1546,6 +1643,9 @@ func reset_combat_state() -> void:
 	item_counts = DEFAULT_ITEM_COUNTS.duplicate()
 	selected_item_index = 0
 	item_hotkeys_down.clear()
+	if is_instance_valid(active_teleport_kunai):
+		active_teleport_kunai.queue_free()
+	active_teleport_kunai = null
 	clear_ai_intent()
 	attack_lunge_timer = 0.0
 	parry_flash_timer = 0.0

@@ -2,7 +2,7 @@ extends CanvasLayer
 
 const ITEM_ORDER: Array[String] = ["gourd", "kunai", "pill", "capsule", "ash_balls"]
 const ITEM_ICON_PATHS := {
-	"gourd": "res://assets/items/gourd/gourd.png",
+	"gourd": "res://assets/items/gourd_seed/gourd_seed.png",
 	"kunai": "res://assets/items/kunai/kunai.png",
 	"pill": "res://assets/items/pill/pill.png",
 	"capsule": "res://assets/items/capsule/capsule.png",

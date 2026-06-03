@@ -208,6 +208,15 @@ func receive_alert(_source: Node = null) -> void:
 	if state == EnemyState.PATROL:
 		state = EnemyState.ALERTED
 
+func receive_ash_ball_stun(duration: float) -> void:
+	if defeated_flag:
+		return
+	state = EnemyState.HURT
+	_interrupt_attack()
+	hit_recoil_timer = duration
+	velocity.x = 0.0
+	_force_play_animation("hurt")
+
 func receive_player_attack(damage: float, posture_damage: float) -> Variant:
 	if defeated_flag:
 		return false

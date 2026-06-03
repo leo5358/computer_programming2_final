@@ -20,12 +20,12 @@ func _initialize() -> void:
 		push_error("Player attack should keep the existing 8-frame custom strip")
 		quit(1)
 		return
-	if sprite.sprite_frames.get_animation_speed("attack_a") != 8.0:
-		push_error("Player attack animation should play at 8fps so frames 1-3/4-5/6-8 match startup/active/recovery")
+	if not is_equal_approx(sprite.sprite_frames.get_animation_speed("attack_a"), player.ATTACK_ANIMATION_FPS):
+		push_error("Player attack animation should match the faster 0.7s attack timing")
 		quit(1)
 		return
-	if sprite.sprite_frames.get_animation_speed("attack_chop") != 8.0:
-		push_error("Player chop animation should use the same committed timing as normal attack")
+	if not is_equal_approx(sprite.sprite_frames.get_animation_speed("attack_chop"), player.ATTACK_ANIMATION_FPS):
+		push_error("Player chop animation should use the same faster committed timing as normal attack")
 		quit(1)
 		return
 	if sprite.sprite_frames.get_frame_count("attack_chop") != 8:
@@ -58,12 +58,16 @@ func _initialize() -> void:
 		push_error("Player current_animation should sync immediately when attack starts")
 		quit(1)
 		return
-	if player.attack_startup < 0.37 or player.attack_active_time < 0.24 or player.attack_recovery < 0.37:
-		push_error("Player attack should map 3 startup frames, 2 active frames, and 3 recovery frames")
+	if not is_equal_approx(player.attack_startup, 0.16) or not is_equal_approx(player.attack_active_time, 0.24):
+		push_error("Player attack should come out about 0.3s faster than the old committed attack")
 		quit(1)
 		return
-	if player.action_timer < 0.99:
-		push_error("Player attack should have enough commitment to prevent mash spam")
+	if not is_equal_approx(player.attack_recovery, 0.30):
+		push_error("Player attack should keep about 0.3s of recovery lockout after the hit")
+		quit(1)
+		return
+	if not is_equal_approx(player.action_timer, 0.70):
+		push_error("Player attack should total about 0.7s after the faster timing pass")
 		quit(1)
 		return
 	if player.attack_lunge_time < player.attack_startup:
