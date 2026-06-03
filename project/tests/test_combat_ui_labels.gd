@@ -16,7 +16,6 @@ func _initialize() -> void:
 		"PostureLabel": "Posture",
 		"HeartbeatLabel": "Heartbeat",
 		"EnemyPostureLabel": "Enemy Posture",
-		"BossPostureLabel": "Boss Posture",
 	}
 	for node_name in labels:
 		var label := main.get_node_or_null("CombatUI/Panel/VBox/%s" % node_name) as Label

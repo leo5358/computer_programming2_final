@@ -651,6 +651,12 @@ func _read_move_axis() -> float:
 		return keyboard_axis
 	return ai_move_axis
 
+func _read_dash_direction() -> float:
+	var direction := _read_move_axis()
+	if direction != 0.0:
+		return sign(direction)
+	return facing
+
 func set_ai_move_axis(axis: float) -> void:
 	ai_move_axis = clamp(axis, -1.0, 1.0)
 
@@ -954,7 +960,7 @@ func _start_dash() -> void:
 	is_dashing = true
 	is_perfect_dodging = false
 	is_invulnerable = true
-	dash_direction = facing
+	dash_direction = _read_dash_direction()
 	dash_timer = dash_duration
 	heartbeat = math.add_heartbeat(heartbeat, 4.0)
 	_play_sfx(dash_sfx)
