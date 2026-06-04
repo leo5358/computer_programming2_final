@@ -2,10 +2,8 @@ extends "res://scripts/enemy_base.gd"
 
 @export var ally_call_range := 420.0
 @export var flee_until_distance := 160.0
-@export var isolated_attack_range := 88.0
 
 var has_called_allies := false
-var has_nearby_allies := false
 
 func _ready() -> void:
 	display_name = "Torchman"
@@ -64,9 +62,9 @@ func _ready() -> void:
 	}
 	custom_animation_speeds = {"idle": 5.0, "walk": 10.0, "attack": 8.0, "hurt": 8.0, "death": 8.0}
 	custom_animation_loops = {"idle": true, "walk": true, "attack": false, "hurt": false, "death": false}
-	max_health = 42.0
+	max_health = 32.0
 	max_posture = 70.0
-	attack_damage = 18.0
+	attack_damage = 8.0
 	attack_posture_damage = 14.0
 	patrol_speed = 42.0
 	chase_speed = 78.0
@@ -82,24 +80,20 @@ func _update_combat_movement() -> void:
 	var distance: float = abs(offset_x)
 	if absf(offset_x) > 4.0:
 		facing = sign(offset_x)
-	if distance <= attack_range and attack_cooldown <= 0.0:
-		_start_attack()
-		return
-	if not has_called_allies:
-		has_nearby_allies = _call_nearby_allies() > 0
-	if distance <= isolated_attack_range and attack_cooldown <= 0.0:
-		_start_attack()
-		return
-	if distance > attack_range and has_nearby_allies and distance < flee_until_distance:
+	if distance > attack_range and (not has_called_allies or distance < flee_until_distance):
 		state = EnemyState.FLEE
 		velocity.x = -sign(offset_x) * flee_speed
+		if not has_called_allies:
+			_call_nearby_allies()
 		return
-	state = EnemyState.CHASE
-	velocity.x = facing * chase_speed
+	if distance <= attack_range and attack_cooldown <= 0.0:
+		_start_attack()
+	else:
+		state = EnemyState.CHASE
+		velocity.x = facing * chase_speed
 
-func _call_nearby_allies() -> int:
+func _call_nearby_allies() -> void:
 	has_called_allies = true
-	var alerted_count := 0
 	for enemy in get_tree().get_nodes_in_group("minor_enemy"):
 		if enemy == self:
 			continue
@@ -109,10 +103,7 @@ func _call_nearby_allies() -> int:
 			continue
 		if enemy.has_method("receive_alert"):
 			enemy.receive_alert(self)
-			alerted_count += 1
-	return alerted_count
 
 func reset_combat_state() -> void:
 	has_called_allies = false
-	has_nearby_allies = false
 	super()

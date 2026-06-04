@@ -41,25 +41,21 @@ const MUDRA_FOCUS_FRAME_START := 3
 const MUDRA_FOCUS_FRAME_END := 5
 const MUDRA_FOCUS_DURATION_RATIO := 0.70
 const DEFAULT_ITEM_COUNTS := {
-	"kunai": 10,
-	"ash_balls": 10,
 	"gourd": 10,
+	"kunai": 10,
 	"pill": 10,
 	"capsule": 10,
+	"ash_balls": 10,
 }
-const ITEM_ORDER: Array[String] = ["kunai", "ash_balls", "gourd", "pill", "capsule"]
-const ATTACK_ITEM_IDS: Array[String] = ["kunai", "ash_balls"]
-const HEAL_ITEM_IDS: Array[String] = ["gourd", "pill", "capsule"]
+const ITEM_ORDER: Array[String] = ["gourd", "kunai", "pill", "capsule", "ash_balls"]
 const EAT_ITEM_IDS := {
 	"gourd": true,
 	"pill": true,
 	"capsule": true,
 }
-const GOURD_HEAL_PERCENT := 0.30
-const PILL_HEARTBEAT_RISE_MULTIPLIER := 0.60
-const PILL_EFFECT_DURATION := 20.0
-const CAPSULE_HEARTBEAT_RISE_MULTIPLIER := 1.20
-const CAPSULE_EFFECT_DURATION := 15.0
+const GOURD_EXPANSION_HEALTH := 20.0
+const ADRENALINE_HEARTBEAT_BOOST := 25.0
+const BLOOD_PRESSURE_HEARTBEAT_DROP := 25.0
 const SMOKE_BOMB_BOSS_PAUSE_TIME := 2.5
 const SMOKE_BOMB_MINOR_STUN_TIME := 1.25
 const PLAYER_STRIP_FRAME_REGIONS := {
@@ -134,7 +130,7 @@ enum PlayerState {
 @export var combat_backpedal_speed_multiplier := 0.55
 @export var combat_backpedal_run_multiplier := 0.45
 @export var dash_impulse := 560.0
-@export var jump_velocity := -559.0
+@export var jump_velocity := -430.0
 @export var coyote_time := 0.1
 @export var wall_climb_speed := 130.0
 @export var wall_slide_speed := 80.0
@@ -146,19 +142,12 @@ enum PlayerState {
 @export var wall_climb_requires_jump := true
 @export var jump_to_ledge_climb_lockout := 0.28
 @export var world_boundary_climb_margin := 24.0
-@export var max_health := 120.0
+@export var max_health := 100.0
 @export var max_posture := 100.0
-@export var posture_disengage_delay := 6.0
-@export_range(0.0, 1.0, 0.01) var posture_recovery_percent_per_second := 0.08
-@export var posture_gain_on_hit_taken_percent := 17.25
-@export var posture_gain_on_perfect_guard_percent := 6.9
-@export var posture_gain_on_partial_guard_percent := 10.35
-@export var posture_gain_on_attack_deflected_percent := 5.75
-@export_range(0.0, 1.0, 0.01) var partial_guard_chip_damage_ratio := 0.25
 @export var max_lives := 3
 @export var world_death_bounds_enabled := true
 @export var world_death_bounds := Rect2(-1024.0, -2048.0, 22000.0, 4096.0)
-@export var base_attack_damage := 13.0
+@export var base_attack_damage := 16.0
 @export var attack_posture_damage := 18.0
 @export var block_posture_damage := 14.0
 @export var perfect_block_posture_damage := 36.0
@@ -215,18 +204,11 @@ enum PlayerState {
 @export var heavy_parry_hitstop_time := 0.20
 @export var heavy_parry_recoil_time := 0.26
 @export var heavy_parry_camera_shake := 42.0
-@export var heartbeat_idle_target := 70.0
-@export var heartbeat_walk_target := 95.0
-@export var heartbeat_run_target := 155.0
-@export var heartbeat_jump_gain := 7.0
-@export var heartbeat_attack_gain := 4.0
-@export var heartbeat_guard_gain := 5.0
-@export var heartbeat_combat_rise_per_second := 2.0
-@export var heartbeat_combat_linger_time := 2.0
-@export var heartbeat_cooldown_delay := 2.0
-@export var heartbeat_walk_rise_percent_per_second := 0.03
-@export var heartbeat_run_rise_percent_per_second := 0.06
-@export var heartbeat_cooldown_percent_per_second := 0.08
+@export var heartbeat_block_rise_rate := 18.0
+@export var heartbeat_cooldown_rate := 8.0
+@export var heartbeat_perfect_guard_gain := 4.0
+@export var heartbeat_block_gain := 5.0
+@export var heartbeat_clean_hit_gain := 20.0
 @export var heartbeat_danger_death_enabled := true
 
 var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
@@ -236,7 +218,6 @@ var lives := max_lives
 var heartbeat: float = CombatMathScript.MIN_HEARTBEAT
 var state := PlayerState.IDLE
 var previous_state := PlayerState.IDLE
-var posture_locked_full_from_perfect_guard := false
 var is_blocking := false
 var is_attacking := false
 var is_parrying := false
@@ -269,7 +250,6 @@ var parry_flash_timer := 0.0
 var block_flash_timer := 0.0
 var is_block_releasing := false
 var hurt_flash_timer := 0.0
-var stunned_hit_heartbeat_cap_pending := false
 var perfect_dodge_timer := 0.0
 var hit_impact_vfx_timer := 0.0
 var hitstop_timer := 0.0
@@ -286,8 +266,6 @@ var sprite_sheet_layout: Dictionary = {}
 var item_counts: Dictionary = DEFAULT_ITEM_COUNTS.duplicate()
 var item_hotkeys_down: Dictionary = {}
 var selected_item_index := 0
-var selected_attack_item_index := 0
-var selected_heal_item_index := 0
 var active_teleport_kunai: Node2D = null
 var current_item_animation := "mudra"
 var has_map_climb_bounds := false
@@ -303,14 +281,6 @@ var player_sheet: Texture2D = null
 var attack_hit_streams: Array[AudioStream] = []
 var chop_hit_stream: AudioStream = null
 var attack_miss_streams: Array[AudioStream] = []
-var posture_combat_timer := 0.0
-var posture_visibility_snapshot := 0.0
-var heartbeat_combat_timer := 0.0
-var heartbeat_cooldown_delay_timer := 0.0
-var heartbeat_direct_checkpoint_respawn := false
-var heartbeat_precise: float = CombatMathScript.MIN_HEARTBEAT
-var heartbeat_modifier_item_id := ""
-var heartbeat_modifier_time_left := 0.0
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var body_collision_shape: CollisionShape2D = $CollisionShape2D
@@ -334,7 +304,6 @@ func _ready() -> void:
 	_setup_hit_impact_vfx()
 	_load_optional_sfx()
 	_set_state(PlayerState.IDLE)
-	posture_visibility_snapshot = posture
 	stats_changed.emit()
 
 func _physics_process(delta: float) -> void:
@@ -381,7 +350,6 @@ func _physics_process(delta: float) -> void:
 	_update_movement(delta)
 	_update_action_state(delta)
 	_update_combat(delta)
-	_update_posture_decay(delta)
 
 	if attack_buff_timer > 0.0:
 		attack_buff_timer -= delta
@@ -393,46 +361,6 @@ func _physics_process(delta: float) -> void:
 	_update_visuals()
 	stats_changed.emit()
 
-func register_posture_contact() -> void:
-	posture_combat_timer = posture_disengage_delay
-
-func is_posture_in_combat() -> bool:
-	return posture_combat_timer > 0.0
-
-func is_posture_bar_visible() -> bool:
-	posture_visibility_snapshot = posture
-	return posture > 0.0 or posture_locked_full_from_perfect_guard
-
-func _posture_amount_from_percent(percent: float) -> float:
-	return ceil(max_posture * (percent / 100.0))
-
-func _clear_player_posture_after_break() -> void:
-	posture = 0.0
-	posture_locked_full_from_perfect_guard = false
-
-func _should_player_stagger_on_full_posture(took_health_damage: bool, was_perfect_guard: bool) -> bool:
-	if took_health_damage:
-		return true
-	if was_perfect_guard:
-		return false
-	return true
-
-func _update_posture_decay(delta: float) -> void:
-	var remaining_delta := delta
-	if posture_combat_timer > 0.0:
-		var consumed: float = min(remaining_delta, posture_combat_timer)
-		posture_combat_timer -= consumed
-		remaining_delta -= consumed
-	if state == PlayerState.DEAD or state == PlayerState.STUNNED:
-		return
-	if posture <= 0.0 or remaining_delta <= 0.0:
-		return
-	var health_ratio: float = clamp(health / max(max_health, 0.001), 0.0, 1.0)
-	var recovery_rate := max_posture * posture_recovery_percent_per_second * health_ratio
-	posture = max(0.0, posture - recovery_rate * remaining_delta)
-	if posture < max_posture:
-		posture_locked_full_from_perfect_guard = false
-
 func _update_inputs() -> void:
 	if _try_use_item_hotkey():
 		_clear_ai_action_intents()
@@ -440,10 +368,7 @@ func _update_inputs() -> void:
 
 	var attack_requested := Input.is_action_just_pressed("attack") or ai_attack_requested
 	var parry_requested := Input.is_action_just_pressed("block") or ai_parry_requested
-	var shift_dodge_target: Node2D = null
-	if Input.is_action_just_pressed("perfect_dodge_shift"):
-		shift_dodge_target = _find_perfect_dodge_target()
-	var dodge_requested := Input.is_action_just_pressed("dash") or ai_dodge_requested or shift_dodge_target != null
+	var dodge_requested := Input.is_action_just_pressed("dash") or ai_dodge_requested
 	var jump_requested := Input.is_action_just_pressed("jump") or ai_jump_requested
 
 	if _can_start_attack() and attack_requested:
@@ -457,17 +382,11 @@ func _update_inputs() -> void:
 	if _can_start_defensive_action() and dodge_requested:
 		if ai_dodge_requested and ai_dodge_target != null:
 			_start_perfect_dodge(ai_dodge_target)
-		elif shift_dodge_target != null:
-			_start_perfect_dodge(shift_dodge_target)
 		else:
 			_start_dash()
 
 	if jump_requested and coyote_timer > 0.0 and _can_jump():
 		_register_combat_input(CombatServerScript.InputType.JUMP)
-		_add_heartbeat_pressure(heartbeat_jump_gain)
-		if state == PlayerState.DEAD:
-			_clear_ai_action_intents()
-			return
 		velocity.y = jump_velocity
 		coyote_timer = 0.0
 		wall_climb_lockout_timer = jump_to_ledge_climb_lockout
@@ -725,33 +644,24 @@ func _update_action_state(delta: float) -> void:
 		action_timer -= delta
 		if action_timer <= 0.0:
 			posture = min(posture, max_posture * 0.55)
-			if stunned_hit_heartbeat_cap_pending:
-				_set_heartbeat_value(min(heartbeat_precise, 120.0))
-				stunned_hit_heartbeat_cap_pending = false
 			is_invulnerable = false
 			sprite.speed_scale = 1.0
 			_set_state(PlayerState.IDLE)
 
 func _update_combat(delta: float) -> void:
-	_sync_heartbeat_precision_from_display()
 	if is_blocking:
 		block_age += delta
 		block_time_left -= delta
-		if not Input.is_action_pressed("block") or block_time_left <= 0.0:
-			_start_block_release()
-
-	if heartbeat_combat_timer > 0.0:
-		heartbeat_combat_timer = max(0.0, heartbeat_combat_timer - delta)
-		_add_heartbeat_pressure(heartbeat_combat_rise_per_second * delta)
+		_add_heartbeat_pressure(heartbeat_block_rise_rate * delta)
 		if state == PlayerState.DEAD:
 			return
+		if not Input.is_action_pressed("block") or block_time_left <= 0.0:
+			_start_block_release()
 	else:
-		_adjust_heartbeat_toward_current_target(delta)
-	_update_heartbeat_modifier(delta)
+		heartbeat = max(CombatMathScript.MIN_HEARTBEAT, heartbeat - heartbeat_cooldown_rate * delta)
 
 func _add_heartbeat_pressure(amount: float) -> void:
-	_sync_heartbeat_precision_from_display()
-	_set_heartbeat_value(math.add_heartbeat(heartbeat_precise, _apply_heartbeat_rise_modifier(amount)))
+	heartbeat = math.add_heartbeat(heartbeat, amount)
 	_check_heartbeat_death()
 
 func _check_heartbeat_death() -> bool:
@@ -761,98 +671,14 @@ func _check_heartbeat_death() -> bool:
 		return true
 	if heartbeat < CombatMathScript.MAX_HEARTBEAT - 0.001:
 		return false
-	_set_heartbeat_value(CombatMathScript.MAX_HEARTBEAT)
-	heartbeat_direct_checkpoint_respawn = true
+	heartbeat = CombatMathScript.MAX_HEARTBEAT
 	_enter_dead()
 	stats_changed.emit()
 	died.emit()
 	return true
 
-func _adjust_heartbeat_toward_current_target(delta: float) -> void:
-	var target_heartbeat: float = _current_heartbeat_target()
-	if is_equal_approx(heartbeat_precise, target_heartbeat):
-		heartbeat_cooldown_delay_timer = 0.0
-		return
-	if heartbeat_precise < target_heartbeat:
-		heartbeat_cooldown_delay_timer = 0.0
-		var rise_amount: float = target_heartbeat * _current_heartbeat_rise_percent_per_second() * delta
-		rise_amount = _apply_heartbeat_rise_modifier(rise_amount)
-		_set_heartbeat_value(min(target_heartbeat, heartbeat_precise + rise_amount))
-		return
-	if heartbeat_cooldown_delay_timer < heartbeat_cooldown_delay:
-		heartbeat_cooldown_delay_timer += delta
-		if heartbeat_cooldown_delay_timer < heartbeat_cooldown_delay:
-			return
-	var next_heartbeat: float = max(target_heartbeat, heartbeat_precise - (heartbeat_precise * heartbeat_cooldown_percent_per_second * delta))
-	_set_heartbeat_value(next_heartbeat)
-
-func _current_heartbeat_target() -> float:
-	if is_running:
-		return heartbeat_run_target
-	if state in [PlayerState.MOVE, PlayerState.JUMP, PlayerState.WALL_CLIMB] and absf(velocity.x) > 4.0:
-		return heartbeat_walk_target
-	return heartbeat_idle_target
-
-func _current_heartbeat_rise_percent_per_second() -> float:
-	if is_running:
-		return heartbeat_run_rise_percent_per_second
-	if state in [PlayerState.MOVE, PlayerState.JUMP, PlayerState.WALL_CLIMB] and absf(velocity.x) > 4.0:
-		return heartbeat_walk_rise_percent_per_second
-	return 0.0
-
-func _mark_heartbeat_combat_activity() -> void:
-	heartbeat_combat_timer = heartbeat_combat_linger_time
-	heartbeat_cooldown_delay_timer = 0.0
-
-func _update_heartbeat_modifier(delta: float) -> void:
-	if heartbeat_modifier_time_left <= 0.0:
-		return
-	heartbeat_modifier_time_left = max(0.0, heartbeat_modifier_time_left - delta)
-	if heartbeat_modifier_time_left <= 0.0:
-		_clear_heartbeat_modifier()
-
-func _apply_heartbeat_rise_modifier(amount: float) -> float:
-	if amount <= 0.0:
-		return amount
-	return amount * _current_heartbeat_rise_multiplier()
-
-func _current_heartbeat_rise_multiplier() -> float:
-	match heartbeat_modifier_item_id:
-		"pill":
-			return PILL_HEARTBEAT_RISE_MULTIPLIER
-		"capsule":
-			return CAPSULE_HEARTBEAT_RISE_MULTIPLIER
-	return 1.0
-
-func _apply_heartbeat_modifier_item(item_id: String) -> void:
-	match item_id:
-		"pill":
-			heartbeat_modifier_item_id = item_id
-			heartbeat_modifier_time_left = PILL_EFFECT_DURATION
-		"capsule":
-			heartbeat_modifier_item_id = item_id
-			heartbeat_modifier_time_left = CAPSULE_EFFECT_DURATION
-		_:
-			_clear_heartbeat_modifier()
-
-func _clear_heartbeat_modifier() -> void:
-	heartbeat_modifier_item_id = ""
-	heartbeat_modifier_time_left = 0.0
-
-func _set_heartbeat_value(value: float) -> void:
-	heartbeat_precise = clamp(value, CombatMathScript.MIN_HEARTBEAT, CombatMathScript.MAX_HEARTBEAT)
-	heartbeat = floor(heartbeat_precise)
-
-func _sync_heartbeat_precision_from_display() -> void:
-	if floor(heartbeat_precise) != heartbeat:
-		heartbeat_precise = heartbeat
-
 func _start_attack() -> void:
 	_register_combat_input(CombatServerScript.InputType.ATTACK)
-	_mark_heartbeat_combat_activity()
-	_add_heartbeat_pressure(heartbeat_attack_gain)
-	if state == PlayerState.DEAD:
-		return
 	current_attack_animation = "attack_chop" if attack_combo_step == 2 else "attack_a"
 	attack_combo_step = (attack_combo_step + 1) % 3
 	attack_lunge_timer = attack_lunge_time
@@ -876,10 +702,11 @@ func _try_use_item_hotkey() -> bool:
 		return true
 	if _item_select_key_just_pressed(KEY_5, 4):
 		return true
-	if _item_use_key_just_pressed(KEY_E, "use_attack"):
-		return use_selected_attack_item()
-	if _item_use_key_just_pressed(KEY_R, "use_heal"):
-		return use_selected_heal_item()
+	if Input.is_key_pressed(KEY_F) and _is_map_interaction_prompt_visible():
+		item_hotkeys_down["use_selected"] = true
+		return false
+	if _item_use_key_just_pressed():
+		return use_selected_item()
 	return false
 
 func _item_select_key_just_pressed(key: Key, index: int) -> bool:
@@ -888,24 +715,20 @@ func _item_select_key_just_pressed(key: Key, index: int) -> bool:
 	var was_pressed := bool(item_hotkeys_down.get(key_name, false))
 	item_hotkeys_down[key_name] = pressed
 	if pressed and not was_pressed:
-		_set_selected_item_index(index)
+		selected_item_index = clampi(index, 0, DEFAULT_ITEM_COUNTS.size() - 1)
 		stats_changed.emit()
 		return true
 	return false
 
-func _item_use_key_just_pressed(key: Key, action_name: String) -> bool:
-	var pressed := Input.is_key_pressed(key)
-	var was_pressed := bool(item_hotkeys_down.get(action_name, false))
-	item_hotkeys_down[action_name] = pressed
+func _item_use_key_just_pressed() -> bool:
+	var pressed := Input.is_key_pressed(KEY_F)
+	var was_pressed := bool(item_hotkeys_down.get("use_selected", false))
+	item_hotkeys_down["use_selected"] = pressed
 	return pressed and not was_pressed
 
-func _set_selected_item_index(index: int) -> void:
-	selected_item_index = clampi(index, 0, ITEM_ORDER.size() - 1)
-	var item_id := ITEM_ORDER[selected_item_index]
-	if ATTACK_ITEM_IDS.has(item_id):
-		selected_attack_item_index = ATTACK_ITEM_IDS.find(item_id)
-	elif HEAL_ITEM_IDS.has(item_id):
-		selected_heal_item_index = HEAL_ITEM_IDS.find(item_id)
+func _is_map_interaction_prompt_visible() -> bool:
+	var prompt := get_tree().root.find_child("PromptLabel", true, false) as CanvasItem
+	return prompt != null and prompt.visible
 
 func _read_move_axis() -> float:
 	var keyboard_axis := Input.get_axis("move_left", "move_right")
@@ -968,20 +791,8 @@ func get_selected_item_id() -> String:
 	var index := clampi(selected_item_index, 0, ITEM_ORDER.size() - 1)
 	return ITEM_ORDER[index]
 
-func get_selected_attack_item_id() -> String:
-	return ATTACK_ITEM_IDS[clampi(selected_attack_item_index, 0, ATTACK_ITEM_IDS.size() - 1)]
-
-func get_selected_heal_item_id() -> String:
-	return HEAL_ITEM_IDS[clampi(selected_heal_item_index, 0, HEAL_ITEM_IDS.size() - 1)]
-
 func use_selected_item() -> bool:
 	return use_item(get_selected_item_id())
-
-func use_selected_attack_item() -> bool:
-	return use_item(get_selected_attack_item_id())
-
-func use_selected_heal_item() -> bool:
-	return use_item(get_selected_heal_item_id())
 
 func use_item(item_id: String) -> bool:
 	if item_id == "kunai" and is_instance_valid(active_teleport_kunai):
@@ -1027,11 +838,12 @@ func use_item(item_id: String) -> bool:
 func _apply_consumable_effect(item_id: String) -> void:
 	match item_id:
 		"gourd":
-			health = min(max_health, health + max_health * GOURD_HEAL_PERCENT)
+			max_health += GOURD_EXPANSION_HEALTH
+			health = min(max_health, health + GOURD_EXPANSION_HEALTH)
 		"pill":
-			_apply_heartbeat_modifier_item(item_id)
+			heartbeat = max(CombatMathScript.MIN_HEARTBEAT, heartbeat - BLOOD_PRESSURE_HEARTBEAT_DROP)
 		"capsule":
-			_apply_heartbeat_modifier_item(item_id)
+			_add_heartbeat_pressure(ADRENALINE_HEARTBEAT_BOOST)
 
 func _use_kunai() -> bool:
 	if not _can_start_action():
@@ -1093,51 +905,6 @@ func _cancel_current_action_flags() -> void:
 	attack_buffer_timer = 0.0
 	attack_has_hit = false
 	attack_has_cut_projectile = false
-
-func refill_items_to_default() -> void:
-	item_counts = DEFAULT_ITEM_COUNTS.duplicate()
-	stats_changed.emit()
-
-func settle_world_interaction(anchor_position: Vector2, refill_items: bool = false) -> void:
-	_cancel_current_action_flags()
-	is_invulnerable = false
-	action_timer = 0.0
-	dash_timer = 0.0
-	attack_elapsed = 0.0
-	attack_lockout_timer = 0.0
-	attack_combo_step = 0
-	block_age = 0.0
-	block_time_left = 0.0
-	parry_elapsed = 0.0
-	attack_lunge_timer = 0.0
-	parry_flash_timer = 0.0
-	block_flash_timer = 0.0
-	hurt_flash_timer = 0.0
-	perfect_dodge_timer = 0.0
-	hit_impact_vfx_timer = 0.0
-	hitstop_timer = 0.0
-	stored_velocity = Vector2.ZERO
-	heavy_parry_recoil_timer = 0.0
-	heavy_parry_recoil_velocity = Vector2.ZERO
-	current_item_animation = "mudra"
-	sprite.speed_scale = 1.0
-	velocity = Vector2.ZERO
-	if is_instance_valid(active_teleport_kunai):
-		active_teleport_kunai.queue_free()
-	active_teleport_kunai = null
-	if refill_items:
-		item_counts = DEFAULT_ITEM_COUNTS.duplicate()
-		health = max_health
-		lives = max_lives
-		posture = 0.0
-		_set_heartbeat_value(CombatMathScript.MIN_HEARTBEAT)
-		heartbeat_combat_timer = 0.0
-		heartbeat_cooldown_delay_timer = 0.0
-		_clear_heartbeat_modifier()
-	global_position = anchor_position
-	_set_state(PlayerState.IDLE)
-	_update_visuals()
-	stats_changed.emit()
 
 func is_action_locked() -> bool:
 	return state in [PlayerState.ATTACK, PlayerState.PARRY, PlayerState.DASH, PlayerState.EAT, PlayerState.HURT, PlayerState.STUNNED, PlayerState.DEAD]
@@ -1337,8 +1104,6 @@ func _find_perfect_dodge_target() -> Node2D:
 func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node = null, attack_type: int = CombatServerScript.AttackType.NORMAL) -> void:
 	if health <= 0.0:
 		return
-	register_posture_contact()
-	_mark_heartbeat_combat_activity()
 	if is_invulnerable and attack_type != CombatServerScript.AttackType.SWEEP:
 		return
 
@@ -1349,52 +1114,40 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 		perfect_parry = true
 		if attacker != null and attacker.has_method("can_be_perfect_parried_by"):
 			perfect_parry = attacker.can_be_perfect_parried_by(self)
-
-	var took_health_damage := false
-	var posture_gain := 0.0
-
-	if perfect_parry:
-		posture_gain = _posture_amount_from_percent(posture_gain_on_perfect_guard_percent)
-		posture = math.add_posture(posture, posture_gain)
-		posture_locked_full_from_perfect_guard = posture >= max_posture
-		_add_heartbeat_pressure(heartbeat_guard_gain)
+	if perfect_parry or (is_parrying and can_guard and can_block) or (is_blocking and can_guard and can_block):
+		var perfect := perfect_parry
+		posture = math.add_posture(posture, 5.0 if perfect else posture_damage * 2.0)
+		_add_heartbeat_pressure(heartbeat_perfect_guard_gain if perfect else heartbeat_block_gain)
+		if state == PlayerState.DEAD:
+			return
+		var heavy_chop_parry := perfect and _is_attacker_chop_attack(attacker)
 		if attacker != null and attacker.has_method("receive_block_feedback_from_player"):
-			attacker.receive_block_feedback_from_player(true, self)
+			attacker.receive_block_feedback_from_player(perfect, self)
 		elif attacker != null and attacker.has_method("receive_block_feedback"):
-			attacker.receive_block_feedback(true)
-		_play_sfx(parry_sfx)
-		if _is_attacker_chop_attack(attacker):
-			_trigger_parry_feedback(_knockback_direction_from_attacker(attacker), heavy_parry_rebound, heavy_parry_hitstop_time, heavy_parry_camera_shake, 0.16)
-			_trigger_parry_impact_vfx(attacker)
+			attacker.receive_block_feedback(perfect)
+		if perfect:
+			_play_sfx(parry_sfx)
+			if heavy_chop_parry:
+				_trigger_parry_feedback(_knockback_direction_from_attacker(attacker), heavy_parry_rebound, heavy_parry_hitstop_time, heavy_parry_camera_shake, 0.16)
+				_trigger_parry_impact_vfx(attacker)
+			else:
+				_trigger_parry_feedback()
+				_trigger_guard_impact_vfx(attacker)
 		else:
-			_trigger_parry_feedback()
+			_play_sfx(block_sfx)
+			_trigger_block_feedback()
 			_trigger_guard_impact_vfx(attacker)
-	elif (is_parrying and can_guard and can_block) or (is_blocking and can_guard and can_block):
-		var chip_damage := damage * partial_guard_chip_damage_ratio
-		health = math.apply_damage(health, chip_damage)
-		took_health_damage = chip_damage > 0.0
-		posture_gain = _posture_amount_from_percent(posture_gain_on_partial_guard_percent)
-		posture = math.add_posture(posture, posture_gain)
-		posture_locked_full_from_perfect_guard = false
-		_add_heartbeat_pressure(heartbeat_guard_gain)
-		if attacker != null and attacker.has_method("receive_partial_guard_feedback_from_player"):
-			attacker.receive_partial_guard_feedback_from_player(self)
-		elif attacker != null and attacker.has_method("receive_partial_guard_feedback"):
-			attacker.receive_partial_guard_feedback()
-		elif attacker != null and attacker.has_method("receive_block_feedback_from_player"):
-			attacker.receive_block_feedback_from_player(false, self)
-		elif attacker != null and attacker.has_method("receive_block_feedback"):
-			attacker.receive_block_feedback(false)
-		_play_sfx(block_sfx)
-		_trigger_block_feedback()
-		_trigger_guard_impact_vfx(attacker)
 	else:
 		health = math.apply_damage(health, damage)
-		took_health_damage = damage > 0.0
-		posture_gain = _posture_amount_from_percent(posture_gain_on_hit_taken_percent)
-		posture = math.add_posture(posture, posture_gain)
-		posture_locked_full_from_perfect_guard = false
-		if health > 0.0:
+		posture = math.add_posture(posture, posture_damage * 1.35)
+		_add_heartbeat_pressure(heartbeat_clean_hit_gain)
+		if state == PlayerState.DEAD:
+			return
+		if health <= 0.0:
+			_handle_health_depleted()
+			stats_changed.emit()
+			return
+		else:
 			_play_sfx(hurt_sfx)
 			_trigger_hurt_feedback(_knockback_direction_from_attacker(attacker))
 			hurt_animation = "hurt"
@@ -1403,16 +1156,12 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 			action_timer = hurt_time
 			is_invulnerable = true
 
-	if health <= 0.0:
-		_handle_health_depleted()
-		stats_changed.emit()
-		return
-
-	if posture >= max_posture and _should_player_stagger_on_full_posture(took_health_damage, perfect_parry):
-		stunned_hit_heartbeat_cap_pending = took_health_damage
+	if posture >= max_posture:
 		_enter_stunned()
 
 	stats_changed.emit()
+	if health <= 0.0:
+		_handle_health_depleted()
 
 func _check_world_death_bounds() -> void:
 	if not world_death_bounds_enabled:
@@ -1430,8 +1179,6 @@ func _handle_health_depleted() -> void:
 		lives -= 1
 		health = max_health
 		posture = 0.0
-		posture_locked_full_from_perfect_guard = false
-		stunned_hit_heartbeat_cap_pending = false
 		_enter_stunned(&"life_knockdown", life_loss_stunned_time, life_loss_animation_speed, false)
 		return
 	_enter_dead()
@@ -1457,7 +1204,7 @@ func _enter_stunned(animation_name: StringName = &"posture_knockdown", duration 
 	stunned_animation = animation_name
 	stunned_animation_speed = posture_break_animation_speed if animation_speed < 0.0 else animation_speed
 	if keep_posture_at_break:
-		_clear_player_posture_after_break()
+		posture = max_posture
 	action_timer = stunned_time if duration < 0.0 else duration
 	is_blocking = false
 	is_attacking = false
@@ -1873,13 +1620,7 @@ func _receive_attack_deflected() -> void:
 	attack_lockout_timer = attack_deflected_attack_lockout_time
 	attack_lunge_timer = 0.0
 	attack_combo_step = 0
-	register_posture_contact()
-	posture_locked_full_from_perfect_guard = false
-	posture = math.add_posture(posture, _posture_amount_from_percent(posture_gain_on_attack_deflected_percent))
-	if posture >= max_posture:
-		stunned_hit_heartbeat_cap_pending = false
-		_enter_stunned()
-		return
+	posture = math.add_posture(posture, attack_deflected_posture_damage)
 	_add_heartbeat_pressure(6.0)
 	if state == PlayerState.DEAD:
 		return
@@ -2040,15 +1781,7 @@ func reset_combat_state() -> void:
 	health = max_health
 	lives = max_lives
 	posture = 0.0
-	posture_locked_full_from_perfect_guard = false
-	stunned_hit_heartbeat_cap_pending = false
-	posture_combat_timer = 0.0
-	posture_visibility_snapshot = posture
-	_set_heartbeat_value(CombatMathScript.MIN_HEARTBEAT)
-	heartbeat_combat_timer = 0.0
-	heartbeat_cooldown_delay_timer = 0.0
-	heartbeat_direct_checkpoint_respawn = false
-	_clear_heartbeat_modifier()
+	heartbeat = CombatMathScript.MIN_HEARTBEAT
 	state = PlayerState.IDLE
 	previous_state = PlayerState.IDLE
 	is_blocking = false
@@ -2077,8 +1810,6 @@ func reset_combat_state() -> void:
 	current_item_animation = "mudra"
 	item_counts = DEFAULT_ITEM_COUNTS.duplicate()
 	selected_item_index = 0
-	selected_attack_item_index = 0
-	selected_heal_item_index = 0
 	item_hotkeys_down.clear()
 	if is_instance_valid(active_teleport_kunai):
 		active_teleport_kunai.queue_free()

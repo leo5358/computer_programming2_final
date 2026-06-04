@@ -68,12 +68,8 @@ func _initialize() -> void:
 		push_error("Using gourd should consume one count")
 		quit(1)
 		return
-	if not is_equal_approx(float(player.get("max_health")), 120.0):
-		push_error("Gourd should not increase max health")
-		quit(1)
-		return
-	if not is_equal_approx(float(player.get("health")), 120.0):
-		push_error("Gourd should heal 30 percent of max health")
+	if float(player.get("max_health")) <= 100.0:
+		push_error("Gourd expansion should increase max health")
 		quit(1)
 		return
 	if player.velocity != Vector2.ZERO:
@@ -97,36 +93,6 @@ func _initialize() -> void:
 		push_error("Eat item action should finish after mudra animation")
 		quit(1)
 		return
-	player.set("health", 40.0)
-	if not player.use_item("gourd"):
-		push_error("Gourd should remain usable after the first drink")
-		quit(1)
-		return
-	if not is_equal_approx(float(player.get("health")), 76.0):
-		push_error("Gourd should restore exactly 30 percent of max health")
-		quit(1)
-		return
-	player.set("action_timer", 0.0)
-	player._update_action_state(0.01)
-
-	if not player.has_method("get_selected_attack_item_id") or not player.has_method("get_selected_heal_item_id"):
-		push_error("Player should expose category-specific selected items")
-		quit(1)
-		return
-	if player.get_selected_attack_item_id() != "kunai" or player.get_selected_heal_item_id() != "gourd":
-		push_error("Player should default to the first attack and heal items")
-		quit(1)
-		return
-	player.set("selected_attack_item_index", 1)
-	player.set("selected_heal_item_index", 2)
-	if player.get_selected_attack_item_id() != "ash_balls":
-		push_error("Player should map attack slot 2 to ash_balls")
-		quit(1)
-		return
-	if player.get_selected_heal_item_id() != "capsule":
-		push_error("Player should map heal slot 3 to capsule")
-		quit(1)
-		return
 
 	var base_heartbeat := float(player.get("heartbeat"))
 	if not player.use_item("capsule"):
@@ -137,13 +103,13 @@ func _initialize() -> void:
 		push_error("Adrenaline capsule should use the 0.8s eat animation")
 		quit(1)
 		return
-	if not is_equal_approx(float(player.get("heartbeat")), base_heartbeat):
-		push_error("Adrenaline capsule should not change heartbeat instantly")
+	if float(player.get("heartbeat")) <= base_heartbeat:
+		push_error("Adrenaline capsule should raise heartbeat")
 		quit(1)
 		return
 	player.set("action_timer", 0.0)
 	player._update_action_state(0.01)
-	var heartbeat_after_capsule := float(player.get("heartbeat"))
+	var raised_heartbeat := float(player.get("heartbeat"))
 	if not player.use_item("pill"):
 		push_error("Blood pressure pill should be usable")
 		quit(1)
@@ -152,37 +118,8 @@ func _initialize() -> void:
 		push_error("Blood pressure pill should use the 0.8s eat animation")
 		quit(1)
 		return
-	if not is_equal_approx(float(player.get("heartbeat")), heartbeat_after_capsule):
-		push_error("Blood pressure pill should not change heartbeat instantly")
-		quit(1)
-		return
-	player.set("action_timer", 0.0)
-	player._update_action_state(0.01)
-
-	if not player.use_selected_attack_item():
-		push_error("Attack category use should trigger the selected attack item")
-		quit(1)
-		return
-	if player.get_current_animation() != "throw" or not is_equal_approx(float(player.get("action_timer")), 0.8):
-		push_error("Selected ash_ball should use the throw animation")
-		quit(1)
-		return
-	if player.get_item_count("ash_balls") != 9:
-		push_error("Selected ash_ball should consume one count")
-		quit(1)
-		return
-	player.set("action_timer", 0.0)
-	player._update_action_state(0.01)
-	if not player.use_selected_heal_item():
-		push_error("Heal category use should trigger the selected heal item")
-		quit(1)
-		return
-	if player.get_current_animation() != "eat" or not is_equal_approx(float(player.get("action_timer")), 0.8):
-		push_error("Selected capsule should use the eat animation")
-		quit(1)
-		return
-	if player.get_item_count("capsule") != 8:
-		push_error("Selected capsule should consume one additional count")
+	if float(player.get("heartbeat")) >= raised_heartbeat:
+		push_error("Blood pressure pill should lower heartbeat")
 		quit(1)
 		return
 	player.set("action_timer", 0.0)

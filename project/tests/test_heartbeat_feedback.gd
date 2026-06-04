@@ -3,7 +3,7 @@ extends SceneTree
 class FakePlayer:
 	extends Node2D
 	signal stats_changed
-	var heartbeat := 70.0
+	var heartbeat := 65.0
 
 func _initialize() -> void:
 	var feedback_script: Script = load("res://scripts/heartbeat_feedback.gd")
@@ -33,7 +33,7 @@ func _initialize() -> void:
 		quit(1)
 		return
 
-	player.heartbeat = 70.0
+	player.heartbeat = 65.0
 	feedback._update_feedback(0.0)
 	var calm_alpha := top_edge.color.a
 	if calm_alpha > 0.02:
@@ -41,22 +41,10 @@ func _initialize() -> void:
 		quit(1)
 		return
 
-	player.heartbeat = 134.0
-	feedback._update_feedback(0.0)
-	if top_edge.color.a > 0.02:
-		push_error("Heartbeat warning should stay invisible below 135 BPM")
-		quit(1)
-		return
-	feedback._update_heartbeat_audio(0.0)
-	if heartbeat_sfx.volume_db != feedback.min_volume_db:
-		push_error("Heartbeat audio should stay at minimum volume below 135 BPM")
-		quit(1)
-		return
-
 	player.heartbeat = 180.0
 	feedback._update_feedback(0.0)
 	var tense_alpha := top_edge.color.a
-	if tense_alpha <= calm_alpha + 0.05:
+	if tense_alpha <= calm_alpha + 0.18:
 		push_error("High heartbeat should visibly intensify the red edge")
 		quit(1)
 		return
@@ -69,7 +57,7 @@ func _initialize() -> void:
 		quit(1)
 		return
 
-	player.heartbeat = 220.0
+	player.heartbeat = 190.0
 	feedback.heartbeat_timer = 0.0
 	feedback._update_feedback(0.2)
 	if feedback.heartbeat_timer <= 0.0:

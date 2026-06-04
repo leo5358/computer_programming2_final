@@ -37,13 +37,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	match event.keycode:
 		KEY_UP, KEY_W:
 			move_selection(-1)
-			_mark_input_handled()
+			get_viewport().set_input_as_handled()
 		KEY_DOWN, KEY_S:
 			move_selection(1)
-			_mark_input_handled()
+			get_viewport().set_input_as_handled()
 		KEY_ENTER, KEY_KP_ENTER:
 			confirm_selection()
-			_mark_input_handled()
+			get_viewport().set_input_as_handled()
 
 func show_death() -> void:
 	visible = true
@@ -97,7 +97,7 @@ func _setup_button_click_sfx() -> void:
 		button_click_sfx.stream = load(BUTTON_CLICK_SFX_PATH)
 
 func _play_button_click_sfx() -> void:
-	if button_click_sfx != null and button_click_sfx.stream != null and button_click_sfx.is_inside_tree():
+	if button_click_sfx != null and button_click_sfx.stream != null:
 		button_click_sfx.play()
 
 func _build_ui() -> void:
@@ -161,12 +161,7 @@ func _on_option_gui_input(event: InputEvent, option_index: int) -> void:
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		confirm_option(option_index)
-		_mark_input_handled()
-
-func _mark_input_handled() -> void:
-	var viewport := get_viewport()
-	if viewport != null:
-		viewport.set_input_as_handled()
+		get_viewport().set_input_as_handled()
 
 func _update_selection() -> void:
 	if retry_label == null or main_menu_label == null:
