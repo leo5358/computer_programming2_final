@@ -26,15 +26,22 @@ func _initialize() -> void:
 		push_error("Enemy test field should include the chapter 1 foothill stairs map")
 		quit(1)
 		return
+	await process_frame
+	var baseline_map_enemy_count := get_nodes_in_group("map_spawned_enemy").size()
+	if baseline_map_enemy_count != 6:
+		push_error("Enemy test field should start with AB foothill map enemies")
+		quit(1)
+		return
 
 	main._spawn_enemy(main.WARRIOR_SCENE, Vector2(460, 360))
 	await process_frame
-	if get_nodes_in_group("minor_enemy").size() != 1:
+	if get_nodes_in_group("minor_enemy").size() != baseline_map_enemy_count + 1:
 		push_error("Spawner should create a minor enemy")
 		quit(1)
 		return
 
-	var enemy: Node = get_nodes_in_group("minor_enemy")[0]
+	var minor_enemies := get_nodes_in_group("minor_enemy")
+	var enemy: Node = minor_enemies[minor_enemies.size() - 1]
 	if not enemy.has_method("get_vision_rect"):
 		push_error("Spawned enemy should expose vision rect for debug mode")
 		quit(1)
@@ -55,6 +62,7 @@ func _initialize() -> void:
 		quit(1)
 		return
 	main.reset_test_field()
+	await process_frame
 	await process_frame
 	if not main.has_method("_spawn_debug_boss"):
 		push_error("Spawner should expose debug Boss spawning for key 0")
@@ -82,8 +90,13 @@ func _initialize() -> void:
 
 	main.reset_test_field()
 	await process_frame
-	if get_nodes_in_group("minor_enemy").size() != 0 or get_nodes_in_group("boss").size() != 0:
-		push_error("Reset should clear all spawned enemies and bosses")
+	await process_frame
+	if get_nodes_in_group("map_spawned_enemy").size() != baseline_map_enemy_count:
+		push_error("Reset should respawn AB foothill map enemies")
+		quit(1)
+		return
+	if get_nodes_in_group("minor_enemy").size() != baseline_map_enemy_count or get_nodes_in_group("boss").size() != 0:
+		push_error("Reset should clear debug-spawned enemies and bosses")
 		quit(1)
 		return
 	if main.get_node_or_null("TrainingDummy") != null:
@@ -96,6 +109,54 @@ func _initialize() -> void:
 		push_error("Main should include player for debug death test")
 		quit(1)
 		return
+	var pause_overlay: CanvasLayer = main.get_node_or_null("PauseOverlay")
+	if pause_overlay == null:
+		push_error("Main should include PauseOverlay for ESC pause")
+		quit(1)
+		return
+	if not main.has_method("_open_pause_menu") or not main.has_method("_resume_from_pause"):
+		push_error("Main should expose pause menu open and resume flow")
+		quit(1)
+		return
+	main._open_pause_menu()
+	await process_frame
+	if not paused:
+		push_error("Opening pause menu should pause the scene tree")
+		quit(1)
+		return
+	if not pause_overlay.visible:
+		push_error("Opening pause menu should show PauseOverlay")
+		quit(1)
+		return
+	main._resume_from_pause()
+	await process_frame
+	if paused:
+		push_error("Resuming pause menu should unpause the scene tree")
+		quit(1)
+		return
+	if pause_overlay.visible:
+		push_error("Resuming pause menu should hide PauseOverlay")
+		quit(1)
+		return
+	if not main.has_method("_save_current_checkpoint_progress"):
+		push_error("Main should expose checkpoint save for pause return-to-menu")
+		quit(1)
+		return
+	if save_manager != null and save_manager.has_method("delete_save"):
+		save_manager.delete_save()
+	player.set("spawn_position", Vector2(888, 571))
+	player.set("health", 76.0)
+	main._save_current_checkpoint_progress()
+	if save_manager == null or not save_manager.has_save():
+		push_error("Pause save should create a checkpoint save when none exists")
+		quit(1)
+		return
+	if save_manager.get_saved_position().distance_to(Vector2(888, 571)) > 1.0:
+		push_error("Pause save should use the player's checkpoint spawn position")
+		quit(1)
+		return
+	if save_manager.has_method("delete_save"):
+		save_manager.delete_save()
 	if not main.has_method("_debug_kill_player"):
 		push_error("Spawner should expose debug player death for checkpoint testing")
 		quit(1)

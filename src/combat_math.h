@@ -6,7 +6,8 @@ extern "C" {
 #endif
 
 #define COMBAT_MIN_HEARTBEAT 65.0
-#define COMBAT_MAX_HEARTBEAT 120.0
+#define COMBAT_ADRENALINE_HEARTBEAT 120.0
+#define COMBAT_MAX_HEARTBEAT 200.0
 
 double combat_apply_damage(double current_health, double damage);
 double combat_add_posture(double current_posture, double amount);

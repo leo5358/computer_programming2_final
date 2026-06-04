@@ -32,6 +32,11 @@ func _initialize() -> void:
 		push_error("Torchman should call nearby Warrior/Archer allies when fleeing")
 		quit(1)
 		return
+	torchman._update_combat_movement()
+	if torchman.state != torchman.EnemyState.FLEE or torchman.velocity.x <= 0.0:
+		push_error("Torchman should keep fleeing until it has opened enough distance")
+		quit(1)
+		return
 
 	player.global_position = Vector2(286.0, 360.0)
 	torchman.attack_cooldown = 0.0

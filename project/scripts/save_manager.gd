@@ -62,6 +62,8 @@ func get_saved_health() -> float:
 	return current_save_data.get("health", 100.0)
 
 func delete_save() -> void:
+	current_save_data = {}
 	if FileAccess.file_exists(SAVE_PATH):
-		DirAccess.remove_absolute(SAVE_PATH)
-		current_save_data = {}
+		var user_dir := DirAccess.open("user://")
+		if user_dir != null:
+			user_dir.remove("savegame.json")

@@ -16,6 +16,11 @@ const H_STONE_PLAZA_SPAWN := Vector2(220, 530.5)
 const BOSS_INTERIOR_SPAWN := Vector2(220, 640.5)
 const BOSS_INTERIOR_BOSS_SPAWN := Vector2(1050, 640.5)
 const TRANSITION_FADE_TIME := 0.45
+const MAP_CLIMB_BOUNDS := {
+	"ab_foothill": Vector2(0.0, 15600.0),
+	"h_stone_plaza": Vector2(0.0, 3000.0),
+	"boss_interior": Vector2(0.0, 2000.0),
+}
 
 var spawn_offsets: Dictionary = {
 	KEY_7: Vector2(360, 360),
@@ -25,11 +30,14 @@ var spawn_offsets: Dictionary = {
 }
 var current_map_id := "ab_foothill"
 var is_transitioning := false
+var is_pause_menu_open := false
+var bgm_volume_before_pause := 0.0
 
 @onready var interaction_prompt: Label = $MapTransitionUI/PromptLabel
 @onready var fade_rect: ColorRect = $MapTransitionUI/FadeRect
 @onready var bgm_player: Node = get_node_or_null("BgmPlayer")
 @onready var death_overlay: CanvasLayer = get_node_or_null("DeathOverlay")
+@onready var pause_overlay: CanvasLayer = get_node_or_null("PauseOverlay")
 
 func _ready() -> void:
 	add_to_group("enemy_test_spawner")
@@ -38,9 +46,11 @@ func _ready() -> void:
 	fade_rect.color = Color(0, 0, 0, 0)
 	_play_start_page_fade_in_if_needed()
 	_check_for_saved_game_load()
+	_apply_current_map_climb_bounds()
 	_update_map_bgm()
 	_connect_player_death_signal()
 	_connect_death_overlay()
+	_connect_pause_overlay()
 	if _should_spawn_default_boss_for_current_run():
 		_spawn_enemy(BOSS_SCENE, spawn_offsets[KEY_0])
 
@@ -85,6 +95,9 @@ func _input(event: InputEvent) -> void:
 	if not (event is InputEventKey) or event.echo or not event.pressed:
 		return
 	match event.keycode:
+		KEY_ESCAPE:
+			_toggle_pause_menu()
+			get_viewport().set_input_as_handled()
 		KEY_7:
 			_spawn_enemy(TORCHMAN_SCENE, spawn_offsets[KEY_7])
 			get_viewport().set_input_as_handled()
@@ -118,6 +131,7 @@ func _input(event: InputEvent) -> void:
 
 func reset_test_field() -> void:
 	clear_test_enemies()
+	call_deferred("_respawn_map_enemies")
 	var player: Node = get_tree().get_first_node_in_group("player")
 	if player != null and player.has_method("reset_combat_state"):
 		player.reset_combat_state()
@@ -148,7 +162,79 @@ func _connect_death_overlay() -> void:
 	if death_overlay.has_signal("main_menu_requested") and not death_overlay.is_connected("main_menu_requested", menu_callback):
 		death_overlay.connect("main_menu_requested", menu_callback)
 
+func _connect_pause_overlay() -> void:
+	if pause_overlay == null:
+		return
+	var resume_callback := Callable(self, "_resume_from_pause")
+	var save_menu_callback := Callable(self, "_save_and_return_to_start_page")
+	if pause_overlay.has_signal("resume_requested") and not pause_overlay.is_connected("resume_requested", resume_callback):
+		pause_overlay.connect("resume_requested", resume_callback)
+	if pause_overlay.has_signal("save_and_menu_requested") and not pause_overlay.is_connected("save_and_menu_requested", save_menu_callback):
+		pause_overlay.connect("save_and_menu_requested", save_menu_callback)
+
+func _toggle_pause_menu() -> void:
+	if is_pause_menu_open:
+		_resume_from_pause()
+	else:
+		_open_pause_menu()
+
+func _open_pause_menu() -> void:
+	if pause_overlay == null or is_transitioning or _is_death_overlay_active():
+		return
+	if bgm_player is AudioStreamPlayer:
+		var player_bgm := bgm_player as AudioStreamPlayer
+		bgm_volume_before_pause = player_bgm.volume_db
+		player_bgm.volume_db = bgm_volume_before_pause - 8.0
+	is_pause_menu_open = true
+	if pause_overlay.has_method("show_pause"):
+		pause_overlay.show_pause()
+	get_tree().paused = true
+
+func _resume_from_pause() -> void:
+	if not is_pause_menu_open:
+		return
+	get_tree().paused = false
+	is_pause_menu_open = false
+	if bgm_player is AudioStreamPlayer:
+		(bgm_player as AudioStreamPlayer).volume_db = bgm_volume_before_pause
+	if pause_overlay != null and pause_overlay.has_method("hide_pause"):
+		pause_overlay.hide_pause()
+
+func _save_and_return_to_start_page() -> void:
+	_save_current_checkpoint_progress()
+	_resume_from_pause()
+	call_deferred("_finish_save_and_return_to_start_page")
+
+func _finish_save_and_return_to_start_page() -> void:
+	clear_test_enemies()
+	_set_player_transition_locked(false)
+	get_tree().change_scene_to_file(START_PAGE_SCENE_PATH)
+
+func _save_current_checkpoint_progress() -> void:
+	if not has_node("/root/SaveManager"):
+		return
+	var sm = get_node("/root/SaveManager")
+	if sm.has_save():
+		sm.save_game(sm.get_saved_map(), sm.get_saved_position(), sm.get_saved_health())
+		return
+
+	var player := _get_player()
+	if player == null:
+		return
+	var save_position := player.global_position
+	if "spawn_position" in player:
+		save_position = player.spawn_position
+	var health := 100.0
+	if player.get("health") != null:
+		health = float(player.get("health"))
+	sm.save_game(current_map_id, save_position, health)
+
+func _is_death_overlay_active() -> bool:
+	return death_overlay != null and (death_overlay.visible or bool(death_overlay.get("is_active")))
+
 func _on_player_died() -> void:
+	if is_pause_menu_open:
+		_resume_from_pause()
 	_set_player_transition_locked(true)
 	if death_overlay != null and death_overlay.has_method("show_death"):
 		death_overlay.show_death()
@@ -233,6 +319,7 @@ func _restore_player_save_state(spawn: Vector2, health: float) -> void:
 	if player == null:
 		return
 	player.global_position = spawn
+	_apply_current_map_climb_bounds()
 	if "spawn_position" in player:
 		player.spawn_position = spawn
 	if player.get("health") != null:
@@ -245,6 +332,11 @@ func clear_test_enemies() -> void:
 		for node in get_tree().get_nodes_in_group(group_name):
 			if node != null and node != self:
 				node.queue_free()
+
+func _respawn_map_enemies() -> void:
+	for spawn_point in get_tree().get_nodes_in_group("enemy_spawn_point"):
+		if spawn_point != null and spawn_point.has_method("respawn_enemy"):
+			spawn_point.respawn_enemy()
 
 func _spawn_enemy(scene: PackedScene, spawn_position: Vector2) -> Node:
 	var instance: Node = scene.instantiate()
@@ -404,12 +496,13 @@ func _switch_map(next_scene: PackedScene, next_map_id: String, player_spawn: Vec
 	var new_map: Node = next_scene.instantiate()
 	add_child(new_map)
 	new_map.name = "Chapter1Map"
+	current_map_id = next_map_id
 	if player != null:
 		move_child(new_map, player.get_index())
 		player.global_position = player_spawn
+		_apply_current_map_climb_bounds()
 		if "spawn_position" in player:
 			player.spawn_position = player_spawn
-	current_map_id = next_map_id
 	_update_map_bgm()
 
 func _update_map_bgm() -> void:
@@ -421,6 +514,17 @@ func _restart_map_bgm(map_id: String) -> void:
 		bgm_player.restart_map_bgm(map_id)
 	elif bgm_player != null and bgm_player.has_method("set_map_bgm"):
 		bgm_player.set_map_bgm(map_id)
+
+func _apply_current_map_climb_bounds() -> void:
+	var player := _get_player()
+	if player == null or not player.has_method("set_map_climb_bounds"):
+		return
+	if not MAP_CLIMB_BOUNDS.has(current_map_id):
+		if player.has_method("clear_map_climb_bounds"):
+			player.clear_map_climb_bounds()
+		return
+	var bounds: Vector2 = MAP_CLIMB_BOUNDS[current_map_id]
+	player.set_map_climb_bounds(bounds.x, bounds.y)
 
 func _set_player_transition_locked(is_locked: bool) -> void:
 	var player: Node2D = _get_player()

@@ -80,10 +80,11 @@ func _update_combat_movement() -> void:
 	var distance: float = abs(offset_x)
 	if absf(offset_x) > 4.0:
 		facing = sign(offset_x)
-	if not has_called_allies and distance > attack_range:
+	if distance > attack_range and (not has_called_allies or distance < flee_until_distance):
 		state = EnemyState.FLEE
 		velocity.x = -sign(offset_x) * flee_speed
-		_call_nearby_allies()
+		if not has_called_allies:
+			_call_nearby_allies()
 		return
 	if distance <= attack_range and attack_cooldown <= 0.0:
 		_start_attack()

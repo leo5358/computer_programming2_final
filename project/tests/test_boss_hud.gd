@@ -20,8 +20,13 @@ func _initialize() -> void:
 	var hud_root := hud.get_node_or_null("BossHudRoot") as Control
 	var health_fill := hud.get_node_or_null("BossHudRoot/HealthFill") as ColorRect
 	var posture_fill := hud.get_node_or_null("BossHudRoot/PostureFill") as ColorRect
+	var overhead_bars := boss.get_node_or_null("OverheadBars") as Node2D
 	if hud_root == null or health_fill == null or posture_fill == null:
 		push_error("Boss HUD should build health and posture bars")
+		quit(1)
+		return
+	if overhead_bars != null and overhead_bars.visible:
+		push_error("Boss should hide minor-enemy overhead health and posture bars")
 		quit(1)
 		return
 	if hud.get_node_or_null("BossHudRoot/HealthValue") != null or hud.get_node_or_null("BossHudRoot/PostureValue") != null:

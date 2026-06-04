@@ -251,6 +251,37 @@ func _initialize() -> void:
 		push_error("Wall climb should become available again after the jump-first lockout")
 		quit(1)
 		return
+	if not player.has_method("set_map_climb_bounds"):
+		push_error("Player should expose map-specific climb bounds")
+		quit(1)
+		return
+	player.set_map_climb_bounds(0.0, 15600.0)
+	player.global_position.x = 40.0
+	if not player._is_at_world_horizontal_boundary(-1.0):
+		push_error("Player should detect ab_foothill left map boundary as unclimbable")
+		quit(1)
+		return
+	if player._is_at_world_horizontal_boundary(1.0):
+		push_error("Player should only block wall climb when pressing toward the nearby boundary")
+		quit(1)
+		return
+	player.global_position.x = 15598.0
+	if not player._is_at_world_horizontal_boundary(1.0):
+		push_error("Player should detect ab_foothill right map boundary as unclimbable")
+		quit(1)
+		return
+	player.set_map_climb_bounds(0.0, 3000.0)
+	player.global_position.x = 2998.0
+	if not player._is_at_world_horizontal_boundary(1.0):
+		push_error("Player should detect plaza right map boundary as unclimbable")
+		quit(1)
+		return
+	player.set_map_climb_bounds(0.0, 2000.0)
+	player.global_position.x = 1998.0
+	if not player._is_at_world_horizontal_boundary(1.0):
+		push_error("Player should detect boss interior right map boundary as unclimbable")
+		quit(1)
+		return
 	Input.action_release("jump")
 
 	player.posture = 99.0

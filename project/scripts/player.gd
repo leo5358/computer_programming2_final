@@ -16,6 +16,7 @@ const PLAYER_SHEET_PATHS := [
 const PLAYER_STRIP_CELL_SIZE := 96
 const DEFAULT_SPRITE_SCALE := Vector2.ONE
 const WALK_SPRITE_SCALE := Vector2(1.1, 1.1)
+const DEFLECT_MISS_SPRITE_SCALE := Vector2(1.1, 1.1)
 const PLAYER_STRIP_PATHS := {
 	"idle": "res://assets/sprites/player/idle.png",
 	"walk": "res://assets/sprites/player/walk.png",
@@ -23,15 +24,22 @@ const PLAYER_STRIP_PATHS := {
 	"attack_a": "res://assets/sprites/player/attack.png",
 	"attack_chop": "res://assets/sprites/player/chop.png",
 	"deflect": "res://assets/sprites/player/deflect.png",
-	"parry": "res://assets/sprites/player/deflect.png",
-	"block": "res://assets/sprites/player/deflect.png",
+	"deflect_miss": "res://assets/sprites/player/deflect_miss.png",
+	"parry": "res://assets/sprites/player/deflect_miss.png",
+	"block": "res://assets/sprites/player/deflect_miss.png",
 	"dash": "res://assets/sprites/player/dash.png",
 	"jump": "res://assets/sprites/player/jump.png",
 	"climb": "res://assets/sprites/player/climb.png",
+	"eat": "res://assets/sprites/player/eat.png",
 	"mudra": "res://assets/sprites/player/mudra.png",
+	"throw": "res://assets/sprites/player/throw.png",
 	"hurt": "res://assets/sprites/player/hurt.png",
 	"death": "res://assets/sprites/player/death.png",
 }
+const ITEM_ACTION_TIME := 0.8
+const MUDRA_FOCUS_FRAME_START := 3
+const MUDRA_FOCUS_FRAME_END := 5
+const MUDRA_FOCUS_DURATION_RATIO := 0.70
 const DEFAULT_ITEM_COUNTS := {
 	"gourd": 10,
 	"kunai": 10,
@@ -93,6 +101,7 @@ const HURT_SFX_PATH := "res://assets/sfx/player_hurt.wav"
 const DEATH_SFX_PATH := "res://assets/sfx/player_death.wav"
 const DASH_SFX_PATH := "res://assets/sfx/dodge.WAV"
 const PERFECT_DODGE_SFX_PATH := "res://assets/sfx/player_perfect_dodge.wav"
+const KUNAI_SFX_PATH := "res://assets/sfx/kunai.MP3"
 const ATTACK_ANIMATION_FPS := 11.43
 
 enum PlayerState {
@@ -132,6 +141,7 @@ enum PlayerState {
 @export var auto_step_increment := 4.0
 @export var wall_climb_requires_jump := true
 @export var jump_to_ledge_climb_lockout := 0.28
+@export var world_boundary_climb_margin := 24.0
 @export var max_health := 100.0
 @export var max_posture := 100.0
 @export var max_lives := 3
@@ -166,6 +176,8 @@ enum PlayerState {
 @export var parry_window := 0.45
 @export var parry_success_recovery_time := 0.12
 @export var parry_flash_time := 0.14
+@export var block_hold_frame := 3
+@export var block_release_time := 0.50
 @export var dash_duration := 0.14
 @export var perfect_dodge_duration := 0.14
 @export var perfect_dodge_impulse := 520.0
@@ -192,6 +204,12 @@ enum PlayerState {
 @export var heavy_parry_hitstop_time := 0.20
 @export var heavy_parry_recoil_time := 0.26
 @export var heavy_parry_camera_shake := 42.0
+@export var heartbeat_block_rise_rate := 18.0
+@export var heartbeat_cooldown_rate := 8.0
+@export var heartbeat_perfect_guard_gain := 4.0
+@export var heartbeat_block_gain := 5.0
+@export var heartbeat_clean_hit_gain := 20.0
+@export var heartbeat_danger_death_enabled := true
 
 var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
 var health := max_health
@@ -230,6 +248,7 @@ var attack_lunge_timer := 0.0
 var current_animation := ""
 var parry_flash_timer := 0.0
 var block_flash_timer := 0.0
+var is_block_releasing := false
 var hurt_flash_timer := 0.0
 var perfect_dodge_timer := 0.0
 var hit_impact_vfx_timer := 0.0
@@ -248,6 +267,10 @@ var item_counts: Dictionary = DEFAULT_ITEM_COUNTS.duplicate()
 var item_hotkeys_down: Dictionary = {}
 var selected_item_index := 0
 var active_teleport_kunai: Node2D = null
+var current_item_animation := "mudra"
+var has_map_climb_bounds := false
+var map_climb_left_x := 0.0
+var map_climb_right_x := 0.0
 var ai_move_axis := 0.0
 var ai_attack_requested := false
 var ai_parry_requested := false
@@ -260,6 +283,7 @@ var chop_hit_stream: AudioStream = null
 var attack_miss_streams: Array[AudioStream] = []
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var body_collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var attack_area: Area2D = $AttackArea
 @onready var hit_impact_vfx: AnimatedSprite2D = get_node_or_null("HitImpactVfx") as AnimatedSprite2D
 @onready var attack_sfx: AudioStreamPlayer2D = $AttackSfx
@@ -269,6 +293,7 @@ var attack_miss_streams: Array[AudioStream] = []
 @onready var death_sfx: AudioStreamPlayer2D = $DeathSfx
 @onready var dash_sfx: AudioStreamPlayer2D = $DashSfx
 @onready var perfect_dodge_sfx: AudioStreamPlayer2D = $PerfectDodgeSfx
+@onready var kunai_sfx: AudioStreamPlayer2D = $KunaiSfx
 @onready var math: RefCounted = CombatMathScript.new()
 
 func _ready() -> void:
@@ -375,10 +400,17 @@ func _update_movement(delta: float) -> void:
 		return
 
 	if state == PlayerState.HURT:
+		if hurt_animation == "deflect_miss" or hurt_animation == "deflect":
+			velocity.x = 0.0
+			return
 		velocity.x = move_toward(velocity.x, 0.0, hurt_slide_friction * delta)
 		return
 
-	if state in [PlayerState.PARRY, PlayerState.EAT, PlayerState.STUNNED]:
+	if state in [PlayerState.PARRY, PlayerState.BLOCK]:
+		velocity.x = 0.0
+		return
+
+	if state in [PlayerState.EAT, PlayerState.STUNNED]:
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 		return
 
@@ -463,6 +495,7 @@ func _should_use_wall_climb(direction: float) -> bool:
 		_can_wall_interact()
 		and _is_pressing_into_wall(direction)
 		and _has_wall_climb_input()
+		and not _is_at_world_horizontal_boundary(direction)
 		and not _should_prefer_auto_step_over_climb()
 		and not _should_defer_wall_climb_for_jump()
 	)
@@ -472,6 +505,33 @@ func _has_wall_climb_input() -> bool:
 
 func _should_defer_wall_climb_for_jump() -> bool:
 	return wall_climb_lockout_timer > 0.0 and state != PlayerState.WALL_CLIMB
+
+func set_map_climb_bounds(left_x: float, right_x: float) -> void:
+	has_map_climb_bounds = true
+	map_climb_left_x = min(left_x, right_x)
+	map_climb_right_x = max(left_x, right_x)
+
+func clear_map_climb_bounds() -> void:
+	has_map_climb_bounds = false
+
+func _is_at_world_horizontal_boundary(direction: float) -> bool:
+	if direction == 0.0:
+		return false
+	if not has_map_climb_bounds and not world_death_bounds_enabled:
+		return false
+	var left_edge: float = map_climb_left_x if has_map_climb_bounds else world_death_bounds.position.x
+	var right_edge: float = map_climb_right_x if has_map_climb_bounds else world_death_bounds.position.x + world_death_bounds.size.x
+	var center_margin: float = world_boundary_climb_margin + _body_half_width()
+	if direction < 0.0:
+		return global_position.x <= left_edge + center_margin
+	return global_position.x >= right_edge - center_margin
+
+func _body_half_width() -> float:
+	if body_collision_shape == null or body_collision_shape.shape == null:
+		return 0.0
+	if body_collision_shape.shape is RectangleShape2D:
+		return ((body_collision_shape.shape as RectangleShape2D).size.x * absf(body_collision_shape.scale.x)) * 0.5
+	return 0.0
 
 func _should_prefer_auto_step_over_climb() -> bool:
 	return auto_step_enabled and (is_on_floor() or coyote_timer > 0.0)
@@ -554,6 +614,13 @@ func _update_action_state(delta: float) -> void:
 		if action_timer <= 0.0:
 			_start_block()
 
+	elif state == PlayerState.BLOCK:
+		if is_block_releasing:
+			action_timer -= delta
+			if action_timer <= 0.0:
+				is_block_releasing = false
+				_set_state(PlayerState.IDLE)
+
 	elif state == PlayerState.DASH:
 		dash_timer -= delta
 		if dash_timer <= 0.0:
@@ -585,12 +652,30 @@ func _update_combat(delta: float) -> void:
 	if is_blocking:
 		block_age += delta
 		block_time_left -= delta
-		heartbeat = math.add_heartbeat(heartbeat, 18.0 * delta)
+		_add_heartbeat_pressure(heartbeat_block_rise_rate * delta)
+		if state == PlayerState.DEAD:
+			return
 		if not Input.is_action_pressed("block") or block_time_left <= 0.0:
-			is_blocking = false
-			_set_state(PlayerState.IDLE)
+			_start_block_release()
 	else:
-		heartbeat = max(CombatMathScript.MIN_HEARTBEAT, heartbeat - 8.0 * delta)
+		heartbeat = max(CombatMathScript.MIN_HEARTBEAT, heartbeat - heartbeat_cooldown_rate * delta)
+
+func _add_heartbeat_pressure(amount: float) -> void:
+	heartbeat = math.add_heartbeat(heartbeat, amount)
+	_check_heartbeat_death()
+
+func _check_heartbeat_death() -> bool:
+	if not heartbeat_danger_death_enabled:
+		return false
+	if state == PlayerState.DEAD:
+		return true
+	if heartbeat < CombatMathScript.MAX_HEARTBEAT - 0.001:
+		return false
+	heartbeat = CombatMathScript.MAX_HEARTBEAT
+	_enter_dead()
+	stats_changed.emit()
+	died.emit()
+	return true
 
 func _start_attack() -> void:
 	_register_combat_input(CombatServerScript.InputType.ATTACK)
@@ -731,9 +816,10 @@ func use_item(item_id: String) -> bool:
 		attack_has_hit = false
 		attack_has_cut_projectile = false
 		velocity = Vector2.ZERO
+		current_item_animation = "eat"
 		_set_state(PlayerState.EAT)
-		action_timer = _animation_duration("mudra")
-		_force_play_animation("mudra")
+		action_timer = ITEM_ACTION_TIME
+		_force_play_animation(current_item_animation)
 		_apply_consumable_effect(item_id)
 		stats_changed.emit()
 		return true
@@ -757,15 +843,16 @@ func _apply_consumable_effect(item_id: String) -> void:
 		"pill":
 			heartbeat = max(CombatMathScript.MIN_HEARTBEAT, heartbeat - BLOOD_PRESSURE_HEARTBEAT_DROP)
 		"capsule":
-			heartbeat = math.add_heartbeat(heartbeat, ADRENALINE_HEARTBEAT_BOOST)
+			_add_heartbeat_pressure(ADRENALINE_HEARTBEAT_BOOST)
 
 func _use_kunai() -> bool:
 	if not _can_start_action():
 		return false
 	_cancel_current_action_flags()
+	current_item_animation = "mudra"
 	_set_state(PlayerState.EAT)
-	action_timer = 0.35
-	_force_play_animation("mudra")
+	action_timer = ITEM_ACTION_TIME
+	_force_play_animation(current_item_animation)
 	
 	var kunai = KunaiScene.instantiate()
 	kunai.global_position = global_position + Vector2(25 * facing, -45)
@@ -787,6 +874,7 @@ func _teleport_to_active_kunai() -> bool:
 	global_position = target_position
 	velocity = Vector2.ZERO
 	_set_state(PlayerState.IDLE)
+	_play_sfx(kunai_sfx)
 	stats_changed.emit()
 	return true
 
@@ -794,9 +882,10 @@ func _use_ash_balls() -> bool:
 	if not _can_start_action():
 		return false
 	_cancel_current_action_flags()
+	current_item_animation = "throw"
 	_set_state(PlayerState.EAT)
-	action_timer = 0.5
-	_force_play_animation("mudra")
+	action_timer = ITEM_ACTION_TIME
+	_force_play_animation(current_item_animation)
 
 	var ash_ball = AshBallScene.instantiate()
 	ash_ball.global_position = global_position + Vector2(25 * facing, -45)
@@ -808,6 +897,7 @@ func _cancel_current_action_flags() -> void:
 	is_blocking = false
 	is_attacking = false
 	is_parrying = false
+	is_block_releasing = false
 	is_dashing = false
 	is_running = false
 	is_perfect_dodging = false
@@ -937,18 +1027,34 @@ func _apply_projectile_slash() -> bool:
 func _start_parry() -> void:
 	_register_combat_input(CombatServerScript.InputType.PARRY)
 	_set_state(PlayerState.PARRY)
+	is_block_releasing = false
 	is_parrying = true
 	is_blocking = false
 	block_age = 0.0
 	parry_elapsed = 0.0
 	action_timer = parry_window
+	_force_play_animation("deflect_miss")
 
 func _start_block() -> void:
 	_set_state(PlayerState.BLOCK)
 	is_parrying = false
 	is_blocking = true
+	is_block_releasing = false
 	block_age = 0.0
 	block_time_left = math.block_duration_for_heartbeat(heartbeat)
+	_force_play_animation("block")
+
+func _start_block_release() -> void:
+	is_blocking = false
+	is_parrying = false
+	is_block_releasing = true
+	action_timer = block_release_time
+	if sprite != null:
+		sprite.speed_scale = 1.0
+		if sprite.animation != &"block":
+			_force_play_animation("block")
+		sprite.frame = max(sprite.frame, min(block_hold_frame + 1, sprite.sprite_frames.get_frame_count("block") - 1))
+		sprite.frame_progress = 0.0
 
 func _start_dash() -> void:
 	_register_combat_input(CombatServerScript.InputType.DASH)
@@ -962,7 +1068,7 @@ func _start_dash() -> void:
 	is_invulnerable = true
 	dash_direction = _read_dash_direction()
 	dash_timer = dash_duration
-	heartbeat = math.add_heartbeat(heartbeat, 4.0)
+	_add_heartbeat_pressure(4.0)
 	_play_sfx(dash_sfx)
 
 func _start_perfect_dodge(attacker: Node2D) -> void:
@@ -976,7 +1082,7 @@ func _start_perfect_dodge(attacker: Node2D) -> void:
 	facing = -dash_direction
 	dash_timer = perfect_dodge_duration
 	perfect_dodge_timer = impact_flash_time
-	heartbeat = math.add_heartbeat(heartbeat, 8.0)
+	_add_heartbeat_pressure(8.0)
 	velocity.x = dash_direction * perfect_dodge_impulse
 	hitstop_timer = perfect_dodge_hitstop_time
 	stored_velocity = Vector2(dash_direction * perfect_dodge_impulse, velocity.y)
@@ -1011,7 +1117,9 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 	if perfect_parry or (is_parrying and can_guard and can_block) or (is_blocking and can_guard and can_block):
 		var perfect := perfect_parry
 		posture = math.add_posture(posture, 5.0 if perfect else posture_damage * 2.0)
-		heartbeat = math.add_heartbeat(heartbeat, 4.0 if perfect else 5.0)
+		_add_heartbeat_pressure(heartbeat_perfect_guard_gain if perfect else heartbeat_block_gain)
+		if state == PlayerState.DEAD:
+			return
 		var heavy_chop_parry := perfect and _is_attacker_chop_attack(attacker)
 		if attacker != null and attacker.has_method("receive_block_feedback_from_player"):
 			attacker.receive_block_feedback_from_player(perfect, self)
@@ -1024,13 +1132,17 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 				_trigger_parry_impact_vfx(attacker)
 			else:
 				_trigger_parry_feedback()
+				_trigger_guard_impact_vfx(attacker)
 		else:
 			_play_sfx(block_sfx)
 			_trigger_block_feedback()
+			_trigger_guard_impact_vfx(attacker)
 	else:
 		health = math.apply_damage(health, damage)
 		posture = math.add_posture(posture, posture_damage * 1.35)
-		heartbeat = math.add_heartbeat(heartbeat, 20.0)
+		_add_heartbeat_pressure(heartbeat_clean_hit_gain)
+		if state == PlayerState.DEAD:
+			return
 		if health <= 0.0:
 			_handle_health_depleted()
 			stats_changed.emit()
@@ -1097,6 +1209,7 @@ func _enter_stunned(animation_name: StringName = &"posture_knockdown", duration 
 	is_blocking = false
 	is_attacking = false
 	is_parrying = false
+	is_block_releasing = false
 	is_dashing = false
 	is_running = false
 	is_perfect_dodging = false
@@ -1121,7 +1234,7 @@ func _can_start_attack() -> bool:
 func _can_start_defensive_action() -> bool:
 	if _can_start_action():
 		return true
-	return state == PlayerState.HURT and hurt_animation == "deflect"
+	return state == PlayerState.HURT and (hurt_animation == "deflect_miss" or hurt_animation == "deflect")
 
 func _can_buffer_attack() -> bool:
 	return state == PlayerState.ATTACK
@@ -1153,12 +1266,15 @@ func _setup_sprite_frames() -> void:
 		_add_strip_animation(frames, "attack_a", ATTACK_ANIMATION_FPS, false)
 		_add_strip_animation(frames, "attack_chop", ATTACK_ANIMATION_FPS, false)
 		_add_strip_animation(frames, "deflect", 14.0, false)
+		_add_strip_animation(frames, "deflect_miss", 14.0, false)
 		_add_strip_animation(frames, "parry", 14.0, false)
-		_add_strip_animation(frames, "block", 8.0, true)
+		_add_strip_animation(frames, "block", 8.0, false)
 		_add_strip_animation(frames, "dash", 18.0, false)
 		_add_strip_animation(frames, "jump", 10.0, true)
 		_add_strip_animation(frames, "climb", 10.0, true)
+		_add_strip_animation(frames, "eat", 10.0, false)
 		_add_strip_animation(frames, "mudra", 10.0, false)
+		_add_strip_animation(frames, "throw", 10.0, false)
 		_add_strip_animation(frames, "hurt", 8.0, false)
 		_add_strip_animation(frames, "death", 7.0, false)
 		_add_derived_animation(frames, &"posture_knockdown", &"death", 3, 8.0, false)
@@ -1328,14 +1444,24 @@ func _add_strip_animation(frames: SpriteFrames, animation: StringName, fps: floa
 			atlas_texture.atlas = texture
 			atlas_texture.region = Rect2(float(region[0]), float(region[1]), float(region[2]), float(region[3]))
 			atlas_texture.filter_clip = true
-			frames.add_frame(animation, atlas_texture)
+			frames.add_frame(animation, atlas_texture, _strip_frame_duration_weight(String(animation), custom_regions.size(), custom_regions.find(region)))
 		return
 	for column in frame_count:
 		var atlas_texture := AtlasTexture.new()
 		atlas_texture.atlas = texture
 		atlas_texture.region = Rect2(column * cell_size, 0, cell_size, cell_size)
 		atlas_texture.filter_clip = true
-		frames.add_frame(animation, atlas_texture)
+		frames.add_frame(animation, atlas_texture, _strip_frame_duration_weight(String(animation), frame_count, column))
+
+func _strip_frame_duration_weight(animation: String, frame_count: int, frame_index: int) -> float:
+	if animation != "mudra":
+		return 1.0
+	var focus_count: int = MUDRA_FOCUS_FRAME_END - MUDRA_FOCUS_FRAME_START + 1
+	var total_weight := float(frame_count)
+	if frame_index >= MUDRA_FOCUS_FRAME_START and frame_index <= MUDRA_FOCUS_FRAME_END:
+		return total_weight * MUDRA_FOCUS_DURATION_RATIO / float(focus_count)
+	var outside_count: int = max(frame_count - focus_count, 1)
+	return total_weight * (1.0 - MUDRA_FOCUS_DURATION_RATIO) / float(outside_count)
 
 func _add_sheet_animation(frames: SpriteFrames, animation: StringName, row: int, count: int, fps: float, loop: bool) -> void:
 	var cell_size: int = int(sprite_sheet_layout["cell_size"])
@@ -1369,7 +1495,7 @@ func _play_state_animation() -> void:
 		PlayerState.ATTACK:
 			next_animation = current_attack_animation
 		PlayerState.PARRY:
-			next_animation = "parry"
+			next_animation = "deflect_miss"
 		PlayerState.BLOCK:
 			next_animation = "block"
 		PlayerState.DASH:
@@ -1379,7 +1505,7 @@ func _play_state_animation() -> void:
 		PlayerState.WALL_CLIMB:
 			next_animation = "climb"
 		PlayerState.EAT:
-			next_animation = "mudra"
+			next_animation = current_item_animation
 		PlayerState.HURT:
 			next_animation = hurt_animation
 		PlayerState.STUNNED:
@@ -1392,6 +1518,19 @@ func _play_state_animation() -> void:
 		current_animation = next_animation
 		_apply_animation_sprite_scale(next_animation)
 		sprite.play(next_animation)
+	_update_block_hold_animation()
+
+func _update_block_hold_animation() -> void:
+	if sprite == null:
+		return
+	if state != PlayerState.BLOCK or not is_blocking or is_block_releasing:
+		return
+	if sprite.animation != &"block":
+		return
+	if sprite.frame >= block_hold_frame:
+		sprite.frame = block_hold_frame
+		sprite.frame_progress = 0.0
+		sprite.speed_scale = 0.0
 
 func _force_play_animation(animation: StringName) -> void:
 	current_animation = animation
@@ -1407,7 +1546,12 @@ func _force_play_animation(animation: StringName) -> void:
 func _apply_animation_sprite_scale(animation: String) -> void:
 	if sprite == null:
 		return
-	sprite.scale = WALK_SPRITE_SCALE if animation == "walk" else DEFAULT_SPRITE_SCALE
+	if animation == "walk":
+		sprite.scale = WALK_SPRITE_SCALE
+	elif animation == "deflect_miss" or animation == "block" or animation == "parry":
+		sprite.scale = DEFLECT_MISS_SPRITE_SCALE
+	else:
+		sprite.scale = DEFAULT_SPRITE_SCALE
 
 func _animation_duration(animation: StringName) -> float:
 	if sprite == null or sprite.sprite_frames == null or not sprite.sprite_frames.has_animation(animation):
@@ -1477,15 +1621,17 @@ func _receive_attack_deflected() -> void:
 	attack_lunge_timer = 0.0
 	attack_combo_step = 0
 	posture = math.add_posture(posture, attack_deflected_posture_damage)
-	heartbeat = math.add_heartbeat(heartbeat, 6.0)
+	_add_heartbeat_pressure(6.0)
+	if state == PlayerState.DEAD:
+		return
 	action_timer = attack_deflected_stun_time
 	hurt_flash_timer = impact_flash_time * 0.65
 	velocity.x = -facing * attack_deflected_rebound
 	_play_sfx(block_sfx)
 	_shake_camera(8.0, 0.08)
-	hurt_animation = "deflect"
+	hurt_animation = "deflect_miss"
 	_set_state(PlayerState.HURT)
-	_force_play_animation("deflect")
+	_force_play_animation("deflect_miss")
 	stats_changed.emit()
 
 func _trigger_attack_hit_feedback() -> void:
@@ -1519,6 +1665,20 @@ func _trigger_parry_impact_vfx(attacker: Node) -> void:
 	hit_impact_vfx.flip_h = facing < 0.0
 	if hit_impact_vfx.sprite_frames != null:
 		hit_impact_vfx.play("chop")
+
+func _trigger_guard_impact_vfx(attacker: Node) -> void:
+	if hit_impact_vfx == null:
+		return
+	hit_impact_vfx_timer = hit_impact_vfx_time
+	hit_impact_vfx.visible = true
+	if attacker is Node2D:
+		var attacker_position := (attacker as Node2D).global_position
+		hit_impact_vfx.global_position = global_position.lerp(attacker_position, 0.5) + Vector2(0.0, -48.0)
+	else:
+		hit_impact_vfx.position = attack_area.position + Vector2(18.0 * facing, -12.0)
+	hit_impact_vfx.flip_h = facing < 0.0
+	if hit_impact_vfx.sprite_frames != null:
+		hit_impact_vfx.play("hit")
 
 func _shake_camera(amount: float, duration: float) -> void:
 	var camera := get_tree().get_first_node_in_group("feedback_camera")
@@ -1577,6 +1737,7 @@ func _load_optional_sfx() -> void:
 	_load_optional_stream(DEATH_SFX_PATH, death_sfx)
 	_load_optional_stream(DASH_SFX_PATH, dash_sfx)
 	_load_optional_stream(PERFECT_DODGE_SFX_PATH, perfect_dodge_sfx)
+	_load_optional_stream(KUNAI_SFX_PATH, kunai_sfx)
 
 func _load_optional_stream(path: String, player: AudioStreamPlayer2D) -> void:
 	if ResourceLoader.exists(path):
@@ -1646,6 +1807,7 @@ func reset_combat_state() -> void:
 	attack_combo_step = 0
 	current_attack_animation = "attack_a"
 	hurt_animation = "hurt"
+	current_item_animation = "mudra"
 	item_counts = DEFAULT_ITEM_COUNTS.duplicate()
 	selected_item_index = 0
 	item_hotkeys_down.clear()

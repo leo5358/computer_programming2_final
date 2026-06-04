@@ -33,18 +33,22 @@ double combat_add_heartbeat(double current_heartbeat, double amount) {
 
 double combat_block_duration_for_heartbeat(double heartbeat) {
     double clamped_heartbeat = combat_clamp(heartbeat, COMBAT_MIN_HEARTBEAT, COMBAT_MAX_HEARTBEAT);
-    double tension = combat_inverse_lerp(COMBAT_MIN_HEARTBEAT, COMBAT_MAX_HEARTBEAT, clamped_heartbeat);
-    return combat_lerp(1.2, 0.35, tension);
+    if (clamped_heartbeat <= COMBAT_ADRENALINE_HEARTBEAT) {
+        double tension = combat_inverse_lerp(COMBAT_MIN_HEARTBEAT, COMBAT_ADRENALINE_HEARTBEAT, clamped_heartbeat);
+        return combat_lerp(1.2, 0.35, tension);
+    }
+    double danger_tension = combat_inverse_lerp(COMBAT_ADRENALINE_HEARTBEAT, COMBAT_MAX_HEARTBEAT, clamped_heartbeat);
+    return combat_lerp(0.35, 0.2, danger_tension);
 }
 
 double combat_damage_with_adrenaline(double base_damage, double heartbeat) {
-    double clamped_heartbeat = combat_clamp(heartbeat, COMBAT_MIN_HEARTBEAT, COMBAT_MAX_HEARTBEAT);
-    double tension = combat_inverse_lerp(COMBAT_MIN_HEARTBEAT, COMBAT_MAX_HEARTBEAT, clamped_heartbeat);
+    double clamped_heartbeat = combat_clamp(heartbeat, COMBAT_MIN_HEARTBEAT, COMBAT_ADRENALINE_HEARTBEAT);
+    double tension = combat_inverse_lerp(COMBAT_MIN_HEARTBEAT, COMBAT_ADRENALINE_HEARTBEAT, clamped_heartbeat);
     return base_damage * combat_lerp(1.0, 1.5, tension);
 }
 
 double combat_posture_damage_with_adrenaline(double base_posture_damage, double heartbeat) {
-    double clamped_heartbeat = combat_clamp(heartbeat, COMBAT_MIN_HEARTBEAT, COMBAT_MAX_HEARTBEAT);
-    double tension = combat_inverse_lerp(COMBAT_MIN_HEARTBEAT, COMBAT_MAX_HEARTBEAT, clamped_heartbeat);
+    double clamped_heartbeat = combat_clamp(heartbeat, COMBAT_MIN_HEARTBEAT, COMBAT_ADRENALINE_HEARTBEAT);
+    double tension = combat_inverse_lerp(COMBAT_MIN_HEARTBEAT, COMBAT_ADRENALINE_HEARTBEAT, clamped_heartbeat);
     return base_posture_damage * combat_lerp(1.0, 1.4, tension);
 }

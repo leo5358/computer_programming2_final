@@ -14,6 +14,8 @@
 [ext_resource type="Script" uid="uid://df53ccqrr0fiv" path="res://scripts/player_posture_hud.gd" id="15_posture_hud"]
 [ext_resource type="Script" path="res://scripts/player_vitals_hud.gd" id="16_vitals_hud"]
 [ext_resource type="Script" path="res://scripts/boss_hud.gd" id="17_boss_hud"]
+[ext_resource type="Script" path="res://scripts/pause_overlay.gd" id="18_pause_overlay"]
+[ext_resource type="Script" path="res://scripts/heartbeat_feedback.gd" id="19_heartbeat_feedback"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(1762, 48)
@@ -79,6 +81,9 @@ script = ExtResource("13_item_ui")
 [node name="PlayerPostureHud" type="CanvasLayer" parent="." unique_id=1538299828]
 script = ExtResource("15_posture_hud")
 
+[node name="HeartbeatFeedback" type="CanvasLayer" parent="."]
+script = ExtResource("19_heartbeat_feedback")
+
 [node name="PlayerVitalsHud" type="CanvasLayer" parent="."]
 script = ExtResource("16_vitals_hud")
 
@@ -87,6 +92,9 @@ script = ExtResource("17_boss_hud")
 
 [node name="DeathOverlay" type="CanvasLayer" parent="." unique_id=1820423079]
 script = ExtResource("14_death_overlay")
+
+[node name="PauseOverlay" type="CanvasLayer" parent="."]
+script = ExtResource("18_pause_overlay")
 
 [node name="Player" parent="." unique_id=373840920 instance=ExtResource("1_player_scene")]
 position = Vector2(430, 571)

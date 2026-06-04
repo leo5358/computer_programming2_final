@@ -137,8 +137,8 @@ func _initialize() -> void:
 		push_error("Enemy deflecting the player's attack should add player posture pressure")
 		quit(1)
 		return
-	if player.current_animation != "deflect" or sprite.animation != "deflect":
-		push_error("Enemy deflect should play the player's deflect recoil animation instead of hurt")
+	if player.current_animation != "deflect_miss" or sprite.animation != "deflect_miss":
+		push_error("Enemy deflect should play the player's deflect_miss recoil animation instead of hurt")
 		quit(1)
 		return
 	if player.attack_combo_step != 0:

@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://cmgi6nhylti3a" path="res://assets/maps/chapter1/structures/shrine_facade.png" id="8_6lmym"]
 [ext_resource type="Texture2D" uid="uid://dmpimxksau067" path="res://assets/maps/chapter1/props/shimenawa_curtain.png" id="9_hh8eg"]
 [ext_resource type="Script" uid="uid://dauwr7kxq7rjl" path="res://scripts/camera_shake.gd" id="10_camera_shake"]
+[ext_resource type="Script" path="res://scripts/enemy_spawn_point.gd" id="enemy_spawn_point_script"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yblr1"]
 size = Vector2(3066.5, 249.5)
@@ -18,6 +19,29 @@ size = Vector2(3066.5, 249.5)
 size = Vector2(140, 1165.75)
 
 [node name="root" type="Node2D" unique_id=506673559]
+
+[node name="EnemySpawns" type="Node2D" parent="."]
+
+[node name="TorchmanEntryScout" type="Node2D" parent="EnemySpawns"]
+position = Vector2(330, 530.5)
+script = ExtResource("enemy_spawn_point_script")
+enemy_type = "torchman"
+facing = -1.0
+spawn_group_id = "plaza_entry_combo"
+
+[node name="WarriorEntryGuard" type="Node2D" parent="EnemySpawns"]
+position = Vector2(680, 530.5)
+script = ExtResource("enemy_spawn_point_script")
+enemy_type = "warrior"
+facing = -1.0
+spawn_group_id = "plaza_entry_combo"
+
+[node name="ArcherEntryRear" type="Node2D" parent="EnemySpawns"]
+position = Vector2(740, 530.5)
+script = ExtResource("enemy_spawn_point_script")
+enemy_type = "archer"
+facing = -1.0
+spawn_group_id = "plaza_entry_combo"
 
 [node name="BackgroundFar" type="Node2D" parent="." unique_id=1049019642]
 

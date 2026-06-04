@@ -60,6 +60,11 @@ func _initialize() -> void:
 		push_error("Player should spawn at H stone plaza entrance")
 		quit(1)
 		return
+	player.global_position.x = 2998.0
+	if not player._is_at_world_horizontal_boundary(1.0):
+		push_error("H stone plaza should set player climb boundary to x=3000")
+		quit(1)
+		return
 	if bgm.get_bgm_path() != "res://assets/audio/BGMs/general_music.mp3":
 		push_error("H stone plaza should keep general BGM after transition")
 		quit(1)
@@ -102,6 +107,11 @@ func _initialize() -> void:
 		return
 	if player.global_position.distance_to(Vector2(220, 640.5)) > 1.0:
 		push_error("Player should spawn at boss interior entrance")
+		quit(1)
+		return
+	player.global_position.x = 1998.0
+	if not player._is_at_world_horizontal_boundary(1.0):
+		push_error("Boss interior should set player climb boundary to x=2000")
 		quit(1)
 		return
 	if bgm.get_bgm_path() != "res://assets/audio/BGMs/boss_music.mp3":

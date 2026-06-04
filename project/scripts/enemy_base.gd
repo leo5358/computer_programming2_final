@@ -132,6 +132,7 @@ var overhead_posture_back: ColorRect
 var overhead_posture_fill: ColorRect
 
 @onready var sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+@onready var body_collision_shape: CollisionShape2D = get_node_or_null("CollisionShape2D") as CollisionShape2D
 @onready var attack_area: Area2D = get_node_or_null("AttackArea") as Area2D
 @onready var attack_collision_shape: CollisionShape2D = get_node_or_null("AttackArea/CollisionShape2D") as CollisionShape2D
 @onready var attack_visual: ColorRect = get_node_or_null("AttackVisual") as ColorRect
@@ -139,9 +140,14 @@ var overhead_posture_fill: ColorRect
 @onready var execute_label: Label = get_node_or_null("ExecuteLabel") as Label
 @onready var warning_label: Label = get_node_or_null("WarningLabel") as Label
 
+var default_collision_layer := 0
+var default_collision_mask := 0
+
 func _ready() -> void:
 	add_to_group("enemy")
 	add_to_group("minor_enemy")
+	default_collision_layer = collision_layer
+	default_collision_mask = collision_mask
 	spawn_position = global_position
 	health = max_health
 	posture = 0.0
@@ -325,7 +331,7 @@ func reset_combat_state() -> void:
 	corpse_timer = 0.0
 	velocity = Vector2.ZERO
 	global_position = spawn_position
-	set_collision_layer_value(1, true)
+	_set_body_collision_enabled(true)
 	_set_attack_visual(false, false)
 	if execute_label != null:
 		execute_label.visible = false
@@ -585,8 +591,18 @@ func _defeat() -> void:
 	corpse_timer = corpse_lifetime
 	velocity = Vector2.ZERO
 	_set_attack_visual(false, false)
-	set_collision_layer_value(1, false)
+	_set_body_collision_enabled(false)
 	defeated.emit()
+
+func _set_body_collision_enabled(enabled: bool) -> void:
+	if enabled:
+		collision_layer = default_collision_layer
+		collision_mask = default_collision_mask
+	else:
+		collision_layer = 0
+		collision_mask = default_collision_mask
+	if body_collision_shape != null:
+		body_collision_shape.disabled = false
 
 func _update_feedback(delta: float) -> void:
 	hit_flash_timer = max(0.0, hit_flash_timer - delta)
@@ -624,7 +640,7 @@ func _create_overhead_bar_rect(rect_name: String, color: Color, position: Vector
 func _update_overhead_bars() -> void:
 	if overhead_root == null:
 		return
-	var show_bars := is_in_group("minor_enemy") and not defeated_flag
+	var show_bars := is_in_group("minor_enemy") and not is_in_group("boss") and not defeated_flag
 	overhead_root.visible = show_bars
 	if not show_bars:
 		return

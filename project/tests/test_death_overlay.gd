@@ -27,6 +27,10 @@ func _initialize() -> void:
 		push_error("Death overlay should expose move_selection")
 		quit(1)
 		return
+	if not overlay.has_method("select_option") or not overlay.has_method("confirm_option"):
+		push_error("Death overlay should expose mouse option selection and confirmation helpers")
+		quit(1)
+		return
 
 	overlay.show_death()
 	await process_frame
@@ -36,10 +40,24 @@ func _initialize() -> void:
 		return
 
 	var title: Label = overlay.get_node_or_null("Content/Box/TitleLabel")
+	var options_container := overlay.get_node_or_null("Content/Box/Options")
 	var retry: Label = overlay.get_node_or_null("Content/Box/Options/RetryLabel")
 	var menu: Label = overlay.get_node_or_null("Content/Box/Options/MainMenuLabel")
+	var click_sfx := overlay.get_node_or_null("ButtonClickSfx") as AudioStreamPlayer
 	if title == null or retry == null or menu == null:
 		push_error("Death overlay should build title and two option labels")
+		quit(1)
+		return
+	if click_sfx == null or click_sfx.stream == null:
+		push_error("Death overlay should include button click SFX")
+		quit(1)
+		return
+	if click_sfx.stream.resource_path != "res://assets/sfx/buttonClick.MP3":
+		push_error("Death overlay button click SFX should use assets/sfx/buttonClick.MP3")
+		quit(1)
+		return
+	if not (options_container is VBoxContainer):
+		push_error("Death overlay options should be stacked vertically")
 		quit(1)
 		return
 	if title.text != "心音斷絕":
@@ -60,12 +78,28 @@ func _initialize() -> void:
 		push_error("Default death overlay selection should retry")
 		quit(1)
 		return
+	if not click_sfx.playing:
+		push_error("Confirming a death overlay option should play button click SFX")
+		quit(1)
+		return
 
 	overlay.show_death()
 	overlay.move_selection(1)
 	overlay.confirm_selection()
 	if int(signal_counts["menu"]) != 1:
 		push_error("Moving death overlay selection once should choose main menu")
+		quit(1)
+		return
+	
+	overlay.show_death()
+	overlay.select_option(overlay.OPTION_MAIN_MENU)
+	if int(overlay.get("selected_index")) != overlay.OPTION_MAIN_MENU:
+		push_error("Mouse hovering death overlay main menu should select it")
+		quit(1)
+		return
+	overlay.confirm_option(overlay.OPTION_MAIN_MENU)
+	if int(signal_counts["menu"]) != 2:
+		push_error("Mouse clicking death overlay main menu should confirm it")
 		quit(1)
 		return
 

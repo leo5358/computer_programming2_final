@@ -14,6 +14,7 @@ const SELECTOR_POSITION_OFFSETS := [
 ]
 const PRESS_SCALE := Vector2(0.94, 0.9)
 const PRESS_DURATION := 0.06
+const BUTTON_CLICK_SFX_PATH := "res://assets/sfx/buttonClick.MP3"
 
 @onready var menu_selector: Sprite2D = $menu_selector
 @onready var menu_selector_glow: Sprite2D = $menu_selector_glow
@@ -28,6 +29,7 @@ var _selector_base_scale := Vector2.ONE
 var _selector_glow_base_scale := Vector2.ONE
 var _press_tween: Tween
 var _is_confirming := false
+var button_click_sfx: AudioStreamPlayer
 
 
 func _ready() -> void:
@@ -44,6 +46,7 @@ func _ready() -> void:
 	fade_rect.color = Color(0, 0, 0, 0)
 	if start_bgm.stream != null and "loop" in start_bgm.stream:
 		start_bgm.stream.loop = true
+	_setup_button_click_sfx()
 	_setup_mouse_hit_areas()
 
 
@@ -91,6 +94,7 @@ func _confirm_selection() -> void:
 	if _is_confirming or _selected_index < 0:
 		return
 
+	_play_button_click_sfx()
 	_play_confirm_press()
 	var option_name: String = MENU_OPTION_NAMES[_selected_index]
 	option_confirmed.emit(_selected_index, option_name)
@@ -149,6 +153,22 @@ func _quit_game() -> void:
 
 func _quit_tree() -> void:
 	get_tree().quit()
+
+
+func _setup_button_click_sfx() -> void:
+	button_click_sfx = get_node_or_null("ButtonClickSfx") as AudioStreamPlayer
+	if button_click_sfx == null:
+		button_click_sfx = AudioStreamPlayer.new()
+		button_click_sfx.name = "ButtonClickSfx"
+		add_child(button_click_sfx)
+	button_click_sfx.process_mode = Node.PROCESS_MODE_ALWAYS
+	if ResourceLoader.exists(BUTTON_CLICK_SFX_PATH):
+		button_click_sfx.stream = load(BUTTON_CLICK_SFX_PATH)
+
+
+func _play_button_click_sfx() -> void:
+	if button_click_sfx != null and button_click_sfx.stream != null:
+		button_click_sfx.play()
 
 
 func _mark_input_handled() -> void:
