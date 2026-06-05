@@ -2,8 +2,8 @@ extends CanvasLayer
 
 const HEARTBEAT_SFX_PATH := "res://assets/sfx/heartbeat.MP3"
 
-@export var min_heartbeat: float = 65.0
-@export var max_heartbeat: float = 200.0
+@export var min_heartbeat: float = 70.0
+@export var max_heartbeat: float = 250.0
 @export var visual_start_heartbeat: float = 115.0
 @export var audio_start_heartbeat: float = 105.0
 @export var edge_thickness: float = 90.0
@@ -21,7 +21,7 @@ var right_edge: ColorRect
 var heartbeat_sfx: AudioStreamPlayer
 var pulse_phase: float = 0.0
 var heartbeat_timer: float = 0.0
-var current_heartbeat: float = 65.0
+var current_heartbeat: float = 70.0
 
 func _ready() -> void:
 	layer = 11

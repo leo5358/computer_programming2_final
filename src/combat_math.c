@@ -1,4 +1,5 @@
 #include "combat_math.h"
+#include <math.h>
 
 static double combat_clamp(double value, double minimum, double maximum) {
     if (value < minimum) {
@@ -42,13 +43,26 @@ double combat_block_duration_for_heartbeat(double heartbeat) {
 }
 
 double combat_damage_with_adrenaline(double base_damage, double heartbeat) {
-    double clamped_heartbeat = combat_clamp(heartbeat, COMBAT_MIN_HEARTBEAT, COMBAT_ADRENALINE_HEARTBEAT);
-    double tension = combat_inverse_lerp(COMBAT_MIN_HEARTBEAT, COMBAT_ADRENALINE_HEARTBEAT, clamped_heartbeat);
-    return base_damage * combat_lerp(1.0, 1.5, tension);
+    double multiplier = 1.0;
+    if (heartbeat >= 220.0) {
+        multiplier = 1.35;
+    } else if (heartbeat >= 210.0) {
+        multiplier = 1.25;
+    } else if (heartbeat >= 200.0) {
+        multiplier = 1.18;
+    } else if (heartbeat >= 180.0) {
+        multiplier = 1.12;
+    } else if (heartbeat >= 160.0) {
+        multiplier = 1.08;
+    } else if (heartbeat >= 130.0) {
+        multiplier = 1.05;
+    } else if (heartbeat >= 110.0) {
+        multiplier = 1.03;
+    }
+    return ceil(base_damage * multiplier);
 }
 
 double combat_posture_damage_with_adrenaline(double base_posture_damage, double heartbeat) {
-    double clamped_heartbeat = combat_clamp(heartbeat, COMBAT_MIN_HEARTBEAT, COMBAT_ADRENALINE_HEARTBEAT);
-    double tension = combat_inverse_lerp(COMBAT_MIN_HEARTBEAT, COMBAT_ADRENALINE_HEARTBEAT, clamped_heartbeat);
-    return base_posture_damage * combat_lerp(1.0, 1.4, tension);
+    (void)heartbeat;
+    return base_posture_damage;
 }
