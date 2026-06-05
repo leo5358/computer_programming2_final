@@ -28,8 +28,8 @@ enum AttackType {
 	GRAB,
 }
 
-const BPM_MIN := 65.0
-const BPM_MAX := 200.0
+const BPM_MIN := 70.0
+const BPM_MAX := 250.0
 const INPUT_BUFFER_MS := 150
 const PARRY_EARLY_MS := 100
 const PARRY_LATE_MS := 50

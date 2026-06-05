@@ -65,7 +65,7 @@ func _initialize() -> void:
 	boss.global_position += Vector2(48.0, 0.0)
 
 	runtime.reset_combat()
-	if abs(player.heartbeat - 65.0) > 0.001:
+	if abs(player.heartbeat - 70.0) > 0.001:
 		push_error("Reset combat should restore player heartbeat")
 		quit(1)
 		return

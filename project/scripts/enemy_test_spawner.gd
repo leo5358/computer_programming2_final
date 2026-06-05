@@ -22,6 +22,8 @@ const DOOR_PROMPT_TEXT := "按下F進入"
 const INTERACTION_FADE_START_ALPHA := 0.2
 const INTERACTION_FADE_TO_BLACK_TIME := 2.0
 const INTERACTION_BLACK_HOLD_TIME := 1.0
+const HEARTBEAT_DEATH_FADE_START_ALPHA := 0.2
+const HEARTBEAT_DEATH_FADE_TIME := 2.0
 const AB_EXIT_CENTER := Vector2(15341.0, -383.0)
 const AB_EXIT_PROMPT_X_RADIUS := 300.0
 const AB_EXIT_INTERACTION_X_RADIUS := 150.0
@@ -248,7 +250,25 @@ func _is_death_overlay_active() -> bool:
 func _on_player_died() -> void:
 	if is_pause_menu_open:
 		_resume_from_pause()
+	var player := _get_player()
+	if player != null and player.get("heartbeat_direct_checkpoint_respawn") != null and bool(player.get("heartbeat_direct_checkpoint_respawn")):
+		if death_overlay != null and death_overlay.has_method("hide_overlay_immediate"):
+			death_overlay.hide_overlay_immediate()
+		call_deferred("_run_heartbeat_death_respawn")
+		return
 	_set_player_transition_locked(true)
+	if death_overlay != null and death_overlay.has_method("show_death"):
+		death_overlay.show_death()
+
+func _run_heartbeat_death_respawn() -> void:
+	if is_transitioning:
+		return
+	is_transitioning = true
+	interaction_prompt.visible = false
+	_set_player_transition_locked(true)
+	fade_rect.visible = true
+	fade_rect.color = Color(0, 0, 0, HEARTBEAT_DEATH_FADE_START_ALPHA)
+	await _fade_to(1.0, HEARTBEAT_DEATH_FADE_TIME)
 	if death_overlay != null and death_overlay.has_method("show_death"):
 		death_overlay.show_death()
 
@@ -263,7 +283,9 @@ func _retry_from_checkpoint() -> void:
 	_reset_player_after_respawn(respawn["position"], float(respawn["health"]))
 	_sync_checkpoints_to_saved_position(String(respawn["map_id"]), respawn["position"])
 	_restart_map_bgm(String(respawn["map_id"]))
+	_clear_fade()
 	_set_player_transition_locked(false)
+	is_transitioning = false
 
 func _return_to_start_page() -> void:
 	clear_test_enemies()

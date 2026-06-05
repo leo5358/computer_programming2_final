@@ -208,11 +208,16 @@ enum PlayerState {
 @export var heavy_parry_hitstop_time := 0.20
 @export var heavy_parry_recoil_time := 0.26
 @export var heavy_parry_camera_shake := 42.0
-@export var heartbeat_block_rise_rate := 18.0
-@export var heartbeat_cooldown_rate := 8.0
-@export var heartbeat_perfect_guard_gain := 4.0
-@export var heartbeat_block_gain := 5.0
-@export var heartbeat_clean_hit_gain := 20.0
+@export var heartbeat_idle_target := 70.0
+@export var heartbeat_walk_target := 95.0
+@export var heartbeat_run_target := 155.0
+@export var heartbeat_jump_gain := 7.0
+@export var heartbeat_attack_gain := 4.0
+@export var heartbeat_guard_gain := 5.0
+@export var heartbeat_combat_rise_per_second := 4.0
+@export var heartbeat_combat_linger_time := 2.0
+@export var heartbeat_target_rise_percent_per_second := 0.25
+@export var heartbeat_cooldown_percent_per_second := 0.10
 @export var heartbeat_danger_death_enabled := true
 
 var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
@@ -289,6 +294,9 @@ var chop_hit_stream: AudioStream = null
 var attack_miss_streams: Array[AudioStream] = []
 var posture_combat_timer := 0.0
 var posture_visibility_snapshot := 0.0
+var heartbeat_combat_timer := 0.0
+var heartbeat_direct_checkpoint_respawn := false
+var heartbeat_precise: float = CombatMathScript.MIN_HEARTBEAT
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var body_collision_shape: CollisionShape2D = $CollisionShape2D
@@ -421,6 +429,10 @@ func _update_inputs() -> void:
 
 	if jump_requested and coyote_timer > 0.0 and _can_jump():
 		_register_combat_input(CombatServerScript.InputType.JUMP)
+		_add_heartbeat_pressure(heartbeat_jump_gain)
+		if state == PlayerState.DEAD:
+			_clear_ai_action_intents()
+			return
 		velocity.y = jump_velocity
 		coyote_timer = 0.0
 		wall_climb_lockout_timer = jump_to_ledge_climb_lockout
@@ -683,19 +695,24 @@ func _update_action_state(delta: float) -> void:
 			_set_state(PlayerState.IDLE)
 
 func _update_combat(delta: float) -> void:
+	_sync_heartbeat_precision_from_display()
 	if is_blocking:
 		block_age += delta
 		block_time_left -= delta
-		_add_heartbeat_pressure(heartbeat_block_rise_rate * delta)
-		if state == PlayerState.DEAD:
-			return
 		if not Input.is_action_pressed("block") or block_time_left <= 0.0:
 			_start_block_release()
+
+	if heartbeat_combat_timer > 0.0:
+		heartbeat_combat_timer = max(0.0, heartbeat_combat_timer - delta)
+		_add_heartbeat_pressure(heartbeat_combat_rise_per_second * delta)
+		if state == PlayerState.DEAD:
+			return
 	else:
-		heartbeat = max(CombatMathScript.MIN_HEARTBEAT, heartbeat - heartbeat_cooldown_rate * delta)
+		_adjust_heartbeat_toward_current_target(delta)
 
 func _add_heartbeat_pressure(amount: float) -> void:
-	heartbeat = math.add_heartbeat(heartbeat, amount)
+	_sync_heartbeat_precision_from_display()
+	_set_heartbeat_value(math.add_heartbeat(heartbeat_precise, amount))
 	_check_heartbeat_death()
 
 func _check_heartbeat_death() -> bool:
@@ -705,14 +722,48 @@ func _check_heartbeat_death() -> bool:
 		return true
 	if heartbeat < CombatMathScript.MAX_HEARTBEAT - 0.001:
 		return false
-	heartbeat = CombatMathScript.MAX_HEARTBEAT
+	_set_heartbeat_value(CombatMathScript.MAX_HEARTBEAT)
+	heartbeat_direct_checkpoint_respawn = true
 	_enter_dead()
 	stats_changed.emit()
 	died.emit()
 	return true
 
+func _adjust_heartbeat_toward_current_target(delta: float) -> void:
+	var target_heartbeat: float = _current_heartbeat_target()
+	if is_equal_approx(heartbeat_precise, target_heartbeat):
+		return
+	if heartbeat_precise < target_heartbeat:
+		var rise_amount: float = (target_heartbeat - heartbeat_precise) * heartbeat_target_rise_percent_per_second * delta
+		_set_heartbeat_value(min(target_heartbeat, heartbeat_precise + rise_amount))
+		return
+	var next_heartbeat: float = max(target_heartbeat, heartbeat_precise - (heartbeat_precise * heartbeat_cooldown_percent_per_second * delta))
+	_set_heartbeat_value(next_heartbeat)
+
+func _current_heartbeat_target() -> float:
+	if is_running:
+		return heartbeat_run_target
+	if state in [PlayerState.MOVE, PlayerState.JUMP, PlayerState.WALL_CLIMB] and absf(velocity.x) > 4.0:
+		return heartbeat_walk_target
+	return heartbeat_idle_target
+
+func _mark_heartbeat_combat_activity() -> void:
+	heartbeat_combat_timer = heartbeat_combat_linger_time
+
+func _set_heartbeat_value(value: float) -> void:
+	heartbeat_precise = clamp(value, CombatMathScript.MIN_HEARTBEAT, CombatMathScript.MAX_HEARTBEAT)
+	heartbeat = floor(heartbeat_precise)
+
+func _sync_heartbeat_precision_from_display() -> void:
+	if floor(heartbeat_precise) != heartbeat:
+		heartbeat_precise = heartbeat
+
 func _start_attack() -> void:
 	_register_combat_input(CombatServerScript.InputType.ATTACK)
+	_mark_heartbeat_combat_activity()
+	_add_heartbeat_pressure(heartbeat_attack_gain)
+	if state == PlayerState.DEAD:
+		return
 	current_attack_animation = "attack_chop" if attack_combo_step == 2 else "attack_a"
 	attack_combo_step = (attack_combo_step + 1) % 3
 	attack_lunge_timer = attack_lunge_time
@@ -889,7 +940,7 @@ func _apply_consumable_effect(item_id: String) -> void:
 		"gourd":
 			health = min(max_health, health + max_health * GOURD_HEAL_PERCENT)
 		"pill":
-			heartbeat = max(CombatMathScript.MIN_HEARTBEAT, heartbeat - BLOOD_PRESSURE_HEARTBEAT_DROP)
+			_set_heartbeat_value(max(CombatMathScript.MIN_HEARTBEAT, heartbeat_precise - BLOOD_PRESSURE_HEARTBEAT_DROP))
 		"capsule":
 			_add_heartbeat_pressure(ADRENALINE_HEARTBEAT_BOOST)
 
@@ -990,6 +1041,8 @@ func settle_world_interaction(anchor_position: Vector2, refill_items: bool = fal
 		health = max_health
 		lives = max_lives
 		posture = 0.0
+		_set_heartbeat_value(CombatMathScript.MIN_HEARTBEAT)
+		heartbeat_combat_timer = 0.0
 	global_position = anchor_position
 	_set_state(PlayerState.IDLE)
 	_update_visuals()
@@ -1194,6 +1247,7 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 	if health <= 0.0:
 		return
 	register_posture_contact()
+	_mark_heartbeat_combat_activity()
 	if is_invulnerable and attack_type != CombatServerScript.AttackType.SWEEP:
 		return
 
@@ -1207,7 +1261,7 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 	if perfect_parry or (is_parrying and can_guard and can_block) or (is_blocking and can_guard and can_block):
 		var perfect := perfect_parry
 		posture = math.add_posture(posture, 5.0 if perfect else posture_damage * 2.0)
-		_add_heartbeat_pressure(heartbeat_perfect_guard_gain if perfect else heartbeat_block_gain)
+		_add_heartbeat_pressure(heartbeat_guard_gain)
 		if state == PlayerState.DEAD:
 			return
 		var heavy_chop_parry := perfect and _is_attacker_chop_attack(attacker)
@@ -1230,7 +1284,6 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 	else:
 		health = math.apply_damage(health, damage)
 		posture = math.add_posture(posture, posture_damage * 1.35)
-		_add_heartbeat_pressure(heartbeat_clean_hit_gain)
 		if state == PlayerState.DEAD:
 			return
 		if health <= 0.0:
@@ -1874,7 +1927,9 @@ func reset_combat_state() -> void:
 	posture = 0.0
 	posture_combat_timer = 0.0
 	posture_visibility_snapshot = posture
-	heartbeat = CombatMathScript.MIN_HEARTBEAT
+	_set_heartbeat_value(CombatMathScript.MIN_HEARTBEAT)
+	heartbeat_combat_timer = 0.0
+	heartbeat_direct_checkpoint_respawn = false
 	state = PlayerState.IDLE
 	previous_state = PlayerState.IDLE
 	is_blocking = false

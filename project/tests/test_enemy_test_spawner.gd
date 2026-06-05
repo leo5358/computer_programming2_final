@@ -149,6 +149,10 @@ func _initialize() -> void:
 		push_error("Checkpoint rest should respawn defeated map enemies")
 		quit(1)
 		return
+	if int(player.get("heartbeat")) != 70:
+		push_error("Checkpoint rest should calm heartbeat back to the base rate")
+		quit(1)
+		return
 	if player.get_item_count("kunai") != 10 or player.get_item_count("capsule") != 10:
 		push_error("Checkpoint rest should refill all item counts to their defaults")
 		quit(1)
@@ -167,8 +171,13 @@ func _initialize() -> void:
 		return
 
 	var pause_overlay: CanvasLayer = main.get_node_or_null("PauseOverlay")
+	var death_overlay: CanvasLayer = main.get_node_or_null("DeathOverlay")
 	if pause_overlay == null:
 		push_error("Main should include PauseOverlay for ESC pause")
+		quit(1)
+		return
+	if death_overlay == null:
+		push_error("Main should include DeathOverlay for checkpoint death flow checks")
 		quit(1)
 		return
 	if not main.has_method("_open_pause_menu") or not main.has_method("_resume_from_pause"):
@@ -218,6 +227,44 @@ func _initialize() -> void:
 		push_error("Spawner should expose debug player death for checkpoint testing")
 		quit(1)
 		return
+	save_manager.save_game("ab_foothill", Vector2(777.0, 571.0), 88.0)
+	player.spawn_position = Vector2(777.0, 571.0)
+	player.global_position = Vector2(1200.0, 571.0)
+	player.heartbeat = 249.0
+	player._start_attack()
+	await process_frame
+	if player.state != player.PlayerState.DEAD:
+		push_error("Heartbeat death should still enter the player death state during the fade-out")
+		quit(1)
+		return
+	var fade_rect: ColorRect = main.get_node_or_null("MapTransitionUI/FadeRect")
+	if fade_rect == null or not fade_rect.visible:
+		push_error("Heartbeat death should show the blackout fade")
+		quit(1)
+		return
+	if absf(fade_rect.color.a - 0.2) > 0.05:
+		push_error("Heartbeat death blackout should start near 20 percent opacity")
+		quit(1)
+		return
+	await create_timer(2.3).timeout
+	if death_overlay == null or not death_overlay.visible:
+		push_error("Heartbeat death should hand off to the death overlay after the blackout completes")
+		quit(1)
+		return
+	if player.global_position.distance_to(Vector2(1200.0, 571.0)) > 1.0:
+		push_error("Heartbeat death should wait on the death overlay instead of auto-respawning")
+		quit(1)
+		return
+	main._retry_from_checkpoint()
+	await process_frame
+	if player.global_position.distance_to(Vector2(777.0, 571.0)) > 1.0:
+		push_error("Retry from heartbeat death should still return to the saved checkpoint")
+		quit(1)
+		return
+	if fade_rect.visible:
+		push_error("Retry should clear the blackout fade after respawn")
+		quit(1)
+		return
 	player.set("health", player.get("max_health"))
 	main._debug_kill_player()
 	await process_frame
@@ -225,7 +272,6 @@ func _initialize() -> void:
 		push_error("Debug player death should force HP to zero")
 		quit(1)
 		return
-	var death_overlay: CanvasLayer = main.get_node_or_null("DeathOverlay")
 	if death_overlay == null or not death_overlay.visible:
 		push_error("Player death should show the death overlay")
 		quit(1)
@@ -239,6 +285,8 @@ func _initialize() -> void:
 		push_error("Main should expose retry from checkpoint")
 		quit(1)
 		return
+	if save_manager != null and save_manager.has_method("delete_save"):
+		save_manager.delete_save()
 	player.set("spawn_position", Vector2(720, 571))
 	bgm.stop()
 	bgm.play(12.0)

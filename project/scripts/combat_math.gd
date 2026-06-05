@@ -1,9 +1,9 @@
 class_name CombatMath
 extends RefCounted
 
-const MIN_HEARTBEAT := 65.0
+const MIN_HEARTBEAT := 70.0
 const ADRENALINE_HEARTBEAT := 120.0
-const MAX_HEARTBEAT := 200.0
+const MAX_HEARTBEAT := 250.0
 
 var native_math: Object
 
@@ -16,9 +16,11 @@ func _init() -> void:
 func _native_math_matches_heartbeat_model() -> bool:
 	if native_math == null:
 		return false
-	if abs(float(native_math.add_heartbeat(190.0, 20.0)) - MAX_HEARTBEAT) > 0.001:
+	if abs(float(native_math.add_heartbeat(240.0, 20.0)) - MAX_HEARTBEAT) > 0.001:
 		return false
 	if abs(float(native_math.block_duration_for_heartbeat(MAX_HEARTBEAT)) - 0.2) > 0.001:
+		return false
+	if abs(float(native_math.damage_with_adrenaline(20.0, 220.0)) - 27.0) > 0.001:
 		return false
 	return true
 
@@ -50,11 +52,24 @@ func block_duration_for_heartbeat(heartbeat: float) -> float:
 func damage_with_adrenaline(base_damage: float, heartbeat: float) -> float:
 	if native_math != null:
 		return native_math.damage_with_adrenaline(base_damage, heartbeat)
-	var tension: float = inverse_lerp(MIN_HEARTBEAT, ADRENALINE_HEARTBEAT, clamp(heartbeat, MIN_HEARTBEAT, ADRENALINE_HEARTBEAT))
-	return base_damage * lerp(1.0, 1.5, tension)
+	var multiplier := 1.0
+	if heartbeat >= 220.0:
+		multiplier = 1.35
+	elif heartbeat >= 210.0:
+		multiplier = 1.25
+	elif heartbeat >= 200.0:
+		multiplier = 1.18
+	elif heartbeat >= 180.0:
+		multiplier = 1.12
+	elif heartbeat >= 160.0:
+		multiplier = 1.08
+	elif heartbeat >= 130.0:
+		multiplier = 1.05
+	elif heartbeat >= 110.0:
+		multiplier = 1.03
+	return ceil(base_damage * multiplier)
 
 func posture_damage_with_adrenaline(base_posture_damage: float, heartbeat: float) -> float:
 	if native_math != null and native_math.has_method("posture_damage_with_adrenaline"):
 		return native_math.posture_damage_with_adrenaline(base_posture_damage, heartbeat)
-	var tension: float = inverse_lerp(MIN_HEARTBEAT, ADRENALINE_HEARTBEAT, clamp(heartbeat, MIN_HEARTBEAT, ADRENALINE_HEARTBEAT))
-	return base_posture_damage * lerp(1.0, 1.4, tension)
+	return base_posture_damage

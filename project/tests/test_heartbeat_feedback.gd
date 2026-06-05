@@ -3,7 +3,7 @@ extends SceneTree
 class FakePlayer:
 	extends Node2D
 	signal stats_changed
-	var heartbeat := 65.0
+	var heartbeat := 70.0
 
 func _initialize() -> void:
 	var feedback_script: Script = load("res://scripts/heartbeat_feedback.gd")
@@ -33,7 +33,7 @@ func _initialize() -> void:
 		quit(1)
 		return
 
-	player.heartbeat = 65.0
+	player.heartbeat = 70.0
 	feedback._update_feedback(0.0)
 	var calm_alpha := top_edge.color.a
 	if calm_alpha > 0.02:
@@ -57,7 +57,7 @@ func _initialize() -> void:
 		quit(1)
 		return
 
-	player.heartbeat = 190.0
+	player.heartbeat = 220.0
 	feedback.heartbeat_timer = 0.0
 	feedback._update_feedback(0.2)
 	if feedback.heartbeat_timer <= 0.0:
