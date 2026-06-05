@@ -55,7 +55,7 @@ const EAT_ITEM_IDS := {
 	"pill": true,
 	"capsule": true,
 }
-const GOURD_EXPANSION_HEALTH := 20.0
+const GOURD_HEAL_PERCENT := 0.30
 const ADRENALINE_HEARTBEAT_BOOST := 25.0
 const BLOOD_PRESSURE_HEARTBEAT_DROP := 25.0
 const SMOKE_BOMB_BOSS_PAUSE_TIME := 2.5
@@ -887,8 +887,7 @@ func use_item(item_id: String) -> bool:
 func _apply_consumable_effect(item_id: String) -> void:
 	match item_id:
 		"gourd":
-			max_health += GOURD_EXPANSION_HEALTH
-			health = min(max_health, health + GOURD_EXPANSION_HEALTH)
+			health = min(max_health, health + max_health * GOURD_HEAL_PERCENT)
 		"pill":
 			heartbeat = max(CombatMathScript.MIN_HEARTBEAT, heartbeat - BLOOD_PRESSURE_HEARTBEAT_DROP)
 		"capsule":
