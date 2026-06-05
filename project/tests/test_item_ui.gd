@@ -16,23 +16,48 @@ func _initialize() -> void:
 		push_error("Main scene should include an ItemUI node")
 		quit(1)
 		return
-	if not item_ui.has_method("get_display_count"):
-		push_error("ItemUI should expose display counts")
+	if not item_ui.has_method("get_display_count") or not item_ui.has_method("get_visible_item_id"):
+		push_error("ItemUI should expose counts and visible slot items")
 		quit(1)
 		return
-	if item_ui.get_display_count("gourd") != 10:
-		push_error("ItemUI should show player gourd count")
+
+	var strip := item_ui.get_node_or_null("Root/ItemStrip") as Control
+	if strip == null:
+		push_error("ItemUI should expose a two-slot item strip")
 		quit(1)
 		return
-	var row := item_ui.get_node_or_null("Root/ItemRow") as HBoxContainer
-	if row == null:
-		push_error("ItemUI should expose an item row")
+	var heal_slot := strip.get_node_or_null("HealSlot") as Control
+	var attack_slot := strip.get_node_or_null("AttackSlot") as Control
+	if heal_slot == null or attack_slot == null:
+		push_error("ItemUI should only create one heal slot and one attack slot")
 		quit(1)
 		return
-	var first_border := row.get_child(0).get_node_or_null("Border") as ColorRect
-	var second_border := row.get_child(1).get_node_or_null("Border") as ColorRect
-	if first_border == null or second_border == null or first_border.color.a <= second_border.color.a:
-		push_error("ItemUI should highlight the first item slot by default")
+	if strip.get_child_count() != 2:
+		push_error("ItemUI should only display two slots")
+		quit(1)
+		return
+
+	if item_ui.get_visible_item_id("attack") != "kunai":
+		push_error("Attack slot should default to kunai")
+		quit(1)
+		return
+	if item_ui.get_visible_item_id("heal") != "gourd":
+		push_error("Heal slot should default to gourd")
+		quit(1)
+		return
+
+	var attack_icon := attack_slot.get_node_or_null("Icon") as TextureRect
+	var heal_icon := heal_slot.get_node_or_null("Icon") as TextureRect
+	if attack_icon == null or heal_icon == null:
+		push_error("ItemUI slots should expose icons")
+		quit(1)
+		return
+	if attack_icon.texture == null or not attack_icon.texture.resource_path.ends_with("assets/items/kunai/kunai.png"):
+		push_error("Attack slot should show the kunai icon by default")
+		quit(1)
+		return
+	if heal_icon.texture == null or not heal_icon.texture.resource_path.ends_with("assets/items/gourd/gourd.png"):
+		push_error("Heal slot should show the gourd icon by default")
 		quit(1)
 		return
 
@@ -42,29 +67,47 @@ func _initialize() -> void:
 		quit(1)
 		return
 
-	player.use_item("gourd")
-	await process_frame
-	if item_ui.get_display_count("gourd") != 9:
-		push_error("ItemUI should update after using an item")
-		quit(1)
-		return
-	player.set("action_timer", 0.0)
-	player._update_action_state(0.01)
-	player.set("selected_item_index", 2)
+	player.set("selected_attack_item_index", 1)
+	player.set("selected_heal_item_index", 2)
 	player.emit_signal("stats_changed")
 	await process_frame
-	var third_border := row.get_child(2).get_node_or_null("Border") as ColorRect
-	if third_border == null or third_border.color.a <= first_border.color.a:
-		push_error("ItemUI should move the thick selection frame to the selected slot")
+
+	if item_ui.get_visible_item_id("attack") != "ash_balls":
+		push_error("Attack slot should switch to ash_balls when attack category changes")
 		quit(1)
 		return
-	if not player.has_method("use_selected_item") or not player.use_selected_item():
-		push_error("Player should use the currently selected item on confirm")
+	if item_ui.get_visible_item_id("heal") != "capsule":
+		push_error("Heal slot should switch to capsule when heal category changes")
+		quit(1)
+		return
+	if attack_icon.texture == null or not attack_icon.texture.resource_path.ends_with("assets/items/ash_balls/ash_balls.png"):
+		push_error("Attack slot icon should update with the selected attack item")
+		quit(1)
+		return
+	if heal_icon.texture == null or not heal_icon.texture.resource_path.ends_with("assets/items/capsule/capsule.png"):
+		push_error("Heal slot icon should update with the selected heal item")
+		quit(1)
+		return
+
+	if not player.has_method("use_selected_heal_item") or not player.use_selected_heal_item():
+		push_error("Heal category use should consume the selected heal item")
 		quit(1)
 		return
 	await process_frame
-	if item_ui.get_display_count("pill") != 9:
-		push_error("Using selected item should consume the selected pill slot")
+	if item_ui.get_display_count("capsule") != 9:
+		push_error("Heal slot should update the displayed count after use")
+		quit(1)
+		return
+
+	player.set("action_timer", 0.0)
+	player._update_action_state(0.01)
+	if not player.has_method("use_selected_attack_item") or not player.use_selected_attack_item():
+		push_error("Attack category use should consume the selected attack item")
+		quit(1)
+		return
+	await process_frame
+	if item_ui.get_display_count("ash_balls") != 9:
+		push_error("Attack slot should update the displayed count after use")
 		quit(1)
 		return
 

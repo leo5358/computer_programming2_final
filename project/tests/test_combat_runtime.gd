@@ -16,6 +16,25 @@ func _initialize() -> void:
 		push_error("CombatRuntime should exist")
 		quit(1)
 		return
+	if not InputMap.has_action("reset_combat"):
+		push_error("Project input map should include reset_combat")
+		quit(1)
+		return
+	var has_f3_key := false
+	var has_r_key := false
+	for event in InputMap.action_get_events("reset_combat"):
+		if event is InputEventKey and event.keycode == KEY_F3:
+			has_f3_key = true
+		if event is InputEventKey and event.keycode == KEY_R:
+			has_r_key = true
+	if not has_f3_key:
+		push_error("reset_combat should remain bound to F3")
+		quit(1)
+		return
+	if has_r_key:
+		push_error("reset_combat should no longer be bound to R")
+		quit(1)
+		return
 
 	runtime.register_input(1, 900)
 	var attack_id: int = runtime.notify_attack_active(0, 1000)
