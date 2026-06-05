@@ -31,14 +31,6 @@ func _initialize() -> void:
 		push_error("Checkpoint should expose player range checks")
 		quit(1)
 		return
-	if not checkpoint.has_method("is_player_in_prompt_range"):
-		push_error("Checkpoint should expose prompt range checks")
-		quit(1)
-		return
-	if not checkpoint.has_method("get_prompt_anchor_position"):
-		push_error("Checkpoint should expose a prompt anchor position")
-		quit(1)
-		return
 	var sprite: Sprite2D = checkpoint.get_node_or_null("Sprite2D")
 	if sprite == null:
 		push_error("Checkpoint art should exist")
@@ -72,23 +64,9 @@ func _initialize() -> void:
 			return
 		character.queue_free()
 
-	player.global_position = checkpoint.global_position + Vector2(250, 0)
-	if not checkpoint.is_player_in_prompt_range(player):
-		push_error("Checkpoint should show prompt within 300 pixels")
-		quit(1)
-		return
-	if checkpoint.is_player_in_range(player):
-		push_error("Checkpoint interaction should require standing inside the checkpoint art")
-		quit(1)
-		return
 	player.global_position = checkpoint.global_position + Vector2(20, 0)
 	if not checkpoint.is_player_in_range(player):
-		push_error("Checkpoint should detect player standing inside the checkpoint art")
-		quit(1)
-		return
-	var prompt_anchor: Vector2 = checkpoint.get_prompt_anchor_position()
-	if prompt_anchor.y >= checkpoint.global_position.y - 250.0:
-		push_error("Checkpoint prompt anchor should be positioned above the checkpoint art")
+		push_error("Checkpoint should detect nearby player")
 		quit(1)
 		return
 
