@@ -277,7 +277,7 @@ func _get_respawn_snapshot() -> Dictionary:
 			return {
 				"map_id": sm.get_saved_map(),
 				"position": sm.get_saved_position(),
-				"health": sm.get_saved_health(),
+				"health": health,
 			}
 	return {
 		"map_id": current_map_id,
