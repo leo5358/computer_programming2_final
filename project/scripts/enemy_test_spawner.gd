@@ -16,6 +16,18 @@ const H_STONE_PLAZA_SPAWN := Vector2(220, 530.5)
 const BOSS_INTERIOR_SPAWN := Vector2(220, 640.5)
 const BOSS_INTERIOR_BOSS_SPAWN := Vector2(1050, 640.5)
 const TRANSITION_FADE_TIME := 0.45
+const INTERACTION_PROMPT_RADIUS := 300.0
+const CHECKPOINT_PROMPT_TEXT := "按下F在此處休息(存檔)"
+const DOOR_PROMPT_TEXT := "按下F進入"
+const INTERACTION_FADE_START_ALPHA := 0.2
+const INTERACTION_FADE_TO_BLACK_TIME := 2.0
+const INTERACTION_BLACK_HOLD_TIME := 1.0
+const AB_EXIT_CENTER := Vector2(15341.0, -383.0)
+const AB_EXIT_PROMPT_X_RADIUS := 300.0
+const AB_EXIT_INTERACTION_X_RADIUS := 150.0
+const H_STONE_PLAZA_EXIT_CENTER := Vector2(2825.16, 257.44)
+const H_STONE_PLAZA_EXIT_PROMPT_X_RADIUS := 300.0
+const H_STONE_PLAZA_EXIT_INTERACTION_X_RADIUS := 150.0
 const MAP_CLIMB_BOUNDS := {
 	"ab_foothill": Vector2(0.0, 15600.0),
 	"h_stone_plaza": Vector2(0.0, 3000.0),
@@ -117,7 +129,8 @@ func _input(event: InputEvent) -> void:
 			_debug_kill_player()
 			get_viewport().set_input_as_handled()
 		KEY_F:
-			if _activate_nearest_checkpoint():
+			if _can_activate_checkpoint():
+				_activate_nearest_checkpoint()
 				get_viewport().set_input_as_handled()
 			elif _can_use_ab_exit():
 				_transition_ab_to_h_stone_plaza()
@@ -348,7 +361,18 @@ func _spawn_enemy(scene: PackedScene, spawn_position: Vector2) -> Node:
 	return instance
 
 func _update_map_interaction_prompt() -> void:
-	interaction_prompt.visible = _can_activate_checkpoint() or _can_use_ab_exit() or _can_use_h_stone_plaza_exit()
+	if interaction_prompt == null:
+		return
+	if is_transitioning:
+		interaction_prompt.visible = false
+		return
+	var prompt_target := _current_prompt_target()
+	if prompt_target.is_empty():
+		interaction_prompt.visible = false
+		return
+	interaction_prompt.text = String(prompt_target.get("text", ""))
+	interaction_prompt.visible = true
+	_position_prompt_on_screen(prompt_target.get("anchor", Vector2.ZERO))
 
 func _can_activate_checkpoint() -> bool:
 	return _nearest_checkpoint() != null
@@ -360,13 +384,8 @@ func _activate_nearest_checkpoint() -> bool:
 	var player := _get_player()
 	if player == null:
 		return false
-	if checkpoint.has_method("activate"):
-		checkpoint.activate(player)
-		if has_node("/root/SaveManager"):
-			var sm = get_node("/root/SaveManager")
-			sm.save_game(current_map_id, player.spawn_position, player.health)
-		return true
-	return false
+	await _rest_at_checkpoint(checkpoint)
+	return true
 
 func _nearest_checkpoint() -> Node:
 	var player := _get_player()
@@ -388,6 +407,26 @@ func _nearest_checkpoint() -> Node:
 			nearest_distance = distance
 	return nearest
 
+func _nearest_checkpoint_prompt() -> Node:
+	var player := _get_player()
+	if player == null or current_map_id != "ab_foothill":
+		return null
+	var nearest: Node = null
+	var nearest_distance := INF
+	for checkpoint in get_tree().get_nodes_in_group("checkpoint"):
+		if checkpoint == null or not checkpoint.has_method("is_player_in_prompt_range"):
+			continue
+		if not checkpoint.is_player_in_prompt_range(player):
+			continue
+		var checkpoint_node := checkpoint as Node2D
+		if checkpoint_node == null:
+			continue
+		var distance := player.global_position.distance_to(checkpoint_node.global_position)
+		if distance < nearest_distance:
+			nearest = checkpoint
+			nearest_distance = distance
+	return nearest
+
 func _can_use_ab_exit() -> bool:
 	if is_transitioning or current_map_id != "ab_foothill":
 		return false
@@ -396,7 +435,7 @@ func _can_use_ab_exit() -> bool:
 	if player == null:
 		return false
 
-	return player.global_position.x >= AB_EXIT_START_X and player.global_position.x <= AB_EXIT_END_X
+	return absf(player.global_position.x - AB_EXIT_CENTER.x) <= AB_EXIT_INTERACTION_X_RADIUS
 
 func _can_use_h_stone_plaza_exit() -> bool:
 	if is_transitioning or current_map_id != "h_stone_plaza":
@@ -406,7 +445,7 @@ func _can_use_h_stone_plaza_exit() -> bool:
 	if player == null:
 		return false
 
-	return player.global_position.x >= H_STONE_PLAZA_EXIT_START_X and player.global_position.x <= H_STONE_PLAZA_EXIT_END_X
+	return absf(player.global_position.x - H_STONE_PLAZA_EXIT_CENTER.x) <= H_STONE_PLAZA_EXIT_INTERACTION_X_RADIUS
 
 func _transition_ab_to_h_stone_plaza() -> void:
 	await _run_map_transition(H_STONE_PLAZA_SCENE, "h_stone_plaza", H_STONE_PLAZA_SPAWN)
@@ -462,17 +501,22 @@ func _run_map_transition(next_scene: PackedScene, next_map_id: String, player_sp
 	is_transitioning = true
 	interaction_prompt.visible = false
 	_set_player_transition_locked(true)
-	await _fade_to(1.0)
+	_begin_interaction_fade()
+	await _fade_to(1.0, INTERACTION_FADE_TO_BLACK_TIME)
 	_switch_map(next_scene, next_map_id, player_spawn)
+	var player := _get_player()
+	if player != null and player.has_method("settle_world_interaction"):
+		player.settle_world_interaction(player_spawn)
 	await get_tree().process_frame
-	await _fade_to(0.0)
+	await get_tree().create_timer(INTERACTION_BLACK_HOLD_TIME).timeout
+	_clear_fade()
 	_set_player_transition_locked(false)
 	is_transitioning = false
 
-func _fade_to(alpha: float) -> void:
+func _fade_to(alpha: float, duration: float = TRANSITION_FADE_TIME) -> void:
 	fade_rect.visible = true
 	var tween: Tween = create_tween()
-	tween.tween_property(fade_rect, "color:a", alpha, TRANSITION_FADE_TIME)
+	tween.tween_property(fade_rect, "color:a", alpha, duration)
 	await tween.finished
 	if alpha <= 0.0:
 		fade_rect.visible = false
@@ -484,7 +528,7 @@ func _play_start_page_fade_in_if_needed() -> void:
 	get_tree().remove_meta("fade_in_from_start_page")
 	fade_rect.visible = true
 	fade_rect.color = Color(0, 0, 0, 1)
-	_fade_to(0.0)
+	_fade_to(0.0, TRANSITION_FADE_TIME)
 
 func _switch_map(next_scene: PackedScene, next_map_id: String, player_spawn: Vector2) -> void:
 	var old_map: Node = get_node_or_null("Chapter1Map")
@@ -541,3 +585,100 @@ func _get_player() -> Node2D:
 	if player is Node2D:
 		return player as Node2D
 	return null
+
+func _rest_at_checkpoint(checkpoint: Node) -> void:
+	var player := _get_player()
+	if player == null or checkpoint == null:
+		return
+	is_transitioning = true
+	interaction_prompt.visible = false
+	_set_player_transition_locked(true)
+	_begin_interaction_fade()
+	await _fade_to(1.0, INTERACTION_FADE_TO_BLACK_TIME)
+	var rest_position := player.global_position
+	if checkpoint.has_method("get_rest_position"):
+		rest_position = checkpoint.get_rest_position()
+	elif checkpoint is Node2D:
+		rest_position = (checkpoint as Node2D).global_position
+	if checkpoint.has_method("activate"):
+		checkpoint.activate(player)
+	if player.has_method("settle_world_interaction"):
+		player.settle_world_interaction(rest_position, true)
+	elif "spawn_position" in player:
+		player.spawn_position = rest_position
+		player.global_position = rest_position
+	if has_node("/root/SaveManager"):
+		var sm = get_node("/root/SaveManager")
+		sm.save_game(current_map_id, rest_position, player.health)
+	clear_test_enemies()
+	await get_tree().process_frame
+	_respawn_map_enemies()
+	await get_tree().create_timer(INTERACTION_BLACK_HOLD_TIME).timeout
+	_clear_fade()
+	_set_player_transition_locked(false)
+	is_transitioning = false
+
+func _begin_interaction_fade() -> void:
+	fade_rect.visible = true
+	fade_rect.color = Color(0, 0, 0, INTERACTION_FADE_START_ALPHA)
+
+func _clear_fade() -> void:
+	if fade_rect == null:
+		return
+	fade_rect.color = Color(0, 0, 0, 0)
+	fade_rect.visible = false
+
+func _position_prompt_on_screen(anchor_value: Variant) -> void:
+	if interaction_prompt == null or get_viewport() == null:
+		return
+	var anchor: Vector2 = anchor_value
+	var screen_position: Vector2 = get_viewport().get_canvas_transform() * anchor
+	interaction_prompt.reset_size()
+	interaction_prompt.position = screen_position - Vector2(interaction_prompt.size.x * 0.5, interaction_prompt.size.y)
+
+func _current_prompt_target() -> Dictionary:
+	var best_target := {}
+	var best_distance := INF
+	var checkpoint := _nearest_checkpoint_prompt()
+	if checkpoint != null:
+		var checkpoint_anchor: Vector2 = (checkpoint as Node2D).global_position
+		if checkpoint.has_method("get_prompt_anchor_position"):
+			checkpoint_anchor = checkpoint.get_prompt_anchor_position()
+		var checkpoint_distance: float = _get_player().global_position.distance_to((checkpoint as Node2D).global_position)
+		best_target = {
+			"text": CHECKPOINT_PROMPT_TEXT,
+			"anchor": checkpoint_anchor,
+		}
+		best_distance = checkpoint_distance
+	var door_target := _current_door_prompt_target()
+	if not door_target.is_empty() and float(door_target.get("distance", INF)) < best_distance:
+		best_target = door_target
+	return best_target
+
+func _current_door_prompt_target() -> Dictionary:
+	var player := _get_player()
+	if player == null:
+		return {}
+	var anchor := Vector2.ZERO
+	match current_map_id:
+		"ab_foothill":
+			anchor = AB_EXIT_CENTER
+		"h_stone_plaza":
+			anchor = H_STONE_PLAZA_EXIT_CENTER
+		_:
+			return {}
+	var distance := player.global_position.distance_to(anchor)
+	if current_map_id == "ab_foothill":
+		if absf(player.global_position.x - AB_EXIT_CENTER.x) > AB_EXIT_PROMPT_X_RADIUS:
+			return {}
+	elif current_map_id == "h_stone_plaza":
+		if absf(player.global_position.x - H_STONE_PLAZA_EXIT_CENTER.x) > H_STONE_PLAZA_EXIT_PROMPT_X_RADIUS:
+			return {}
+	else:
+		if distance > INTERACTION_PROMPT_RADIUS:
+			return {}
+	return {
+		"text": DOOR_PROMPT_TEXT,
+		"anchor": anchor,
+		"distance": distance,
+	}

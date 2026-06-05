@@ -73,13 +73,19 @@ func _initialize() -> void:
 
 	var rear_checkpoint := checkpoints[2] as Node2D
 	var rear_checkpoint_position := rear_checkpoint.global_position
-	player.global_position = rear_checkpoint.global_position
+	player.global_position = rear_checkpoint.global_position + Vector2(250.0, 0.0)
 	main._update_map_interaction_prompt()
 	if not prompt.visible:
-		push_error("Checkpoint should show the F prompt when player is nearby")
+		push_error("Checkpoint should show the rest prompt when player is within 300 pixels")
 		quit(1)
 		return
-	if not main._activate_nearest_checkpoint():
+	if prompt.text != "按下F在此處休息(存檔)":
+		push_error("Checkpoint prompt should show the new rest/save text")
+		quit(1)
+		return
+	player.global_position = rear_checkpoint.global_position
+	await process_frame
+	if not await main._activate_nearest_checkpoint():
 		push_error("F interaction should activate nearby checkpoint")
 		quit(1)
 		return
@@ -107,6 +113,10 @@ func _initialize() -> void:
 		return
 	if not is_equal_approx(float(player.get("health")), float(player.get("max_health"))):
 		push_error("Retry after death should restore player health to full instead of saved low health")
+		quit(1)
+		return
+	if int(player.get_item_count("kunai")) != 10 or int(player.get_item_count("gourd")) != 10:
+		push_error("Checkpoint rest should refill item counts before retry state continues")
 		quit(1)
 		return
 	await main._transition_ab_to_h_stone_plaza()

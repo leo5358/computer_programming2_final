@@ -109,6 +109,63 @@ func _initialize() -> void:
 		push_error("Main should include player for debug death test")
 		quit(1)
 		return
+	var checkpoint_prompt: Label = main.get_node_or_null("MapTransitionUI/PromptLabel")
+	if checkpoint_prompt == null:
+		push_error("Main should include a map interaction prompt label")
+		quit(1)
+		return
+	var rear_checkpoint := main.get_node_or_null("Chapter1Map/Checkpoints/CheckpointRear") as Node2D
+	if rear_checkpoint == null:
+		push_error("AB foothill should include the rear checkpoint for rest testing")
+		quit(1)
+		return
+	var first_map_enemy := get_nodes_in_group("map_spawned_enemy")[0] as Node
+	first_map_enemy.queue_free()
+	await process_frame
+	player.set("item_counts", {
+		"kunai": 2,
+		"ash_balls": 3,
+		"gourd": 4,
+		"pill": 5,
+		"capsule": 6,
+	})
+	player.set("health", 23.0)
+	player.set("lives", 1)
+	player.set("posture", 57.0)
+	player.emit_signal("stats_changed")
+	player.global_position = rear_checkpoint.global_position + Vector2(220.0, 0.0)
+	main._update_map_interaction_prompt()
+	if not checkpoint_prompt.visible or checkpoint_prompt.text != "按下F在此處休息(存檔)":
+		push_error("Checkpoint rest prompt should appear near the checkpoint within 300 pixels")
+		quit(1)
+		return
+	player.global_position = rear_checkpoint.global_position
+	await process_frame
+	if not await main._activate_nearest_checkpoint():
+		push_error("Checkpoint interaction should succeed when standing on the checkpoint art")
+		quit(1)
+		return
+	if get_nodes_in_group("map_spawned_enemy").size() != baseline_map_enemy_count:
+		push_error("Checkpoint rest should respawn defeated map enemies")
+		quit(1)
+		return
+	if player.get_item_count("kunai") != 10 or player.get_item_count("capsule") != 10:
+		push_error("Checkpoint rest should refill all item counts to their defaults")
+		quit(1)
+		return
+	if not is_equal_approx(float(player.get("health")), float(player.get("max_health"))):
+		push_error("Checkpoint rest should refill player health to max")
+		quit(1)
+		return
+	if int(player.get("lives")) != int(player.get("max_lives")):
+		push_error("Checkpoint rest should refill player revive lives to max")
+		quit(1)
+		return
+	if not is_zero_approx(float(player.get("posture"))):
+		push_error("Checkpoint rest should reset player posture bar to zero")
+		quit(1)
+		return
+
 	var pause_overlay: CanvasLayer = main.get_node_or_null("PauseOverlay")
 	if pause_overlay == null:
 		push_error("Main should include PauseOverlay for ESC pause")

@@ -925,6 +925,47 @@ func _cancel_current_action_flags() -> void:
 	attack_has_hit = false
 	attack_has_cut_projectile = false
 
+func refill_items_to_default() -> void:
+	item_counts = DEFAULT_ITEM_COUNTS.duplicate()
+	stats_changed.emit()
+
+func settle_world_interaction(anchor_position: Vector2, refill_items: bool = false) -> void:
+	_cancel_current_action_flags()
+	is_invulnerable = false
+	action_timer = 0.0
+	dash_timer = 0.0
+	attack_elapsed = 0.0
+	attack_lockout_timer = 0.0
+	attack_combo_step = 0
+	block_age = 0.0
+	block_time_left = 0.0
+	parry_elapsed = 0.0
+	attack_lunge_timer = 0.0
+	parry_flash_timer = 0.0
+	block_flash_timer = 0.0
+	hurt_flash_timer = 0.0
+	perfect_dodge_timer = 0.0
+	hit_impact_vfx_timer = 0.0
+	hitstop_timer = 0.0
+	stored_velocity = Vector2.ZERO
+	heavy_parry_recoil_timer = 0.0
+	heavy_parry_recoil_velocity = Vector2.ZERO
+	current_item_animation = "mudra"
+	sprite.speed_scale = 1.0
+	velocity = Vector2.ZERO
+	if is_instance_valid(active_teleport_kunai):
+		active_teleport_kunai.queue_free()
+	active_teleport_kunai = null
+	if refill_items:
+		item_counts = DEFAULT_ITEM_COUNTS.duplicate()
+		health = max_health
+		lives = max_lives
+		posture = 0.0
+	global_position = anchor_position
+	_set_state(PlayerState.IDLE)
+	_update_visuals()
+	stats_changed.emit()
+
 func is_action_locked() -> bool:
 	return state in [PlayerState.ATTACK, PlayerState.PARRY, PlayerState.DASH, PlayerState.EAT, PlayerState.HURT, PlayerState.STUNNED, PlayerState.DEAD]
 
