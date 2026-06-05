@@ -68,8 +68,12 @@ func _initialize() -> void:
 		push_error("Using gourd should consume one count")
 		quit(1)
 		return
-	if float(player.get("max_health")) <= 100.0:
-		push_error("Gourd expansion should increase max health")
+	if not is_equal_approx(float(player.get("max_health")), 100.0):
+		push_error("Gourd should not increase max health")
+		quit(1)
+		return
+	if not is_equal_approx(float(player.get("health")), 100.0):
+		push_error("Gourd should heal 30 percent of max health")
 		quit(1)
 		return
 	if player.velocity != Vector2.ZERO:
@@ -93,6 +97,17 @@ func _initialize() -> void:
 		push_error("Eat item action should finish after mudra animation")
 		quit(1)
 		return
+	player.set("health", 40.0)
+	if not player.use_item("gourd"):
+		push_error("Gourd should remain usable after the first drink")
+		quit(1)
+		return
+	if not is_equal_approx(float(player.get("health")), 70.0):
+		push_error("Gourd should restore exactly 30 percent of max health")
+		quit(1)
+		return
+	player.set("action_timer", 0.0)
+	player._update_action_state(0.01)
 
 	if not player.has_method("get_selected_attack_item_id") or not player.has_method("get_selected_heal_item_id"):
 		push_error("Player should expose category-specific selected items")
