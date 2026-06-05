@@ -61,10 +61,12 @@ enum EnemyState {
 @export var thrust_hitbox_size := Vector2(112.0, 42.0)
 @export var thrust_hitbox_offset := Vector2(62.0, -34.0)
 @export var pressure_duration := 2.0
+@export var posture_disengage_delay := 6.0
 @export var pressure_thrust_range_multiplier := 1.25
 @export var whiff_cooldown_multiplier := 0.45
 @export var posture_recovery_pause := 1.4
 @export var posture_recovery_rate := 10.0
+@export_range(0.0, 1.0, 0.01) var posture_recovery_percent_per_second := 0.05
 @export var perfect_parry_input_leeway := 0.16
 @export var is_perilous_attack := false
 @export var perfect_parry_posture_damage := 22.0
@@ -130,6 +132,7 @@ var overhead_hp_back: ColorRect
 var overhead_hp_fill: ColorRect
 var overhead_posture_back: ColorRect
 var overhead_posture_fill: ColorRect
+var posture_visibility_snapshot := 0.0
 
 @onready var sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
 @onready var body_collision_shape: CollisionShape2D = get_node_or_null("CollisionShape2D") as CollisionShape2D
@@ -165,6 +168,7 @@ func _ready() -> void:
 		warning_label.visible = false
 	_setup_overhead_bars()
 	_update_overhead_bars()
+	posture_visibility_snapshot = posture
 	stats_changed.emit()
 
 func _physics_process(delta: float) -> void:
@@ -328,6 +332,7 @@ func reset_combat_state() -> void:
 	counter_after_deflect = false
 	pressure_timer = 0.0
 	posture_recovery_pause_timer = 0.0
+	posture_visibility_snapshot = posture
 	corpse_timer = 0.0
 	velocity = Vector2.ZERO
 	global_position = spawn_position
@@ -556,19 +561,30 @@ func _maybe_convert_windup_to_thrust() -> void:
 		_start_thrust_attack()
 
 func _mark_combat_pressure() -> void:
-	pressure_timer = pressure_duration
+	pressure_timer = posture_disengage_delay
 	posture_recovery_pause_timer = posture_recovery_pause
 
+func is_posture_in_combat() -> bool:
+	return pressure_timer > 0.0
+
+func is_posture_bar_visible() -> bool:
+	posture_visibility_snapshot = posture
+	return posture > 0.0
+
 func _update_pressure_and_posture(delta: float) -> void:
-	pressure_timer = max(0.0, pressure_timer - delta)
+	var remaining_delta := delta
+	if pressure_timer > 0.0:
+		var consumed: float = min(remaining_delta, pressure_timer)
+		pressure_timer -= consumed
+		remaining_delta -= consumed
 	posture_recovery_pause_timer = max(0.0, posture_recovery_pause_timer - delta)
 	if defeated_flag or posture_broken:
 		return
-	if posture_recovery_pause_timer > 0.0 or posture <= 0.0:
+	if posture <= 0.0 or remaining_delta <= 0.0:
 		return
 	var health_ratio: float = clamp(health / max(max_health, 0.001), 0.0, 1.0)
-	var recovery_rate := posture_recovery_rate * (0.35 + 0.65 * health_ratio)
-	posture = max(0.0, posture - recovery_rate * delta)
+	var recovery_rate := max_posture * posture_recovery_percent_per_second * health_ratio
+	posture = max(0.0, posture - recovery_rate * remaining_delta)
 
 func _set_attack_visual(show_visual: bool, active: bool) -> void:
 	if attack_visual != null:
@@ -649,6 +665,9 @@ func _update_overhead_bars() -> void:
 	var posture_ratio: float = clamp(posture / max(max_posture, 0.001), 0.0, 1.0)
 	overhead_hp_fill.size = Vector2(overhead_bar_size.x * health_ratio, overhead_bar_size.y)
 	overhead_posture_fill.size = Vector2(overhead_bar_size.x * posture_ratio, overhead_bar_size.y)
+	var show_posture := is_posture_bar_visible()
+	overhead_posture_back.visible = show_posture
+	overhead_posture_fill.visible = show_posture
 
 func _update_visuals() -> void:
 	if sprite == null or sprite.sprite_frames == null:

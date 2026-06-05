@@ -111,9 +111,14 @@ func _update_stats() -> void:
 	var max_health = float(boss.get("max_health")) if boss.get("max_health") != null else 100.0
 	var posture = float(boss.get("posture")) if boss.get("posture") != null else 0.0
 	var max_posture = float(boss.get("max_posture")) if boss.get("max_posture") != null else 100.0
+	var show_posture := false
+	if boss.has_method("is_posture_bar_visible"):
+		show_posture = bool(boss.is_posture_bar_visible())
 	
 	var h_ratio = clamp(health / max(max_health, 1.0), 0.0, 1.0)
 	var p_ratio = clamp(posture / max(max_posture, 1.0), 0.0, 1.0)
 	
 	health_fill.size = Vector2(current_bar_width * h_ratio, health_height)
 	posture_fill.size = Vector2(current_bar_width * p_ratio, posture_height)
+	posture_back.visible = show_posture
+	posture_fill.visible = show_posture

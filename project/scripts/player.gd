@@ -146,6 +146,8 @@ enum PlayerState {
 @export var world_boundary_climb_margin := 24.0
 @export var max_health := 100.0
 @export var max_posture := 100.0
+@export var posture_disengage_delay := 6.0
+@export_range(0.0, 1.0, 0.01) var posture_recovery_percent_per_second := 0.08
 @export var max_lives := 3
 @export var world_death_bounds_enabled := true
 @export var world_death_bounds := Rect2(-1024.0, -2048.0, 22000.0, 4096.0)
@@ -285,6 +287,8 @@ var player_sheet: Texture2D = null
 var attack_hit_streams: Array[AudioStream] = []
 var chop_hit_stream: AudioStream = null
 var attack_miss_streams: Array[AudioStream] = []
+var posture_combat_timer := 0.0
+var posture_visibility_snapshot := 0.0
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var body_collision_shape: CollisionShape2D = $CollisionShape2D
@@ -308,6 +312,7 @@ func _ready() -> void:
 	_setup_hit_impact_vfx()
 	_load_optional_sfx()
 	_set_state(PlayerState.IDLE)
+	posture_visibility_snapshot = posture
 	stats_changed.emit()
 
 func _physics_process(delta: float) -> void:
@@ -354,6 +359,7 @@ func _physics_process(delta: float) -> void:
 	_update_movement(delta)
 	_update_action_state(delta)
 	_update_combat(delta)
+	_update_posture_decay(delta)
 
 	if attack_buff_timer > 0.0:
 		attack_buff_timer -= delta
@@ -364,6 +370,30 @@ func _physics_process(delta: float) -> void:
 	_check_world_death_bounds()
 	_update_visuals()
 	stats_changed.emit()
+
+func register_posture_contact() -> void:
+	posture_combat_timer = posture_disengage_delay
+
+func is_posture_in_combat() -> bool:
+	return posture_combat_timer > 0.0
+
+func is_posture_bar_visible() -> bool:
+	posture_visibility_snapshot = posture
+	return posture > 0.0
+
+func _update_posture_decay(delta: float) -> void:
+	var remaining_delta := delta
+	if posture_combat_timer > 0.0:
+		var consumed: float = min(remaining_delta, posture_combat_timer)
+		posture_combat_timer -= consumed
+		remaining_delta -= consumed
+	if state == PlayerState.DEAD or state == PlayerState.STUNNED:
+		return
+	if posture <= 0.0 or remaining_delta <= 0.0:
+		return
+	var health_ratio: float = clamp(health / max(max_health, 0.001), 0.0, 1.0)
+	var recovery_rate := max_posture * posture_recovery_percent_per_second * health_ratio
+	posture = max(0.0, posture - recovery_rate * remaining_delta)
 
 func _update_inputs() -> void:
 	if _try_use_item_hotkey():
@@ -1164,6 +1194,7 @@ func _find_perfect_dodge_target() -> Node2D:
 func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node = null, attack_type: int = CombatServerScript.AttackType.NORMAL) -> void:
 	if health <= 0.0:
 		return
+	register_posture_contact()
 	if is_invulnerable and attack_type != CombatServerScript.AttackType.SWEEP:
 		return
 
@@ -1680,6 +1711,7 @@ func _receive_attack_deflected() -> void:
 	attack_lockout_timer = attack_deflected_attack_lockout_time
 	attack_lunge_timer = 0.0
 	attack_combo_step = 0
+	register_posture_contact()
 	posture = math.add_posture(posture, attack_deflected_posture_damage)
 	_add_heartbeat_pressure(6.0)
 	if state == PlayerState.DEAD:
@@ -1841,6 +1873,8 @@ func reset_combat_state() -> void:
 	health = max_health
 	lives = max_lives
 	posture = 0.0
+	posture_combat_timer = 0.0
+	posture_visibility_snapshot = posture
 	heartbeat = CombatMathScript.MIN_HEARTBEAT
 	state = PlayerState.IDLE
 	previous_state = PlayerState.IDLE

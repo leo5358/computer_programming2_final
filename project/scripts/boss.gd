@@ -480,6 +480,7 @@ func _ready() -> void:
 	attack_cooldown_duration = 1.38
 	posture_recovery_pause = 1.6
 	posture_recovery_rate = 5.0
+	posture_recovery_percent_per_second = 0.10
 	guard_chance = 0.8
 	guard_posture_damage = 1.2
 	guard_lockout_duration = 0.32
