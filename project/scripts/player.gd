@@ -41,13 +41,15 @@ const MUDRA_FOCUS_FRAME_START := 3
 const MUDRA_FOCUS_FRAME_END := 5
 const MUDRA_FOCUS_DURATION_RATIO := 0.70
 const DEFAULT_ITEM_COUNTS := {
-	"gourd": 10,
 	"kunai": 10,
+	"ash_balls": 10,
+	"gourd": 10,
 	"pill": 10,
 	"capsule": 10,
-	"ash_balls": 10,
 }
-const ITEM_ORDER: Array[String] = ["gourd", "kunai", "pill", "capsule", "ash_balls"]
+const ITEM_ORDER: Array[String] = ["kunai", "ash_balls", "gourd", "pill", "capsule"]
+const ATTACK_ITEM_IDS: Array[String] = ["kunai", "ash_balls"]
+const HEAL_ITEM_IDS: Array[String] = ["gourd", "pill", "capsule"]
 const EAT_ITEM_IDS := {
 	"gourd": true,
 	"pill": true,
@@ -266,6 +268,8 @@ var sprite_sheet_layout: Dictionary = {}
 var item_counts: Dictionary = DEFAULT_ITEM_COUNTS.duplicate()
 var item_hotkeys_down: Dictionary = {}
 var selected_item_index := 0
+var selected_attack_item_index := 0
+var selected_heal_item_index := 0
 var active_teleport_kunai: Node2D = null
 var current_item_animation := "mudra"
 var has_map_climb_bounds := false
@@ -702,11 +706,10 @@ func _try_use_item_hotkey() -> bool:
 		return true
 	if _item_select_key_just_pressed(KEY_5, 4):
 		return true
-	if Input.is_key_pressed(KEY_F) and _is_map_interaction_prompt_visible():
-		item_hotkeys_down["use_selected"] = true
-		return false
-	if _item_use_key_just_pressed():
-		return use_selected_item()
+	if _item_use_key_just_pressed(KEY_E, "use_attack"):
+		return use_selected_attack_item()
+	if _item_use_key_just_pressed(KEY_R, "use_heal"):
+		return use_selected_heal_item()
 	return false
 
 func _item_select_key_just_pressed(key: Key, index: int) -> bool:
@@ -715,20 +718,24 @@ func _item_select_key_just_pressed(key: Key, index: int) -> bool:
 	var was_pressed := bool(item_hotkeys_down.get(key_name, false))
 	item_hotkeys_down[key_name] = pressed
 	if pressed and not was_pressed:
-		selected_item_index = clampi(index, 0, DEFAULT_ITEM_COUNTS.size() - 1)
+		_set_selected_item_index(index)
 		stats_changed.emit()
 		return true
 	return false
 
-func _item_use_key_just_pressed() -> bool:
-	var pressed := Input.is_key_pressed(KEY_F)
-	var was_pressed := bool(item_hotkeys_down.get("use_selected", false))
-	item_hotkeys_down["use_selected"] = pressed
+func _item_use_key_just_pressed(key: Key, action_name: String) -> bool:
+	var pressed := Input.is_key_pressed(key)
+	var was_pressed := bool(item_hotkeys_down.get(action_name, false))
+	item_hotkeys_down[action_name] = pressed
 	return pressed and not was_pressed
 
-func _is_map_interaction_prompt_visible() -> bool:
-	var prompt := get_tree().root.find_child("PromptLabel", true, false) as CanvasItem
-	return prompt != null and prompt.visible
+func _set_selected_item_index(index: int) -> void:
+	selected_item_index = clampi(index, 0, ITEM_ORDER.size() - 1)
+	var item_id := ITEM_ORDER[selected_item_index]
+	if ATTACK_ITEM_IDS.has(item_id):
+		selected_attack_item_index = ATTACK_ITEM_IDS.find(item_id)
+	elif HEAL_ITEM_IDS.has(item_id):
+		selected_heal_item_index = HEAL_ITEM_IDS.find(item_id)
 
 func _read_move_axis() -> float:
 	var keyboard_axis := Input.get_axis("move_left", "move_right")
@@ -791,8 +798,20 @@ func get_selected_item_id() -> String:
 	var index := clampi(selected_item_index, 0, ITEM_ORDER.size() - 1)
 	return ITEM_ORDER[index]
 
+func get_selected_attack_item_id() -> String:
+	return ATTACK_ITEM_IDS[clampi(selected_attack_item_index, 0, ATTACK_ITEM_IDS.size() - 1)]
+
+func get_selected_heal_item_id() -> String:
+	return HEAL_ITEM_IDS[clampi(selected_heal_item_index, 0, HEAL_ITEM_IDS.size() - 1)]
+
 func use_selected_item() -> bool:
 	return use_item(get_selected_item_id())
+
+func use_selected_attack_item() -> bool:
+	return use_item(get_selected_attack_item_id())
+
+func use_selected_heal_item() -> bool:
+	return use_item(get_selected_heal_item_id())
 
 func use_item(item_id: String) -> bool:
 	if item_id == "kunai" and is_instance_valid(active_teleport_kunai):
@@ -1810,6 +1829,8 @@ func reset_combat_state() -> void:
 	current_item_animation = "mudra"
 	item_counts = DEFAULT_ITEM_COUNTS.duplicate()
 	selected_item_index = 0
+	selected_attack_item_index = 0
+	selected_heal_item_index = 0
 	item_hotkeys_down.clear()
 	if is_instance_valid(active_teleport_kunai):
 		active_teleport_kunai.queue_free()

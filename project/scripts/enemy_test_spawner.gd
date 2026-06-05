@@ -125,7 +125,7 @@ func _input(event: InputEvent) -> void:
 			elif _can_use_h_stone_plaza_exit():
 				_transition_h_stone_plaza_to_boss_interior()
 				get_viewport().set_input_as_handled()
-		KEY_R:
+		KEY_F5:
 			reset_test_field()
 			get_viewport().set_input_as_handled()
 

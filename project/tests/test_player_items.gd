@@ -94,6 +94,25 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+	if not player.has_method("get_selected_attack_item_id") or not player.has_method("get_selected_heal_item_id"):
+		push_error("Player should expose category-specific selected items")
+		quit(1)
+		return
+	if player.get_selected_attack_item_id() != "kunai" or player.get_selected_heal_item_id() != "gourd":
+		push_error("Player should default to the first attack and heal items")
+		quit(1)
+		return
+	player.set("selected_attack_item_index", 1)
+	player.set("selected_heal_item_index", 2)
+	if player.get_selected_attack_item_id() != "ash_balls":
+		push_error("Player should map attack slot 2 to ash_balls")
+		quit(1)
+		return
+	if player.get_selected_heal_item_id() != "capsule":
+		push_error("Player should map heal slot 3 to capsule")
+		quit(1)
+		return
+
 	var base_heartbeat := float(player.get("heartbeat"))
 	if not player.use_item("capsule"):
 		push_error("Adrenaline capsule should be usable")
@@ -120,6 +139,35 @@ func _initialize() -> void:
 		return
 	if float(player.get("heartbeat")) >= raised_heartbeat:
 		push_error("Blood pressure pill should lower heartbeat")
+		quit(1)
+		return
+	player.set("action_timer", 0.0)
+	player._update_action_state(0.01)
+
+	if not player.use_selected_attack_item():
+		push_error("Attack category use should trigger the selected attack item")
+		quit(1)
+		return
+	if player.get_current_animation() != "throw" or not is_equal_approx(float(player.get("action_timer")), 0.8):
+		push_error("Selected ash_ball should use the throw animation")
+		quit(1)
+		return
+	if player.get_item_count("ash_balls") != 9:
+		push_error("Selected ash_ball should consume one count")
+		quit(1)
+		return
+	player.set("action_timer", 0.0)
+	player._update_action_state(0.01)
+	if not player.use_selected_heal_item():
+		push_error("Heal category use should trigger the selected heal item")
+		quit(1)
+		return
+	if player.get_current_animation() != "eat" or not is_equal_approx(float(player.get("action_timer")), 0.8):
+		push_error("Selected capsule should use the eat animation")
+		quit(1)
+		return
+	if player.get_item_count("capsule") != 8:
+		push_error("Selected capsule should consume one additional count")
 		quit(1)
 		return
 	player.set("action_timer", 0.0)
