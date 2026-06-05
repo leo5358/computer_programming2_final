@@ -32,11 +32,16 @@ func _initialize() -> void:
 		quit(1)
 		return
 	var sprite: Sprite2D = checkpoint.get_node_or_null("Sprite2D")
-	if sprite == null or sprite.scale.distance_to(Vector2(0.4, 0.4)) > 0.001:
-		push_error("Checkpoint art should be scaled up for map readability")
+	if sprite == null:
+		push_error("Checkpoint art should exist")
 		quit(1)
 		return
-	if not is_equal_approx(sprite.position.y, -241.2):
+	var sprite_size := sprite.texture.get_size() * sprite.scale
+	if sprite_size.distance_to(Vector2(300, 300)) > 0.01:
+		push_error("Checkpoint art should render at 300x300 on the map")
+		quit(1)
+		return
+	if not is_equal_approx(sprite.position.y, -140.4):
 		push_error("Checkpoint art bottom should sit on the floor contact point")
 		quit(1)
 		return

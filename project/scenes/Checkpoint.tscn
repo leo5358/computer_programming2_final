@@ -9,6 +9,6 @@ z_index = 80
 script = ExtResource("1_checkpoint_script")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(0, -241.2)
-scale = Vector2(0.4, 0.4)
+position = Vector2(0, -140.4)
+scale = Vector2(0.23923445, 0.23923445)
 texture = ExtResource("3_checkpoint_unable")
