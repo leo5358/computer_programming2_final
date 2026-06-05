@@ -25,7 +25,7 @@ func _initialize() -> void:
 		push_error("Main scene should include map-aware BgmPlayer")
 		quit(1)
 		return
-	if bgm.get_bgm_path() != "res://assets/audio/BGMs/general_music.mp3":
+	if bgm.get_bgm_path() != "res://assets/BGMs/general_music.mp3":
 		push_error("AB foothill should start with general BGM")
 		quit(1)
 		return
@@ -65,7 +65,7 @@ func _initialize() -> void:
 		push_error("H stone plaza should set player climb boundary to x=3000")
 		quit(1)
 		return
-	if bgm.get_bgm_path() != "res://assets/audio/BGMs/general_music.mp3":
+	if bgm.get_bgm_path() != "res://assets/BGMs/general_music.mp3":
 		push_error("H stone plaza should keep general BGM after transition")
 		quit(1)
 		return
@@ -114,7 +114,7 @@ func _initialize() -> void:
 		push_error("Boss interior should set player climb boundary to x=2000")
 		quit(1)
 		return
-	if bgm.get_bgm_path() != "res://assets/audio/BGMs/boss_music.mp3":
+	if bgm.get_bgm_path() != "res://assets/BGMs/boss_music.mp3":
 		push_error("Boss interior should switch to boss BGM after transition")
 		quit(1)
 		return

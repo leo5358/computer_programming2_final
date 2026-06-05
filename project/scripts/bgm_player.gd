@@ -1,7 +1,7 @@
 extends AudioStreamPlayer
 
-const GENERAL_BGM_PATH := "res://assets/audio/BGMs/general_music.mp3"
-const BOSS_BGM_PATH := "res://assets/audio/BGMs/boss_music.mp3"
+const GENERAL_BGM_PATH := "res://assets/BGMs/general_music.mp3"
+const BOSS_BGM_PATH := "res://assets/BGMs/boss_music.mp3"
 const BOSS_LOOP_START := 6.0
 
 var bgm_loop_enabled := true

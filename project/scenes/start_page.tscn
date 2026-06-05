@@ -9,7 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://bhra26ny3ssex" path="res://assets/start_page/menu_selector_glow.png" id="7_4r0lf"]
 [ext_resource type="Texture2D" path="res://assets/start_page/mist.png" id="8_2f82o"]
 [ext_resource type="Script" path="res://scripts/start_page.gd" id="9_rd1x7"]
-[ext_resource type="AudioStream" path="res://assets/audio/BGMs/start_page_music.mp3" id="10_start_bgm"]
+[ext_resource type="AudioStream" path="res://assets/BGMs/start_page_music.mp3" id="10_start_bgm"]
 
 [node name="Node2D" type="Node2D" unique_id=627760668]
 position = Vector2(16, -11)

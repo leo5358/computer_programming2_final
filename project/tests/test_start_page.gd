@@ -46,8 +46,8 @@ func _initialize() -> void:
 		push_error("Start page should have BGM stream")
 		quit(1)
 		return
-	if start_bgm.stream.resource_path != "res://assets/audio/BGMs/start_page_music.mp3":
-		push_error("Start page should use assets/audio/BGMs/start_page_music.mp3")
+	if start_bgm.stream.resource_path != "res://assets/BGMs/start_page_music.mp3":
+		push_error("Start page should use assets/BGMs/start_page_music.mp3")
 		quit(1)
 		return
 	if "loop" in start_bgm.stream and not bool(start_bgm.stream.loop):
