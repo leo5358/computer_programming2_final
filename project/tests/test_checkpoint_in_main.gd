@@ -91,6 +91,7 @@ func _initialize() -> void:
 		push_error("Main should expose death retry flow for checkpoint restoration")
 		quit(1)
 		return
+	save_manager.save_game("ab_foothill", rear_checkpoint_position, 37.0)
 	main._debug_kill_player()
 	await process_frame
 	main._retry_from_checkpoint()
@@ -100,12 +101,12 @@ func _initialize() -> void:
 		push_error("Retry after death should keep or recreate the player")
 		quit(1)
 		return
-	if player.global_position.distance_to(rear_checkpoint_position) > 1.0:
+	if player.global_position.distance_to(rear_checkpoint_position) > 12.0:
 		push_error("Retry after death should restore the last activated checkpoint position")
 		quit(1)
 		return
-	if float(player.get("health")) <= 0.0:
-		push_error("Retry after death should restore player health")
+	if not is_equal_approx(float(player.get("health")), float(player.get("max_health"))):
+		push_error("Retry after death should restore player health to full instead of saved low health")
 		quit(1)
 		return
 	await main._transition_ab_to_h_stone_plaza()

@@ -223,7 +223,7 @@ const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 # --- Boss Parameters ---
 @export var posture_damage_taken_boss := 18.0
 @export var leash_range_boss := 420.0
-@export var detection_range_boss := 280.0
+@export var detection_range_boss := 340.0
 @export var attack_start_distance_boss := 112.0
 @export var attack_hold_distance_boss := 78.0
 @export var close_spacing_distance_boss := 58.0
@@ -232,6 +232,7 @@ const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 @export var gap_close_thrust_max_distance_boss := 190.0
 @export var chop_gap_close_min_distance_boss := 118.0
 @export var chop_gap_close_max_distance_boss := 340.0
+@export var chop_gap_close_commit_min_distance_boss := 240.0
 @export var chop_lunge_start_boss := 0.78
 @export var chop_lunge_end_boss := 1.54
 @export var chop_lunge_speed_boss := 330.0
@@ -243,6 +244,7 @@ const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 @export var thrust_lunge_speed_boss := 340.0
 @export var combo_link_delay_boss := 0.22
 @export var combo_max_count_boss := 2
+@export var combo_vertical_tolerance_boss := 84.0
 @export var perfect_parry_cooldown_boss := 1.05
 @export var guard_pressure_chop_threshold_boss := 2
 @export var attack_hit_frame_boss := 4
@@ -587,6 +589,9 @@ func _start_normal_attack(profile_name: String = "", combo_followup: bool = fals
 
 func _update_attack_state(delta: float) -> void:
 	_update_attack_state_boss_internal(delta)
+
+func _should_start_attack() -> bool:
+	return _should_start_attack_boss_internal()
 
 func _update_attack_visual(show_visual: bool, active: bool) -> void:
 	_update_attack_visual_boss_internal(show_visual, active)
@@ -1026,6 +1031,8 @@ func _can_start_chop_gap_close_from_distance_boss_internal(distance: float) -> b
 		return true
 	if guard_pressure_count_boss >= guard_pressure_chop_threshold_boss:
 		return true
+	if distance < chop_gap_close_commit_min_distance_boss:
+		return false
 	return _should_use_chop_gap_close_boss_internal()
 
 func _should_use_chop_gap_close_boss_internal() -> bool:
@@ -1036,7 +1043,7 @@ func _should_use_chop_gap_close_boss_internal() -> bool:
 	if abs(offset.y) > 56.0:
 		return false
 	var distance := absf(offset.x)
-	if distance < chop_gap_close_min_distance_boss or distance > chop_gap_close_max_distance_boss:
+	if distance < chop_gap_close_commit_min_distance_boss or distance > chop_gap_close_max_distance_boss:
 		return false
 	return true
 
@@ -1048,7 +1055,7 @@ func _update_attack_pressure_boss_internal(delta: float) -> bool:
 		if attack_pressure_timer_boss <= 0.0 and _should_start_attack_boss_internal():
 			_start_normal_attack_boss_internal()
 		return true
-	if forced_counter_profile_boss.is_empty() and _should_start_attack_boss_internal():
+	if forced_counter_profile_boss.is_empty() and guard_pressure_count_boss < guard_pressure_chop_threshold_boss and _should_start_attack_boss_internal():
 		attack_pressure_timer_boss = attack_pressure_commit_time_boss
 		velocity.x = 0.0
 		_update_engaged_hold_boss_internal()
@@ -1185,7 +1192,7 @@ func _is_player_in_combo_range_boss_internal() -> bool:
 	if player == null:
 		return false
 	var offset: Vector2 = player.global_position - global_position
-	if abs(offset.y) > 56.0:
+	if abs(offset.y) > combo_vertical_tolerance_boss:
 		return false
 	var distance := absf(offset.x)
 	return distance >= close_spacing_distance_boss and distance <= attack_start_distance_boss
