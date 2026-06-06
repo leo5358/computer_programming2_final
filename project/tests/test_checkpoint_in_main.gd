@@ -120,8 +120,43 @@ func _initialize() -> void:
 		quit(1)
 		return
 	await main._transition_ab_to_h_stone_plaza()
-	if main.get_node_or_null("Chapter1Map/Checkpoints") != null:
-		push_error("AB checkpoints should be removed with the AB map after leaving AB foothill")
+	if main.get("current_map_id") != "h_stone_plaza":
+		push_error("Checkpoint interaction test should be on H stone plaza after transition")
+		quit(1)
+		return
+	var plaza_checkpoint := main.get_node_or_null("Chapter1Map/Checkpoints/CheckpointPlaza") as Node2D
+	if plaza_checkpoint == null:
+		push_error("H stone plaza should include its plaza checkpoint after transition")
+		quit(1)
+		return
+	if plaza_checkpoint.global_position.distance_to(Vector2(2087, 530)) > 1.0:
+		push_error("H stone plaza checkpoint should keep its design position after transition")
+		quit(1)
+		return
+	player.global_position = plaza_checkpoint.global_position + Vector2(250.0, 0.0)
+	main._update_map_interaction_prompt()
+	if not prompt.visible:
+		push_error("H stone plaza checkpoint should show the rest prompt within 300 pixels")
+		quit(1)
+		return
+	player.global_position = plaza_checkpoint.global_position
+	await process_frame
+	var f_event := InputEventKey.new()
+	f_event.keycode = KEY_F
+	f_event.pressed = true
+	main._input(f_event)
+	await process_frame
+	await create_timer(3.2).timeout
+	if not bool(plaza_checkpoint.get("activated")):
+		push_error("H stone plaza checkpoint interaction should activate from the F flow")
+		quit(1)
+		return
+	if save_manager.get_saved_map() != "h_stone_plaza":
+		push_error("H stone plaza checkpoint should save plaza progress")
+		quit(1)
+		return
+	if save_manager.get_saved_position().distance_to(plaza_checkpoint.global_position) > 1.0:
+		push_error("H stone plaza checkpoint should save the checkpoint position")
 		quit(1)
 		return
 

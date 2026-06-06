@@ -457,7 +457,7 @@ func _activate_nearest_checkpoint() -> bool:
 
 func _nearest_checkpoint() -> Node:
 	var player := _get_player()
-	if player == null or current_map_id != "ab_foothill":
+	if player == null:
 		return null
 	var nearest: Node = null
 	var nearest_distance := INF
@@ -477,7 +477,7 @@ func _nearest_checkpoint() -> Node:
 
 func _nearest_checkpoint_prompt() -> Node:
 	var player := _get_player()
-	if player == null or current_map_id != "ab_foothill":
+	if player == null:
 		return null
 	var nearest: Node = null
 	var nearest_distance := INF
@@ -519,7 +519,6 @@ func _transition_ab_to_h_stone_plaza() -> void:
 	await _run_map_transition(H_STONE_PLAZA_SCENE, "h_stone_plaza", H_STONE_PLAZA_SPAWN)
 
 func _transition_h_stone_plaza_to_boss_interior() -> void:
-	_save_boss_gate_checkpoint()
 	await _run_map_transition(BOSS_INTERIOR_SCENE, "boss_interior", BOSS_INTERIOR_SPAWN)
 	_spawn_boss_for_boss_interior()
 
@@ -528,15 +527,8 @@ func _debug_warp_to_boss_interior() -> void:
 	await _run_map_transition(BOSS_INTERIOR_SCENE, "boss_interior", BOSS_INTERIOR_SPAWN)
 	_spawn_boss_for_boss_interior()
 
-func _save_boss_gate_checkpoint() -> void:
-	var player := _get_player()
-	if player == null or not has_node("/root/SaveManager"):
-		return
-	var sm = get_node("/root/SaveManager")
-	sm.save_game("h_stone_plaza", player.global_position, player.health)
-
 func _sync_checkpoints_to_saved_position(map_id: String, saved_position: Vector2) -> void:
-	if map_id != "ab_foothill":
+	if map_id != current_map_id:
 		return
 	var player := _get_player()
 	for checkpoint in get_tree().get_nodes_in_group("checkpoint"):

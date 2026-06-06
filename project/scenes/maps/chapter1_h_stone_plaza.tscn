@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://dmpimxksau067" path="res://assets/maps/chapter1/props/shimenawa_curtain.png" id="9_hh8eg"]
 [ext_resource type="Script" uid="uid://dauwr7kxq7rjl" path="res://scripts/camera_shake.gd" id="10_camera_shake"]
 [ext_resource type="Script" path="res://scripts/enemy_spawn_point.gd" id="enemy_spawn_point_script"]
+[ext_resource type="PackedScene" path="res://scenes/Checkpoint.tscn" id="checkpoint_scene"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yblr1"]
 size = Vector2(3066.5, 249.5)
@@ -19,6 +20,11 @@ size = Vector2(3066.5, 249.5)
 size = Vector2(140, 1165.75)
 
 [node name="root" type="Node2D" unique_id=506673559]
+
+[node name="Checkpoints" type="Node2D" parent="."]
+
+[node name="CheckpointPlaza" parent="Checkpoints" instance=ExtResource("checkpoint_scene")]
+position = Vector2(2087, 530)
 
 [node name="EnemySpawns" type="Node2D" parent="."]
 
