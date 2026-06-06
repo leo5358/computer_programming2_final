@@ -113,6 +113,7 @@ var counter_after_deflect := false
 var pressure_timer := 0.0
 var posture_recovery_pause_timer := 0.0
 var corpse_timer := 0.0
+var corpse_has_landed := false
 var attack_area_base_position := Vector2.ZERO
 var attack_hitbox_base_size := Vector2.ZERO
 var current_attack_profile := "attack"
@@ -180,6 +181,13 @@ func _physics_process(delta: float) -> void:
 		if corpse_timer <= 0.0:
 			queue_free()
 			return
+		if corpse_has_landed or is_on_floor():
+			corpse_has_landed = true
+			velocity = Vector2.ZERO
+			_update_visuals()
+			_update_overhead_bars()
+			stats_changed.emit()
+			return
 	if not is_on_floor():
 		velocity.y += gravity * delta
 	else:
@@ -198,6 +206,8 @@ func _physics_process(delta: float) -> void:
 		_update_movement_state(delta)
 
 	move_and_slide()
+	if defeated_flag and is_on_floor():
+		corpse_has_landed = true
 	_update_visuals()
 	_update_overhead_bars()
 	stats_changed.emit()
@@ -334,6 +344,7 @@ func reset_combat_state() -> void:
 	posture_recovery_pause_timer = 0.0
 	posture_visibility_snapshot = posture
 	corpse_timer = 0.0
+	corpse_has_landed = false
 	velocity = Vector2.ZERO
 	global_position = spawn_position
 	_set_body_collision_enabled(true)
@@ -605,6 +616,7 @@ func _defeat() -> void:
 	state = EnemyState.DEAD
 	health = 0.0
 	corpse_timer = corpse_lifetime
+	corpse_has_landed = false
 	velocity = Vector2.ZERO
 	_set_attack_visual(false, false)
 	_set_body_collision_enabled(false)

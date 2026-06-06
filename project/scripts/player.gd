@@ -410,7 +410,10 @@ func _update_inputs() -> void:
 
 	var attack_requested := Input.is_action_just_pressed("attack") or ai_attack_requested
 	var parry_requested := Input.is_action_just_pressed("block") or ai_parry_requested
-	var dodge_requested := Input.is_action_just_pressed("dash") or ai_dodge_requested
+	var shift_dodge_target: Node2D = null
+	if Input.is_action_just_pressed("perfect_dodge_shift"):
+		shift_dodge_target = _find_perfect_dodge_target()
+	var dodge_requested := Input.is_action_just_pressed("dash") or ai_dodge_requested or shift_dodge_target != null
 	var jump_requested := Input.is_action_just_pressed("jump") or ai_jump_requested
 
 	if _can_start_attack() and attack_requested:
@@ -424,6 +427,8 @@ func _update_inputs() -> void:
 	if _can_start_defensive_action() and dodge_requested:
 		if ai_dodge_requested and ai_dodge_target != null:
 			_start_perfect_dodge(ai_dodge_target)
+		elif shift_dodge_target != null:
+			_start_perfect_dodge(shift_dodge_target)
 		else:
 			_start_dash()
 

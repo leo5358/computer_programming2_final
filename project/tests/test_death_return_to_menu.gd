@@ -33,4 +33,40 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+	main = scene.instantiate()
+	get_root().add_child(main)
+	await process_frame
+	if not main.has_method("_debug_warp_to_boss_interior"):
+		push_error("Main should expose debug boss warp for boss death return flow")
+		quit(1)
+		return
+	await main._debug_warp_to_boss_interior()
+	await process_frame
+	var player: Node = get_first_node_in_group("player")
+	var death_overlay: Node = main.get_node_or_null("DeathOverlay")
+	if player == null or death_overlay == null:
+		push_error("Boss return flow should have player and death overlay")
+		quit(1)
+		return
+	if not main.has_method("_debug_kill_player"):
+		push_error("Main should expose debug kill for death overlay flow")
+		quit(1)
+		return
+	main._debug_kill_player()
+	await process_frame
+	if not bool(death_overlay.get("is_active")):
+		push_error("Boss death should activate death overlay before returning to menu")
+		quit(1)
+		return
+	paused = true
+	if death_overlay.has_method("confirm_option"):
+		death_overlay.confirm_option(1)
+	else:
+		main._return_to_start_page()
+	await process_frame
+	if paused:
+		push_error("Returning to start page from boss death should leave the tree unpaused")
+		quit(1)
+		return
+
 	quit(0)

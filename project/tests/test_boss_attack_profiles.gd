@@ -83,6 +83,11 @@ func _initialize() -> void:
 		push_error("Parrying Boss chop should knock the player away from the Boss")
 		quit(1)
 		return
+	player._physics_process(player.hitstop_timer + 0.01)
+	if player.velocity.x >= -player.heavy_parry_rebound + 1.0:
+		push_error("Parrying Boss chop should keep heavy recoil after hitstop ends")
+		quit(1)
+		return
 	var hit_impact := player.get_node_or_null("HitImpactVfx") as AnimatedSprite2D
 	if hit_impact == null or not hit_impact.visible or hit_impact.animation != "chop":
 		push_error("Parrying Boss chop should show the chop hit impact VFX")
