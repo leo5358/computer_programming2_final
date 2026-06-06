@@ -216,7 +216,7 @@ enum PlayerState {
 @export var heartbeat_jump_gain := 7.0
 @export var heartbeat_attack_gain := 4.0
 @export var heartbeat_guard_gain := 5.0
-@export var heartbeat_combat_rise_per_second := 4.0
+@export var heartbeat_combat_rise_per_second := 2.0
 @export var heartbeat_combat_linger_time := 2.0
 @export var heartbeat_cooldown_delay := 2.0
 @export var heartbeat_walk_rise_percent_per_second := 0.03

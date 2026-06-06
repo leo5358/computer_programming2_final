@@ -87,9 +87,9 @@ func _test_pill_combat_modifier(player_scene: PackedScene) -> bool:
 		return false
 	player.heartbeat_combat_timer = 1.5
 	player._update_combat(1.0)
-	if not _assert_equal(player.heartbeat, 102.0, "Pill should reduce combat pressure to floor(100 + 4 * 0.6) after one second"):
+	if not _assert_equal(player.heartbeat, 101.0, "Pill should reduce combat pressure to floor(100 + 2 * 0.6) after one second"):
 		return false
-	if not _assert_approx(player.heartbeat_precise, 102.4, "Pill should reduce combat pressure in heartbeat_precise without rounding away the fraction"):
+	if not _assert_approx(player.heartbeat_precise, 101.2, "Pill should reduce combat pressure in heartbeat_precise without rounding away the fraction"):
 		return false
 	await _despawn_player(player)
 	return true
@@ -104,13 +104,13 @@ func _test_pill_duration(player_scene: PackedScene) -> bool:
 		return false
 	player.heartbeat_combat_timer = 25.0
 	player._update_combat(19.0)
-	if not _assert_approx(player.heartbeat_precise, 145.6, "Pill should stay active for the first nineteen seconds of combat pressure"):
+	if not _assert_approx(player.heartbeat_precise, 122.8, "Pill should stay active for the first nineteen seconds of combat pressure"):
 		return false
 	player._update_combat(1.0)
-	if not _assert_approx(player.heartbeat_precise, 148.0, "Pill should still apply on the twentieth second before expiring"):
+	if not _assert_approx(player.heartbeat_precise, 124.0, "Pill should still apply on the twentieth second before expiring"):
 		return false
 	player._update_combat(1.0)
-	if not _assert_approx(player.heartbeat_precise, 152.0, "Pill should expire after twenty seconds so later combat pressure returns to the full rate"):
+	if not _assert_approx(player.heartbeat_precise, 126.0, "Pill should expire after twenty seconds so later combat pressure returns to the full rate"):
 		return false
 	await _despawn_player(player)
 	return true
@@ -143,13 +143,13 @@ func _test_capsule_duration(player_scene: PackedScene) -> bool:
 		return false
 	player.heartbeat_combat_timer = 20.0
 	player._update_combat(14.0)
-	if not _assert_approx(player.heartbeat_precise, 167.2, "Capsule should stay active for the first fourteen seconds of combat pressure"):
+	if not _assert_approx(player.heartbeat_precise, 133.6, "Capsule should stay active for the first fourteen seconds of combat pressure"):
 		return false
 	player._update_combat(1.0)
-	if not _assert_approx(player.heartbeat_precise, 172.0, "Capsule should still apply on the fifteenth second before expiring"):
+	if not _assert_approx(player.heartbeat_precise, 136.0, "Capsule should still apply on the fifteenth second before expiring"):
 		return false
 	player._update_combat(1.0)
-	if not _assert_approx(player.heartbeat_precise, 176.0, "Capsule should expire after fifteen seconds so later combat pressure returns to the full rate"):
+	if not _assert_approx(player.heartbeat_precise, 138.0, "Capsule should expire after fifteen seconds so later combat pressure returns to the full rate"):
 		return false
 	await _despawn_player(player)
 	return true
@@ -183,10 +183,10 @@ func _test_pill_to_capsule_overwrite(player_scene: PackedScene) -> bool:
 		return false
 	player.heartbeat_combat_timer = 20.0
 	player._update_combat(15.0)
-	if not _assert_approx(player.heartbeat_precise, 172.0, "Pill to capsule overwrite should keep only the capsule timer through the fifteenth second"):
+	if not _assert_approx(player.heartbeat_precise, 136.0, "Pill to capsule overwrite should keep only the capsule timer through the fifteenth second"):
 		return false
 	player._update_combat(1.0)
-	if not _assert_approx(player.heartbeat_precise, 176.0, "Pill to capsule overwrite should expire on the capsule window instead of reverting to the older pill timer"):
+	if not _assert_approx(player.heartbeat_precise, 138.0, "Pill to capsule overwrite should expire on the capsule window instead of reverting to the older pill timer"):
 		return false
 	await _despawn_player(player)
 	return true
@@ -220,10 +220,10 @@ func _test_capsule_to_pill_overwrite(player_scene: PackedScene) -> bool:
 		return false
 	player.heartbeat_combat_timer = 20.0
 	player._update_combat(15.0)
-	if not _assert_approx(player.heartbeat_precise, 136.0, "Capsule to pill overwrite should keep the later pill timer active past the old capsule boundary"):
+	if not _assert_approx(player.heartbeat_precise, 118.0, "Capsule to pill overwrite should keep the later pill timer active past the old capsule boundary"):
 		return false
 	player._update_combat(1.0)
-	if not _assert_approx(player.heartbeat_precise, 138.4, "Capsule to pill overwrite should continue using the pill modifier after the original capsule window would have ended"):
+	if not _assert_approx(player.heartbeat_precise, 119.2, "Capsule to pill overwrite should continue using the pill modifier after the original capsule window would have ended"):
 		return false
 	await _despawn_player(player)
 	return true
