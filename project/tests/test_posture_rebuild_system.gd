@@ -65,6 +65,28 @@ func _initialize() -> void:
 	if not _assert_close(player.posture, 0.0, "Player stagger should clear posture after break"):
 		return
 
+	player.reset_combat_state()
+	player.posture = player.max_posture - 18.0
+	player._set_heartbeat_value(80.0)
+	player.receive_enemy_attack(10.0, 99.0)
+	if player.state != player.PlayerState.STUNNED:
+		_fail("Player direct health hit filling posture should enter stunned state")
+		return
+	player._update_action_state(player.stunned_time + 0.05)
+	if not _assert_close(player.heartbeat, 80.0, "Player posture-break recovery should keep heartbeat unchanged when already below 120", 0.01):
+		return
+
+	player.reset_combat_state()
+	player.posture = player.max_posture - 18.0
+	player._set_heartbeat_value(160.0)
+	player.receive_enemy_attack(10.0, 99.0)
+	if player.state != player.PlayerState.STUNNED:
+		_fail("Player direct health hit filling posture should enter stunned state")
+		return
+	player._update_action_state(player.stunned_time + 0.05)
+	if not _assert_close(player.heartbeat, 120.0, "Player posture-break recovery should clamp heartbeat back to 120 when above it", 0.01):
+		return
+
 	enemy.reset_combat_state()
 	enemy.guard_chance = 0.0
 	enemy.posture = enemy.max_posture - 15.0

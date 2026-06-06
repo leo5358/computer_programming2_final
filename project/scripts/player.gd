@@ -269,6 +269,7 @@ var parry_flash_timer := 0.0
 var block_flash_timer := 0.0
 var is_block_releasing := false
 var hurt_flash_timer := 0.0
+var stunned_hit_heartbeat_cap_pending := false
 var perfect_dodge_timer := 0.0
 var hit_impact_vfx_timer := 0.0
 var hitstop_timer := 0.0
@@ -724,6 +725,9 @@ func _update_action_state(delta: float) -> void:
 		action_timer -= delta
 		if action_timer <= 0.0:
 			posture = min(posture, max_posture * 0.55)
+			if stunned_hit_heartbeat_cap_pending:
+				_set_heartbeat_value(min(heartbeat_precise, 120.0))
+				stunned_hit_heartbeat_cap_pending = false
 			is_invulnerable = false
 			sprite.speed_scale = 1.0
 			_set_state(PlayerState.IDLE)
@@ -1405,6 +1409,7 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 		return
 
 	if posture >= max_posture and _should_player_stagger_on_full_posture(took_health_damage, perfect_parry):
+		stunned_hit_heartbeat_cap_pending = took_health_damage
 		_enter_stunned()
 
 	stats_changed.emit()
@@ -1426,6 +1431,7 @@ func _handle_health_depleted() -> void:
 		health = max_health
 		posture = 0.0
 		posture_locked_full_from_perfect_guard = false
+		stunned_hit_heartbeat_cap_pending = false
 		_enter_stunned(&"life_knockdown", life_loss_stunned_time, life_loss_animation_speed, false)
 		return
 	_enter_dead()
@@ -1871,6 +1877,7 @@ func _receive_attack_deflected() -> void:
 	posture_locked_full_from_perfect_guard = false
 	posture = math.add_posture(posture, _posture_amount_from_percent(posture_gain_on_attack_deflected_percent))
 	if posture >= max_posture:
+		stunned_hit_heartbeat_cap_pending = false
 		_enter_stunned()
 		return
 	_add_heartbeat_pressure(6.0)
@@ -2034,6 +2041,7 @@ func reset_combat_state() -> void:
 	lives = max_lives
 	posture = 0.0
 	posture_locked_full_from_perfect_guard = false
+	stunned_hit_heartbeat_cap_pending = false
 	posture_combat_timer = 0.0
 	posture_visibility_snapshot = posture
 	_set_heartbeat_value(CombatMathScript.MIN_HEARTBEAT)
