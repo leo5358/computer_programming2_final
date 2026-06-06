@@ -255,6 +255,10 @@ func _initialize() -> void:
 		push_error("Player should expose map-specific climb bounds")
 		quit(1)
 		return
+	if not player.has_method("_refresh_enemy_collision_exceptions"):
+		push_error("Player should expose enemy collision exception refresh for hit iframe pass-through")
+		quit(1)
+		return
 	player.set_map_climb_bounds(0.0, 15600.0)
 	player.global_position.x = 40.0
 	if not player._is_at_world_horizontal_boundary(-1.0):
@@ -397,16 +401,20 @@ func _initialize() -> void:
 	player.health = 1.0
 	player.velocity = Vector2(120.0, -40.0)
 	player.receive_enemy_attack(10.0, 0.0)
-	if player.state != player.PlayerState.STUNNED:
-		push_error("Player should enter life knockdown when one HP bar is depleted while lives remain")
+	if player.state != player.PlayerState.DEAD:
+		push_error("Player should enter the death state while waiting for revive when HP is depleted and lives remain")
 		quit(1)
 		return
-	if player.lives != player.max_lives - 1 or player.health != player.max_health:
-		push_error("Depleting HP with lives remaining should consume one life and refill HP")
+	if player.lives != player.max_lives or player.health != 0.0:
+		push_error("Depleting HP with lives remaining should wait at zero HP until revive is confirmed")
 		quit(1)
 		return
-	if player.current_animation != "life_knockdown_forward":
-		push_error("Life loss should play the full death animation as a heavier knockdown")
+	if player.current_animation != "death":
+		push_error("Revive-eligible defeat should play the death animation")
+		quit(1)
+		return
+	if not player.is_waiting_for_revive():
+		push_error("Revive-eligible defeat should mark the player as waiting for revive")
 		quit(1)
 		return
 
