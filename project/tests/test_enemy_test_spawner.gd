@@ -28,8 +28,8 @@ func _initialize() -> void:
 		return
 	await process_frame
 	var baseline_map_enemy_count := get_nodes_in_group("map_spawned_enemy").size()
-	if baseline_map_enemy_count != 6:
-		push_error("Enemy test field should start with AB foothill map enemies")
+	if baseline_map_enemy_count != 0:
+		push_error("Enemy test field should start without AB foothill map enemies while encounters are being re-placed")
 		quit(1)
 		return
 
@@ -92,7 +92,7 @@ func _initialize() -> void:
 	await process_frame
 	await process_frame
 	if get_nodes_in_group("map_spawned_enemy").size() != baseline_map_enemy_count:
-		push_error("Reset should respawn AB foothill map enemies")
+		push_error("Reset should keep AB foothill map enemies empty")
 		quit(1)
 		return
 	if get_nodes_in_group("minor_enemy").size() != baseline_map_enemy_count or get_nodes_in_group("boss").size() != 0:
@@ -119,9 +119,6 @@ func _initialize() -> void:
 		push_error("AB foothill should include the rear checkpoint for rest testing")
 		quit(1)
 		return
-	var first_map_enemy := get_nodes_in_group("map_spawned_enemy")[0] as Node
-	first_map_enemy.queue_free()
-	await process_frame
 	player.set("item_counts", {
 		"kunai": 2,
 		"ash_balls": 3,
@@ -146,7 +143,7 @@ func _initialize() -> void:
 		quit(1)
 		return
 	if get_nodes_in_group("map_spawned_enemy").size() != baseline_map_enemy_count:
-		push_error("Checkpoint rest should respawn defeated map enemies")
+		push_error("Checkpoint rest should keep AB foothill map enemies empty")
 		quit(1)
 		return
 	if int(player.get("heartbeat")) != 70:

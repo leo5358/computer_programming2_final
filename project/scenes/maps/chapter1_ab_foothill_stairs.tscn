@@ -35,7 +35,6 @@
 [ext_resource type="Texture2D" uid="uid://dp4ool7c17xme" path="res://assets/maps/chapter1/props/lantern.png" id="33_lqjsx"]
 [ext_resource type="Script" uid="uid://dauwr7kxq7rjl" path="res://scripts/camera_shake.gd" id="36_camera_shake"]
 [ext_resource type="PackedScene" path="res://scenes/Checkpoint.tscn" id="checkpoint_scene"]
-[ext_resource type="Script" path="res://scripts/enemy_spawn_point.gd" id="enemy_spawn_point_script"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ih6mn"]
 texture = ExtResource("20_6f4q3")
@@ -351,48 +350,6 @@ position = Vector2(8563, 96)
 position = Vector2(13751, 83)
 
 [node name="EnemySpawns" type="Node2D" parent="."]
-
-[node name="WarriorIntro" type="Node2D" parent="EnemySpawns"]
-position = Vector2(1850, 571)
-script = ExtResource("enemy_spawn_point_script")
-enemy_type = "warrior"
-facing = -1.0
-spawn_group_id = "ab_intro"
-
-[node name="TorchmanUpperSteps" type="Node2D" parent="EnemySpawns"]
-position = Vector2(3000, 331)
-script = ExtResource("enemy_spawn_point_script")
-enemy_type = "torchman"
-facing = -1.0
-spawn_group_id = "ab_upper_steps"
-
-[node name="WarriorLowerFlat" type="Node2D" parent="EnemySpawns"]
-position = Vector2(4700, 571)
-script = ExtResource("enemy_spawn_point_script")
-enemy_type = "warrior"
-facing = -1.0
-spawn_group_id = "ab_lower_flat"
-
-[node name="TorchmanAlarm" type="Node2D" parent="EnemySpawns"]
-position = Vector2(9700, 403)
-script = ExtResource("enemy_spawn_point_script")
-enemy_type = "torchman"
-facing = -1.0
-spawn_group_id = "ab_alarm_pair"
-
-[node name="WarriorAlarmGuard" type="Node2D" parent="EnemySpawns"]
-position = Vector2(10150, 394)
-script = ExtResource("enemy_spawn_point_script")
-enemy_type = "warrior"
-facing = -1.0
-spawn_group_id = "ab_alarm_pair"
-
-[node name="ArcherExitGuard" type="Node2D" parent="EnemySpawns"]
-position = Vector2(13210, 80)
-script = ExtResource("enemy_spawn_point_script")
-enemy_type = "archer"
-facing = -1.0
-spawn_group_id = "ab_exit"
 
 [node name="BackgroundFar" type="Node2D" parent="." unique_id=257268548]
 
@@ -3574,6 +3531,7 @@ vertical_follow_ratio = 0.2
 lookahead_distance = 120.0
 lookahead_smoothing_speed = 5.0
 dynamic_bottom_limit_enabled = true
+bottom_limit_keyframes = PackedFloat32Array(1510, 655, 1750, 540, 2750, 540, 2990, 655, 9110, 655, 9350, 490, 11560, 490, 11800, 400, 12720, 400, 14000, 200, 14700, -10)
 
 [node name="Collision" type="Node2D" parent="." unique_id=1693735335]
 

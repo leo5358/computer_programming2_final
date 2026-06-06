@@ -26,7 +26,7 @@ func _initialize() -> void:
 		push_error("Without nearby enemies, moving left should turn player left")
 		quit(1)
 		return
-	var normal_retreat_speed: float = abs(player.velocity.x)
+	var normal_left_speed: float = abs(player.velocity.x)
 
 	player.clear_ai_intent()
 	player.velocity = Vector2.ZERO
@@ -38,16 +38,16 @@ func _initialize() -> void:
 	player.set_ai_move_axis(-1.0)
 	player._update_movement(0.10)
 
-	if player.facing <= 0.0:
-		push_error("Combat retreat should keep player facing the nearby enemy")
+	if player.facing >= 0.0:
+		push_error("Nearby enemies should not force tactical retreat facing while moving left")
 		quit(1)
 		return
 	if player.velocity.x >= 0.0:
-		push_error("Combat retreat should still move away from the enemy")
+		push_error("Nearby enemies should not stop leftward movement")
 		quit(1)
 		return
-	if abs(player.velocity.x) >= normal_retreat_speed:
-		push_error("Combat retreat should be slower than normal movement")
+	if abs(player.velocity.x) < normal_left_speed:
+		push_error("Nearby enemies should not slow movement into tactical retreat speed")
 		quit(1)
 		return
 
@@ -56,7 +56,7 @@ func _initialize() -> void:
 	player.set_ai_move_axis(1.0)
 	player._update_movement(0.10)
 	if player.facing <= 0.0 or player.velocity.x <= 0.0:
-		push_error("Combat forward movement should face and move toward the nearby enemy")
+		push_error("Moving right near an enemy should still follow normal movement facing")
 		quit(1)
 		return
 

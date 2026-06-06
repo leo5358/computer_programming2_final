@@ -129,10 +129,6 @@ enum PlayerState {
 @export var acceleration := 2000.0
 @export var friction := 3200.0
 @export var turn_brake := 4200.0
-@export var combat_lock_range_x := 260.0
-@export var combat_lock_range_y := 90.0
-@export var combat_backpedal_speed_multiplier := 0.55
-@export var combat_backpedal_run_multiplier := 0.45
 @export var dash_impulse := 560.0
 @export var jump_velocity := -430.0
 @export var coyote_time := 0.1
@@ -527,48 +523,15 @@ func _update_movement(delta: float) -> void:
 			_set_state(PlayerState.IDLE)
 
 func _apply_horizontal_control(direction: float, delta: float) -> void:
-	var combat_target: Node2D = _find_combat_facing_target()
 	if direction != 0.0:
 		var movement_facing: float = sign(direction)
-		if combat_target != null:
-			var target_direction: float = sign(combat_target.global_position.x - global_position.x)
-			if target_direction != 0.0:
-				facing = target_direction
-		else:
-			facing = movement_facing
+		facing = movement_facing
 		var accel := turn_brake if velocity.x != 0.0 and sign(velocity.x) != sign(direction) else acceleration
 		var target_speed := run_speed if is_running else walk_speed
-		if combat_target != null and sign(direction) != facing:
-			target_speed = run_speed * combat_backpedal_run_multiplier if is_running else walk_speed * combat_backpedal_speed_multiplier
 		velocity.x = move_toward(velocity.x, direction * target_speed, accel * delta)
 	else:
 		is_running = false
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
-
-func _find_combat_facing_target() -> Node2D:
-	var nearest: Node2D = null
-	var nearest_distance := INF
-	for group_name in ["enemy", "boss"]:
-		for target in get_tree().get_nodes_in_group(group_name):
-			if not (target is Node2D):
-				continue
-			if _combat_target_is_defeated(target):
-				continue
-			var offset: Vector2 = (target as Node2D).global_position - global_position
-			if abs(offset.x) > combat_lock_range_x or abs(offset.y) > combat_lock_range_y:
-				continue
-			var distance: float = abs(offset.x)
-			if distance < nearest_distance:
-				nearest = target as Node2D
-				nearest_distance = distance
-	return nearest
-
-func _combat_target_is_defeated(target: Node) -> bool:
-	if target.get("defeated_flag") != null and bool(target.get("defeated_flag")):
-		return true
-	if target.get("health") != null and float(target.get("health")) <= 0.0:
-		return true
-	return false
 
 func _can_wall_interact() -> bool:
 	return is_on_wall() and not is_on_floor() and _can_jump()
