@@ -388,7 +388,7 @@ facing = -1.0
 spawn_group_id = "ab_alarm_pair"
 
 [node name="ArcherExitGuard" type="Node2D" parent="EnemySpawns"]
-position = Vector2(13210, 452)
+position = Vector2(13210, 80)
 script = ExtResource("enemy_spawn_point_script")
 enemy_type = "archer"
 facing = -1.0

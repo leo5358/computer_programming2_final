@@ -1758,7 +1758,8 @@ func _knockback_direction_from_attacker(attacker: Node) -> float:
 func _is_attacker_chop_attack(attacker: Node) -> bool:
 	if attacker == null:
 		return false
-	return String(attacker.get("current_attack_animation")) == "chop"
+	var anim = attacker.get("current_attack_animation")
+	return anim != null and str(anim) == "chop"
 
 func _receive_attack_deflected() -> void:
 	is_attacking = false
