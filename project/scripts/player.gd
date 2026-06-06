@@ -2,6 +2,8 @@ extends CharacterBody2D
 
 signal stats_changed
 signal died
+signal revive_prompt_requested
+signal death_animation_finished(revive_pending: bool)
 
 const CombatMathScript = preload("res://scripts/combat_math.gd")
 const CombatServerScript = preload("res://scripts/combat_server.gd")
@@ -311,6 +313,8 @@ var heartbeat_direct_checkpoint_respawn := false
 var heartbeat_precise: float = CombatMathScript.MIN_HEARTBEAT
 var heartbeat_modifier_item_id := ""
 var heartbeat_modifier_time_left := 0.0
+var revive_available_pending := false
+var death_animation_reported := false
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var body_collision_shape: CollisionShape2D = $CollisionShape2D
@@ -331,6 +335,8 @@ func _ready() -> void:
 	spawn_position = global_position
 	combat_runtime = get_tree().get_first_node_in_group("combat_runtime")
 	_setup_sprite_frames()
+	if sprite != null and not sprite.animation_finished.is_connected(_on_sprite_animation_finished):
+		sprite.animation_finished.connect(_on_sprite_animation_finished)
 	_setup_hit_impact_vfx()
 	_load_optional_sfx()
 	_set_state(PlayerState.IDLE)
@@ -1427,12 +1433,8 @@ func _check_world_death_bounds() -> void:
 
 func _handle_health_depleted() -> void:
 	if lives > 1:
-		lives -= 1
-		health = max_health
-		posture = 0.0
-		posture_locked_full_from_perfect_guard = false
-		stunned_hit_heartbeat_cap_pending = false
-		_enter_stunned(&"life_knockdown", life_loss_stunned_time, life_loss_animation_speed, false)
+		_enter_revive_wait_state()
+		revive_prompt_requested.emit()
 		return
 	_enter_dead()
 	died.emit()
@@ -1947,6 +1949,8 @@ func _shake_camera(amount: float, duration: float) -> void:
 func _enter_dead() -> void:
 	health = 0.0
 	lives = 0
+	revive_available_pending = false
+	death_animation_reported = false
 	posture = min(posture, max_posture)
 	is_blocking = false
 	is_attacking = false
@@ -1969,12 +1973,113 @@ func _enter_dead() -> void:
 	_set_state(PlayerState.DEAD)
 	_update_visuals()
 
+func _enter_revive_wait_state() -> void:
+	health = 0.0
+	revive_available_pending = true
+	death_animation_reported = false
+	posture = min(posture, max_posture)
+	is_blocking = false
+	is_attacking = false
+	is_parrying = false
+	is_dashing = false
+	is_perfect_dodging = false
+	is_invulnerable = true
+	action_timer = 0.0
+	dash_timer = 0.0
+	attack_has_hit = false
+	hitstop_timer = 0.0
+	velocity = Vector2.ZERO
+	heavy_parry_recoil_timer = 0.0
+	heavy_parry_recoil_velocity = Vector2.ZERO
+	sprite.speed_scale = 1.0
+	_fade_in_sfx(death_sfx, 1.0)
+	_set_state(PlayerState.DEAD)
+	_update_visuals()
+	stats_changed.emit()
+
 func force_death_for_debug() -> void:
 	if state == PlayerState.DEAD:
+		return
+	if lives > 1:
+		_enter_revive_wait_state()
+		revive_prompt_requested.emit()
 		return
 	_enter_dead()
 	stats_changed.emit()
 	died.emit()
+
+func is_waiting_for_revive() -> bool:
+	return revive_available_pending
+
+func has_completed_death_animation() -> bool:
+	return death_animation_reported
+
+func revive_in_place() -> bool:
+	if not revive_available_pending:
+		return false
+	lives = max(0, lives - 1)
+	revive_available_pending = false
+	death_animation_reported = false
+	health = max_health
+	posture = 0.0
+	posture_locked_full_from_perfect_guard = false
+	stunned_hit_heartbeat_cap_pending = false
+	_set_heartbeat_value(CombatMathScript.MIN_HEARTBEAT)
+	heartbeat_combat_timer = 0.0
+	heartbeat_cooldown_delay_timer = 0.0
+	heartbeat_direct_checkpoint_respawn = false
+	_clear_heartbeat_modifier()
+	state = PlayerState.IDLE
+	previous_state = PlayerState.IDLE
+	is_blocking = false
+	is_attacking = false
+	is_parrying = false
+	is_dashing = false
+	is_running = false
+	is_perfect_dodging = false
+	is_invulnerable = false
+	is_block_releasing = false
+	block_age = 0.0
+	parry_elapsed = 0.0
+	block_time_left = 0.0
+	action_timer = 0.0
+	dash_timer = 0.0
+	dash_direction = 1.0
+	wall_climb_direction = 0.0
+	wall_climb_lockout_timer = 0.0
+	attack_elapsed = 0.0
+	attack_buffer_timer = 0.0
+	attack_buffer_queued = false
+	attack_lockout_timer = 0.0
+	attack_has_hit = false
+	attack_has_cut_projectile = false
+	attack_combo_step = 0
+	current_attack_animation = "attack_a"
+	hurt_animation = "hurt"
+	attack_lunge_timer = 0.0
+	current_animation = ""
+	parry_flash_timer = 0.0
+	block_flash_timer = 0.0
+	hurt_flash_timer = 0.0
+	perfect_dodge_timer = 0.0
+	hit_impact_vfx_timer = 0.0
+	hitstop_timer = 0.0
+	stored_velocity = Vector2.ZERO
+	heavy_parry_recoil_timer = 0.0
+	heavy_parry_recoil_velocity = Vector2.ZERO
+	velocity = Vector2.ZERO
+	sprite.speed_scale = 1.0
+	if hit_impact_vfx != null:
+		hit_impact_vfx.visible = false
+	_update_visuals()
+	stats_changed.emit()
+	return true
+
+func _on_sprite_animation_finished() -> void:
+	if sprite == null or state != PlayerState.DEAD or sprite.animation != &"death" or death_animation_reported:
+		return
+	death_animation_reported = true
+	death_animation_finished.emit(revive_available_pending)
 
 func _fade_in_sfx(player: AudioStreamPlayer2D, duration: float) -> void:
 	if player == null:

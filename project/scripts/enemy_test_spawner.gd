@@ -51,6 +51,7 @@ var bgm_volume_before_pause := 0.0
 @onready var fade_rect: ColorRect = $MapTransitionUI/FadeRect
 @onready var bgm_player: Node = get_node_or_null("BgmPlayer")
 @onready var death_overlay: CanvasLayer = get_node_or_null("DeathOverlay")
+@onready var revive_overlay: CanvasLayer = get_node_or_null("ReviveOverlay")
 @onready var pause_overlay: CanvasLayer = get_node_or_null("PauseOverlay")
 
 func _ready() -> void:
@@ -64,6 +65,7 @@ func _ready() -> void:
 	_update_map_bgm()
 	_connect_player_death_signal()
 	_connect_death_overlay()
+	_connect_revive_overlay()
 	_connect_pause_overlay()
 	if _should_spawn_default_boss_for_current_run():
 		_spawn_enemy(BOSS_SCENE, spawn_offsets[KEY_0])
@@ -166,6 +168,9 @@ func _connect_player_death_signal() -> void:
 	var callback := Callable(self, "_on_player_died")
 	if player != null and player.has_signal("died") and not player.is_connected("died", callback):
 		player.connect("died", callback)
+	var revive_callback := Callable(self, "_on_player_revive_prompt_requested")
+	if player != null and player.has_signal("revive_prompt_requested") and not player.is_connected("revive_prompt_requested", revive_callback):
+		player.connect("revive_prompt_requested", revive_callback)
 
 func _connect_death_overlay() -> void:
 	if death_overlay == null:
@@ -176,6 +181,16 @@ func _connect_death_overlay() -> void:
 		death_overlay.connect("retry_requested", retry_callback)
 	if death_overlay.has_signal("main_menu_requested") and not death_overlay.is_connected("main_menu_requested", menu_callback):
 		death_overlay.connect("main_menu_requested", menu_callback)
+
+func _connect_revive_overlay() -> void:
+	if revive_overlay == null:
+		return
+	var revive_callback := Callable(self, "_revive_player_in_place")
+	var give_up_callback := Callable(self, "_give_up_from_revive")
+	if revive_overlay.has_signal("revive_requested") and not revive_overlay.is_connected("revive_requested", revive_callback):
+		revive_overlay.connect("revive_requested", revive_callback)
+	if revive_overlay.has_signal("give_up_requested") and not revive_overlay.is_connected("give_up_requested", give_up_callback):
+		revive_overlay.connect("give_up_requested", give_up_callback)
 
 func _connect_pause_overlay() -> void:
 	if pause_overlay == null:
@@ -194,7 +209,7 @@ func _toggle_pause_menu() -> void:
 		_open_pause_menu()
 
 func _open_pause_menu() -> void:
-	if pause_overlay == null or is_transitioning or _is_death_overlay_active():
+	if pause_overlay == null or is_transitioning or _is_death_overlay_active() or _is_revive_overlay_active():
 		return
 	if bgm_player is AudioStreamPlayer:
 		var player_bgm := bgm_player as AudioStreamPlayer
@@ -247,6 +262,9 @@ func _save_current_checkpoint_progress() -> void:
 func _is_death_overlay_active() -> bool:
 	return death_overlay != null and (death_overlay.visible or bool(death_overlay.get("is_active")))
 
+func _is_revive_overlay_active() -> bool:
+	return revive_overlay != null and (revive_overlay.visible or bool(revive_overlay.get("is_active")))
+
 func _on_player_died() -> void:
 	if is_pause_menu_open:
 		_resume_from_pause()
@@ -259,6 +277,28 @@ func _on_player_died() -> void:
 	_set_player_transition_locked(true)
 	if death_overlay != null and death_overlay.has_method("show_death"):
 		death_overlay.show_death()
+
+func _on_player_revive_prompt_requested() -> void:
+	if is_pause_menu_open:
+		_resume_from_pause()
+	is_transitioning = true
+	_set_player_transition_locked(true)
+	var player := _get_player()
+	await _await_player_death_animation(player)
+	if player == null or not is_instance_valid(player):
+		return
+	if player.has_method("is_waiting_for_revive") and not player.is_waiting_for_revive():
+		return
+	if revive_overlay != null and revive_overlay.has_method("show_revive_prompt"):
+		revive_overlay.show_revive_prompt()
+
+func _await_player_death_animation(player: Node) -> void:
+	if player == null or not is_instance_valid(player):
+		return
+	if player.has_method("has_completed_death_animation") and player.has_completed_death_animation():
+		return
+	if player.has_signal("death_animation_finished"):
+		await player.death_animation_finished
 
 func _run_heartbeat_death_respawn() -> void:
 	if is_transitioning:
@@ -275,6 +315,8 @@ func _run_heartbeat_death_respawn() -> void:
 func _retry_from_checkpoint() -> void:
 	if death_overlay != null and death_overlay.has_method("hide_overlay_immediate"):
 		death_overlay.hide_overlay_immediate()
+	if revive_overlay != null and revive_overlay.has_method("hide_overlay_immediate"):
+		revive_overlay.hide_overlay_immediate()
 	var respawn := _get_respawn_snapshot()
 	clear_test_enemies()
 	_switch_map(_scene_for_map_id(String(respawn["map_id"])), String(respawn["map_id"]), respawn["position"])
@@ -288,10 +330,14 @@ func _retry_from_checkpoint() -> void:
 	is_transitioning = false
 
 func _return_to_start_page() -> void:
+	get_tree().paused = false
+	is_pause_menu_open = false
 	clear_test_enemies()
 	_set_player_transition_locked(false)
 	if death_overlay != null and death_overlay.has_method("hide_overlay_immediate"):
 		death_overlay.hide_overlay_immediate()
+	if revive_overlay != null and revive_overlay.has_method("hide_overlay_immediate"):
+		revive_overlay.hide_overlay_immediate()
 	if has_node("/root/SaveManager"):
 		var sm = get_node("/root/SaveManager")
 		if sm.has_method("delete_save"):
@@ -649,6 +695,20 @@ func _clear_fade() -> void:
 		return
 	fade_rect.color = Color(0, 0, 0, 0)
 	fade_rect.visible = false
+
+func _revive_player_in_place() -> void:
+	var player := _get_player()
+	if player == null:
+		return
+	if revive_overlay != null and revive_overlay.has_method("hide_overlay_immediate"):
+		revive_overlay.hide_overlay_immediate()
+	if player.has_method("revive_in_place"):
+		player.revive_in_place()
+	is_transitioning = false
+	_set_player_transition_locked(false)
+
+func _give_up_from_revive() -> void:
+	_retry_from_checkpoint()
 
 func _position_prompt_on_screen(anchor_value: Variant) -> void:
 	if interaction_prompt == null or get_viewport() == null:
