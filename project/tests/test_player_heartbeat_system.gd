@@ -14,8 +14,31 @@ func _initialize() -> void:
 	player.reset_combat_state()
 	player.heartbeat = 101.0
 	player._update_combat(1.0)
-	if player.heartbeat != 90.0:
-		push_error("Heartbeat should floor its 10 percent cooldown toward the current action cap")
+	if player.heartbeat != 101.0:
+		push_error("Heartbeat should wait two seconds before cooldown starts while out of combat")
+		quit(1)
+		return
+	player._update_combat(1.0)
+	if player.heartbeat != 92.0:
+		push_error("Heartbeat should floor its 8 percent cooldown from the current heartbeat after the two second delay")
+		quit(1)
+		return
+
+	player.reset_combat_state()
+	player.state = player.PlayerState.MOVE
+	player.velocity.x = 180.0
+	player.is_running = true
+	player.heartbeat = 120.0
+	player.is_running = false
+	player.velocity.x = 80.0
+	player._update_combat(1.0)
+	if player.heartbeat != 120.0:
+		push_error("Heartbeat should wait two seconds before cooling down when dropping from running to walking")
+		quit(1)
+		return
+	player._update_combat(1.0)
+	if player.heartbeat != 110.0:
+		push_error("Heartbeat should cool down toward the walking target after the two second delay")
 		quit(1)
 		return
 
@@ -24,8 +47,8 @@ func _initialize() -> void:
 	player.velocity.x = 90.0
 	player.heartbeat = 70.0
 	player._update_combat(1.0)
-	if player.heartbeat <= 70.0 or player.heartbeat >= 95.0:
-		push_error("Walking should raise heartbeat gradually toward the walking target")
+	if player.heartbeat != 72.0:
+		push_error("Walking should add floor(walk target * 3%%) per second until the walking target")
 		quit(1)
 		return
 
@@ -35,8 +58,19 @@ func _initialize() -> void:
 	player.is_running = true
 	player.heartbeat = 95.0
 	player._update_combat(1.0)
-	if player.heartbeat <= 95.0 or player.heartbeat >= 155.0:
-		push_error("Running should raise heartbeat gradually toward the running target")
+	if player.heartbeat != 104.0:
+		push_error("Running should add floor(run target * 6%%) per second until the running target")
+		quit(1)
+		return
+
+	player.reset_combat_state()
+	player.state = player.PlayerState.MOVE
+	player.velocity.x = 180.0
+	player.is_running = true
+	player.heartbeat = 70.0
+	player._update_combat(1.0)
+	if player.heartbeat != 79.0:
+		push_error("Running from idle should use the same run rise rate and floor the result")
 		quit(1)
 		return
 

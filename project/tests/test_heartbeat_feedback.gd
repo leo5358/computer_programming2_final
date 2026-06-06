@@ -41,10 +41,22 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+	player.heartbeat = 134.0
+	feedback._update_feedback(0.0)
+	if top_edge.color.a > 0.02:
+		push_error("Heartbeat warning should stay invisible below 135 BPM")
+		quit(1)
+		return
+	feedback._update_heartbeat_audio(0.0)
+	if heartbeat_sfx.volume_db != feedback.min_volume_db:
+		push_error("Heartbeat audio should stay at minimum volume below 135 BPM")
+		quit(1)
+		return
+
 	player.heartbeat = 180.0
 	feedback._update_feedback(0.0)
 	var tense_alpha := top_edge.color.a
-	if tense_alpha <= calm_alpha + 0.18:
+	if tense_alpha <= calm_alpha + 0.05:
 		push_error("High heartbeat should visibly intensify the red edge")
 		quit(1)
 		return
