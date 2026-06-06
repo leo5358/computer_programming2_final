@@ -92,8 +92,8 @@ func _initialize() -> void:
 		push_error("Successful Warrior guard should still add small posture pressure")
 		quit(1)
 		return
-	if warrior.posture - posture_before > 4.0:
-		push_error("Successful Warrior guard should not let the player farm large posture damage")
+	if warrior.posture - posture_before > 5.0:
+		push_error("Successful Warrior guard should use the rebuilt small-enemy guard pressure ratio")
 		quit(1)
 		return
 	if warrior.state != warrior.EnemyState.DEFLECT:

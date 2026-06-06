@@ -150,6 +150,11 @@ enum PlayerState {
 @export var max_posture := 100.0
 @export var posture_disengage_delay := 6.0
 @export_range(0.0, 1.0, 0.01) var posture_recovery_percent_per_second := 0.08
+@export var posture_gain_on_hit_taken_percent := 17.25
+@export var posture_gain_on_perfect_guard_percent := 6.9
+@export var posture_gain_on_partial_guard_percent := 10.35
+@export var posture_gain_on_attack_deflected_percent := 5.75
+@export_range(0.0, 1.0, 0.01) var partial_guard_chip_damage_ratio := 0.25
 @export var max_lives := 3
 @export var world_death_bounds_enabled := true
 @export var world_death_bounds := Rect2(-1024.0, -2048.0, 22000.0, 4096.0)
@@ -231,6 +236,7 @@ var lives := max_lives
 var heartbeat: float = CombatMathScript.MIN_HEARTBEAT
 var state := PlayerState.IDLE
 var previous_state := PlayerState.IDLE
+var posture_locked_full_from_perfect_guard := false
 var is_blocking := false
 var is_attacking := false
 var is_parrying := false
@@ -394,7 +400,21 @@ func is_posture_in_combat() -> bool:
 
 func is_posture_bar_visible() -> bool:
 	posture_visibility_snapshot = posture
-	return posture > 0.0
+	return posture > 0.0 or posture_locked_full_from_perfect_guard
+
+func _posture_amount_from_percent(percent: float) -> float:
+	return ceil(max_posture * (percent / 100.0))
+
+func _clear_player_posture_after_break() -> void:
+	posture = 0.0
+	posture_locked_full_from_perfect_guard = false
+
+func _should_player_stagger_on_full_posture(took_health_damage: bool, was_perfect_guard: bool) -> bool:
+	if took_health_damage:
+		return true
+	if was_perfect_guard:
+		return false
+	return true
 
 func _update_posture_decay(delta: float) -> void:
 	var remaining_delta := delta
@@ -409,6 +429,8 @@ func _update_posture_decay(delta: float) -> void:
 	var health_ratio: float = clamp(health / max(max_health, 0.001), 0.0, 1.0)
 	var recovery_rate := max_posture * posture_recovery_percent_per_second * health_ratio
 	posture = max(0.0, posture - recovery_rate * remaining_delta)
+	if posture < max_posture:
+		posture_locked_full_from_perfect_guard = false
 
 func _update_inputs() -> void:
 	if _try_use_item_hotkey():
@@ -1323,39 +1345,52 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 		perfect_parry = true
 		if attacker != null and attacker.has_method("can_be_perfect_parried_by"):
 			perfect_parry = attacker.can_be_perfect_parried_by(self)
-	if perfect_parry or (is_parrying and can_guard and can_block) or (is_blocking and can_guard and can_block):
-		var perfect := perfect_parry
-		posture = math.add_posture(posture, 5.0 if perfect else posture_damage * 2.0)
+
+	var took_health_damage := false
+	var posture_gain := 0.0
+
+	if perfect_parry:
+		posture_gain = _posture_amount_from_percent(posture_gain_on_perfect_guard_percent)
+		posture = math.add_posture(posture, posture_gain)
+		posture_locked_full_from_perfect_guard = posture >= max_posture
 		_add_heartbeat_pressure(heartbeat_guard_gain)
-		if state == PlayerState.DEAD:
-			return
-		var heavy_chop_parry := perfect and _is_attacker_chop_attack(attacker)
 		if attacker != null and attacker.has_method("receive_block_feedback_from_player"):
-			attacker.receive_block_feedback_from_player(perfect, self)
+			attacker.receive_block_feedback_from_player(true, self)
 		elif attacker != null and attacker.has_method("receive_block_feedback"):
-			attacker.receive_block_feedback(perfect)
-		if perfect:
-			_play_sfx(parry_sfx)
-			if heavy_chop_parry:
-				_trigger_parry_feedback(_knockback_direction_from_attacker(attacker), heavy_parry_rebound, heavy_parry_hitstop_time, heavy_parry_camera_shake, 0.16)
-				_trigger_parry_impact_vfx(attacker)
-			else:
-				_trigger_parry_feedback()
-				_trigger_guard_impact_vfx(attacker)
+			attacker.receive_block_feedback(true)
+		_play_sfx(parry_sfx)
+		if _is_attacker_chop_attack(attacker):
+			_trigger_parry_feedback(_knockback_direction_from_attacker(attacker), heavy_parry_rebound, heavy_parry_hitstop_time, heavy_parry_camera_shake, 0.16)
+			_trigger_parry_impact_vfx(attacker)
 		else:
-			_play_sfx(block_sfx)
-			_trigger_block_feedback()
+			_trigger_parry_feedback()
 			_trigger_guard_impact_vfx(attacker)
+	elif (is_parrying and can_guard and can_block) or (is_blocking and can_guard and can_block):
+		var chip_damage := damage * partial_guard_chip_damage_ratio
+		health = math.apply_damage(health, chip_damage)
+		took_health_damage = chip_damage > 0.0
+		posture_gain = _posture_amount_from_percent(posture_gain_on_partial_guard_percent)
+		posture = math.add_posture(posture, posture_gain)
+		posture_locked_full_from_perfect_guard = false
+		_add_heartbeat_pressure(heartbeat_guard_gain)
+		if attacker != null and attacker.has_method("receive_partial_guard_feedback_from_player"):
+			attacker.receive_partial_guard_feedback_from_player(self)
+		elif attacker != null and attacker.has_method("receive_partial_guard_feedback"):
+			attacker.receive_partial_guard_feedback()
+		elif attacker != null and attacker.has_method("receive_block_feedback_from_player"):
+			attacker.receive_block_feedback_from_player(false, self)
+		elif attacker != null and attacker.has_method("receive_block_feedback"):
+			attacker.receive_block_feedback(false)
+		_play_sfx(block_sfx)
+		_trigger_block_feedback()
+		_trigger_guard_impact_vfx(attacker)
 	else:
 		health = math.apply_damage(health, damage)
-		posture = math.add_posture(posture, posture_damage * 1.35)
-		if state == PlayerState.DEAD:
-			return
-		if health <= 0.0:
-			_handle_health_depleted()
-			stats_changed.emit()
-			return
-		else:
+		took_health_damage = damage > 0.0
+		posture_gain = _posture_amount_from_percent(posture_gain_on_hit_taken_percent)
+		posture = math.add_posture(posture, posture_gain)
+		posture_locked_full_from_perfect_guard = false
+		if health > 0.0:
 			_play_sfx(hurt_sfx)
 			_trigger_hurt_feedback(_knockback_direction_from_attacker(attacker))
 			hurt_animation = "hurt"
@@ -1364,12 +1399,15 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 			action_timer = hurt_time
 			is_invulnerable = true
 
-	if posture >= max_posture:
+	if health <= 0.0:
+		_handle_health_depleted()
+		stats_changed.emit()
+		return
+
+	if posture >= max_posture and _should_player_stagger_on_full_posture(took_health_damage, perfect_parry):
 		_enter_stunned()
 
 	stats_changed.emit()
-	if health <= 0.0:
-		_handle_health_depleted()
 
 func _check_world_death_bounds() -> void:
 	if not world_death_bounds_enabled:
@@ -1387,6 +1425,7 @@ func _handle_health_depleted() -> void:
 		lives -= 1
 		health = max_health
 		posture = 0.0
+		posture_locked_full_from_perfect_guard = false
 		_enter_stunned(&"life_knockdown", life_loss_stunned_time, life_loss_animation_speed, false)
 		return
 	_enter_dead()
@@ -1412,7 +1451,7 @@ func _enter_stunned(animation_name: StringName = &"posture_knockdown", duration 
 	stunned_animation = animation_name
 	stunned_animation_speed = posture_break_animation_speed if animation_speed < 0.0 else animation_speed
 	if keep_posture_at_break:
-		posture = max_posture
+		_clear_player_posture_after_break()
 	action_timer = stunned_time if duration < 0.0 else duration
 	is_blocking = false
 	is_attacking = false
@@ -1829,7 +1868,11 @@ func _receive_attack_deflected() -> void:
 	attack_lunge_timer = 0.0
 	attack_combo_step = 0
 	register_posture_contact()
-	posture = math.add_posture(posture, attack_deflected_posture_damage)
+	posture_locked_full_from_perfect_guard = false
+	posture = math.add_posture(posture, _posture_amount_from_percent(posture_gain_on_attack_deflected_percent))
+	if posture >= max_posture:
+		_enter_stunned()
+		return
 	_add_heartbeat_pressure(6.0)
 	if state == PlayerState.DEAD:
 		return
@@ -1990,6 +2033,7 @@ func reset_combat_state() -> void:
 	health = max_health
 	lives = max_lives
 	posture = 0.0
+	posture_locked_full_from_perfect_guard = false
 	posture_combat_timer = 0.0
 	posture_visibility_snapshot = posture
 	_set_heartbeat_value(CombatMathScript.MIN_HEARTBEAT)

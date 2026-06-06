@@ -221,7 +221,7 @@ const VISUAL_CENTER_X_BOSS := 64.0
 const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 
 # --- Boss Parameters ---
-@export var posture_damage_taken_boss := 18.0
+@export var posture_gain_on_direct_damage_boss := 9.0
 @export var leash_range_boss := 420.0
 @export var detection_range_boss := 340.0
 @export var attack_start_distance_boss := 112.0
@@ -259,13 +259,16 @@ const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 @export var hit_spark_time_boss := 0.16
 @export var hit_freeze_time_boss := 0.055
 @export var hurt_feedback_time_boss := 0.66
-@export var normal_attack_parry_posture_damage_boss := 36.0
-@export var normal_attack_block_posture_damage_boss := 14.0
+@export var posture_gain_on_perfect_parried_boss := 8.0
+@export var posture_gain_on_partial_guarded_boss := 5.0
+@export var posture_gain_on_guard_success_boss := 5.0
+@export var posture_break_idle_reset_delay_boss := 6.0
+@export var posture_break_hit_reset_delay_boss := 3.0
 @export var deflect_feedback_time_boss := 0.28
 @export var perfect_deflect_feedback_time_boss := 0.50
 @export var forced_counter_deflect_window_boss := 0.95
 @export var debug_fixed_attack_profile_boss := ""
-@export var minimum_health_from_player_attack_boss := 1.0
+@export var minimum_health_from_player_attack_boss := 0.0
 @export var attack_recovery_time_boss := 0.58
 @export var attack_pressure_commit_time_boss := 0.45
 @export var chop_parry_hitstop_time_boss := 0.20
@@ -297,6 +300,8 @@ var forced_counter_timer_boss := 0.0
 var attack_pressure_timer_boss := 0.0
 var is_chop_parried_recovery_boss := false
 var smoke_bomb_pause_timer_boss := 0.0
+var posture_break_reset_timer_boss := 0.0
+var posture_break_took_followup_hit_boss := false
 
 var attack_pressure_timer: float:
 	get:
@@ -444,9 +449,9 @@ var perfect_parry_cooldown: float:
 
 var normal_attack_parry_posture_damage: float:
 	get:
-		return normal_attack_parry_posture_damage_boss
+		return posture_gain_on_perfect_parried_boss
 	set(value):
-		normal_attack_parry_posture_damage_boss = value
+		posture_gain_on_perfect_parried_boss = value
 
 var minimum_health_from_player_attack: float:
 	get:
@@ -470,7 +475,7 @@ func _ready() -> void:
 	
 	display_name = "Corrupted Guardian"
 	max_health = 400.0
-	max_posture = 160.0
+	max_posture = 120.0
 	patrol_speed = 58.0
 	patrol_distance = 120.0
 	chase_speed = 86.0
@@ -482,7 +487,7 @@ func _ready() -> void:
 	posture_recovery_rate = 5.0
 	posture_recovery_percent_per_second = 0.10
 	guard_chance = 0.8
-	guard_posture_damage = 1.2
+	minimum_health_from_player_attack_boss = 0.0
 	guard_lockout_duration = 0.32
 	perfect_parry_input_leeway = 0.30
 	patrol_direction = 1.0
@@ -535,7 +540,11 @@ func _physics_process(delta: float) -> void:
 		velocity.x = 0.0
 	elif posture_broken:
 		velocity.x = 0.0
+		posture_break_reset_timer_boss = max(0.0, posture_break_reset_timer_boss - delta)
 		play_boss_animation(current_animation_boss)
+		if posture_break_reset_timer_boss <= 0.0:
+			_reset_boss_posture_break_state()
+			play_boss_animation("idle")
 	elif feedback_timer_boss > 0.0:
 		velocity.x = 0.0
 	elif hit_recoil_timer > 0.0:
@@ -656,7 +665,12 @@ func receive_player_attack(damage: float, posture_damage: float) -> Variant:
 	if defeated_flag:
 		return false
 	if posture_broken:
-		execute()
+		health = max(0.0, health - damage)
+		if not posture_break_took_followup_hit_boss:
+			posture_break_took_followup_hit_boss = true
+			posture_break_reset_timer_boss = posture_break_hit_reset_delay_boss
+		if health <= 0.0:
+			execute()
 		return true
 	has_engaged_player_boss = true
 	_mark_combat_pressure()
@@ -674,15 +688,17 @@ func receive_player_attack(damage: float, posture_damage: float) -> Variant:
 		return {"guarded": true}
 		
 	_spawn_damage_number_boss(damage)
-	health = max(minimum_health_from_player_attack_boss, health - damage)
-	posture = clamp(posture + max(posture_damage, posture_damage_taken_boss), 0.0, max_posture)
+	health = max(0.0, health - damage)
+	posture = clamp(posture + _boss_posture_amount_from_percent(posture_gain_on_direct_damage_boss), 0.0, max_posture)
 	
 	_force_play_boss_animation("hurt")
 	feedback_timer_boss = max(feedback_timer_boss, hurt_feedback_time_boss)
 	_trigger_hit_feedback_boss_internal()
 	
 	if posture >= max_posture:
-		_break_posture_boss_internal()
+		_start_boss_posture_break(posture_break_idle_reset_delay_boss)
+	if health <= 0.0:
+		execute()
 	stats_changed.emit()
 	return true
 
@@ -705,7 +721,7 @@ func _should_guard_player_attack_boss_internal() -> bool:
 
 func _guard_player_attack_boss_internal() -> void:
 	_mark_combat_pressure()
-	posture = clamp(posture + guard_posture_damage, 0.0, max_posture)
+	posture = clamp(posture + _boss_posture_amount_from_percent(posture_gain_on_guard_success_boss), 0.0, max_posture)
 	_interrupt_attack_boss_internal()
 	_queue_forced_counter_boss()
 	deflect_toggle_boss = not deflect_toggle_boss
@@ -721,7 +737,7 @@ func _guard_player_attack_boss_internal() -> void:
 		hit_spark.position.x = 18.0 * facing
 		hit_spark.visible = true
 	if posture >= max_posture:
-		_break_posture_boss_internal()
+		_start_boss_posture_break(posture_break_idle_reset_delay_boss)
 	stats_changed.emit()
 
 func receive_block_feedback(_perfect: bool) -> void:
@@ -736,9 +752,10 @@ func _receive_block_feedback_boss_internal(_perfect: bool) -> void:
 	has_engaged_player_boss = true
 	_mark_combat_pressure()
 	var perfect := _perfect
-	posture = clamp(posture + (normal_attack_parry_posture_damage_boss if perfect else normal_attack_block_posture_damage_boss), 0.0, max_posture)
+	var posture_percent := posture_gain_on_perfect_parried_boss if _perfect else posture_gain_on_partial_guarded_boss
+	posture = clamp(posture + _boss_posture_amount_from_percent(posture_percent), 0.0, max_posture)
 	if posture >= max_posture:
-		_break_posture_boss_internal()
+		_start_boss_posture_break(posture_break_idle_reset_delay_boss)
 		stats_changed.emit()
 		return
 	if perfect and current_attack_animation == "chop" and (is_attack_winding_up_boss or is_attack_active_boss):
@@ -792,6 +809,8 @@ func reset_combat_state() -> void:
 	guard_lockout_timer = 0.0
 	has_engaged_player_boss = false
 	posture_recovery_pause_timer = 0.0
+	posture_break_reset_timer_boss = 0.0
+	posture_break_took_followup_hit_boss = false
 	forced_counter_profile_boss = ""
 	consecutive_guard_count_boss = 0
 	forced_counter_timer_boss = 0.0
@@ -814,10 +833,28 @@ func reset_combat_state() -> void:
 	stats_changed.emit()
 
 func _break_posture_boss_internal() -> void:
+	_start_boss_posture_break(posture_break_idle_reset_delay_boss)
+
+func _boss_posture_amount_from_percent(percent: float) -> float:
+	return ceil(max_posture * (percent / 100.0))
+
+func _reset_boss_posture_break_state() -> void:
+	posture = 0.0
+	posture_broken = false
+	posture_break_reset_timer_boss = 0.0
+	posture_break_took_followup_hit_boss = false
+	if execute_label != null:
+		execute_label.visible = false
+	if hit_spark != null:
+		hit_spark.visible = false
+
+func _start_boss_posture_break(reset_delay: float) -> void:
 	if posture_broken or defeated_flag:
 		return
 	posture = max_posture
 	posture_broken = true
+	posture_break_reset_timer_boss = reset_delay
+	posture_break_took_followup_hit_boss = false
 	_interrupt_attack_boss_internal()
 	feedback_timer_boss = max(feedback_timer_boss, perfect_deflect_feedback_time_boss)
 	velocity = Vector2.ZERO
