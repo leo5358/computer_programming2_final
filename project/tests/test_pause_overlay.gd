@@ -102,6 +102,13 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+	var detached_click := InputEventMouseButton.new()
+	detached_click.button_index = MOUSE_BUTTON_LEFT
+	detached_click.pressed = true
+	get_root().remove_child(overlay)
+	overlay.set("is_active", true)
+	overlay.call("_on_option_gui_input", detached_click, overlay.OPTION_SAVE_MENU)
+
 	overlay.hide_pause()
 	await process_frame
 	if overlay.visible or bool(overlay.get("is_active")):
