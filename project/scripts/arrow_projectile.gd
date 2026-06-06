@@ -15,16 +15,21 @@ var owner_enemy: Node = null
 
 func _ready() -> void:
 	add_to_group("enemy_projectile")
-	if sprite != null:
-		sprite.flip_h = direction < 0.0
+	_sync_sprite_direction()
 
 func setup(fire_direction: float, source: Node) -> void:
 	direction = sign(fire_direction)
 	if direction == 0.0:
 		direction = 1.0
 	owner_enemy = source
+	_sync_sprite_direction()
+
+func _sync_sprite_direction() -> void:
 	if sprite != null:
+		# The arrow texture faces right by default, so we flip it if moving left
 		sprite.flip_h = direction < 0.0
+		# Increase scale slightly for better visibility if needed, or keep consistent
+		sprite.scale = Vector2(0.35, 0.35) 
 
 func _physics_process(delta: float) -> void:
 	if destroyed:
