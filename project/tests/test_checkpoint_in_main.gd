@@ -73,7 +73,7 @@ func _initialize() -> void:
 
 	var rear_checkpoint := checkpoints[2] as Node2D
 	var rear_checkpoint_position := rear_checkpoint.global_position
-	player.global_position = rear_checkpoint.global_position + Vector2(250.0, 0.0)
+	player.global_position = rear_checkpoint.global_position + Vector2(-250.0, 0.0)
 	main._update_map_interaction_prompt()
 	if not prompt.visible:
 		push_error("Checkpoint should show the rest prompt when player is within 300 pixels")

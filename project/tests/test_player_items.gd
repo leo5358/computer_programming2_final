@@ -51,10 +51,18 @@ func _initialize() -> void:
 			push_error("Player should expose item counts")
 			quit(1)
 			return
-		if player.get_item_count(item_id) != 10:
-			push_error("Player should start with 10 %s" % item_id)
+		if player.get_item_count(item_id) != 0:
+			push_error("Player should start with 0 %s" % item_id)
 			quit(1)
 			return
+
+	player.set("item_counts", {
+		"kunai": 10,
+		"ash_balls": 10,
+		"gourd": 10,
+		"pill": 10,
+		"capsule": 10,
+	})
 
 	if not player.has_method("use_item"):
 		push_error("Player should expose item use")

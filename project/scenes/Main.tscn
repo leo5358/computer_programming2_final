@@ -74,6 +74,38 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 0)
 
+[node name="PickupNotice" type="Control" parent="MapTransitionUI"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -330.0
+offset_top = -42.0
+offset_right = -32.0
+offset_bottom = 42.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="Icon" type="TextureRect" parent="MapTransitionUI/PickupNotice"]
+offset_left = 0.0
+offset_top = 10.0
+offset_right = 64.0
+offset_bottom = 74.0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="MapTransitionUI/PickupNotice"]
+offset_left = 72.0
+offset_top = 14.0
+offset_right = 298.0
+offset_bottom = 70.0
+theme_override_font_sizes/font_size = 30
+text = "獲得 x1"
+vertical_alignment = 1
+
 [node name="ItemUI" type="CanvasLayer" parent="." unique_id=1033738818]
 script = ExtResource("13_item_ui")
 

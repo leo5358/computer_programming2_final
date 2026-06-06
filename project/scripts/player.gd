@@ -43,11 +43,11 @@ const MUDRA_FOCUS_FRAME_START := 3
 const MUDRA_FOCUS_FRAME_END := 5
 const MUDRA_FOCUS_DURATION_RATIO := 0.70
 const DEFAULT_ITEM_COUNTS := {
-	"kunai": 10,
-	"ash_balls": 10,
-	"gourd": 10,
-	"pill": 10,
-	"capsule": 10,
+	"kunai": 0,
+	"ash_balls": 0,
+	"gourd": 0,
+	"pill": 0,
+	"capsule": 0,
 }
 const ITEM_ORDER: Array[String] = ["kunai", "ash_balls", "gourd", "pill", "capsule"]
 const ATTACK_ITEM_IDS: Array[String] = ["kunai", "ash_balls"]
@@ -875,6 +875,10 @@ func get_item_count(item_id: String) -> int:
 
 func get_item_counts() -> Dictionary:
 	return item_counts.duplicate()
+
+func add_item(item_id: String, quantity: int = 1) -> void:
+	item_counts[item_id] = max(0, get_item_count(item_id) + quantity)
+	stats_changed.emit()
 
 func get_selected_item_id() -> String:
 	var index := clampi(selected_item_index, 0, ITEM_ORDER.size() - 1)

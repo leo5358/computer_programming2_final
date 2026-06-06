@@ -66,6 +66,13 @@ func _initialize() -> void:
 		push_error("Main scene should include a usable player")
 		quit(1)
 		return
+	player.set("item_counts", {
+		"kunai": 10,
+		"ash_balls": 10,
+		"gourd": 10,
+		"pill": 10,
+		"capsule": 10,
+	})
 
 	player.set("selected_attack_item_index", 1)
 	player.set("selected_heal_item_index", 2)

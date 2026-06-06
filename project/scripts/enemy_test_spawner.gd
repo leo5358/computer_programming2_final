@@ -17,9 +17,19 @@ const BOSS_INTERIOR_SPAWN := Vector2(220, 640.5)
 const BOSS_INTERIOR_BOSS_SPAWN := Vector2(1050, 640.5)
 const TRANSITION_FADE_TIME := 0.45
 const INTERACTION_PROMPT_RADIUS := 300.0
+const ITEM_PICKUP_PROMPT_TEXT := "按F撿起"
 const CHECKPOINT_PROMPT_TEXT := "按下F在此處休息(存檔)"
 const DOOR_PROMPT_TEXT := "按下F進入"
 const INTERACTION_FADE_START_ALPHA := 0.2
+const PICKUP_NOTICE_FADE_TIME := 0.25
+const PICKUP_NOTICE_HOLD_TIME := 2.0
+const ITEM_ICON_PATHS := {
+	"gourd": "res://assets/items/gourd/gourd.png",
+	"kunai": "res://assets/items/kunai/kunai.png",
+	"pill": "res://assets/items/pill/pill.png",
+	"capsule": "res://assets/items/capsule/capsule.png",
+	"ash_balls": "res://assets/items/ash_balls/ash_balls.png",
+}
 const INTERACTION_FADE_TO_BLACK_TIME := 2.0
 const INTERACTION_BLACK_HOLD_TIME := 1.0
 const HEARTBEAT_DEATH_FADE_START_ALPHA := 0.2
@@ -46,9 +56,13 @@ var current_map_id := "ab_foothill"
 var is_transitioning := false
 var is_pause_menu_open := false
 var bgm_volume_before_pause := 0.0
+var pickup_notice_tween: Tween = null
 
 @onready var interaction_prompt: Label = $MapTransitionUI/PromptLabel
 @onready var fade_rect: ColorRect = $MapTransitionUI/FadeRect
+@onready var pickup_notice: Control = get_node_or_null("MapTransitionUI/PickupNotice")
+@onready var pickup_notice_icon: TextureRect = get_node_or_null("MapTransitionUI/PickupNotice/Icon")
+@onready var pickup_notice_label: Label = get_node_or_null("MapTransitionUI/PickupNotice/Label")
 @onready var bgm_player: Node = get_node_or_null("BgmPlayer")
 @onready var death_overlay: CanvasLayer = get_node_or_null("DeathOverlay")
 @onready var revive_overlay: CanvasLayer = get_node_or_null("ReviveOverlay")
@@ -133,7 +147,10 @@ func _input(event: InputEvent) -> void:
 			_debug_kill_player()
 			get_viewport().set_input_as_handled()
 		KEY_F:
-			if _can_activate_checkpoint():
+			if _can_collect_map_item():
+				_collect_nearest_map_item()
+				get_viewport().set_input_as_handled()
+			elif _can_activate_checkpoint():
 				_activate_nearest_checkpoint()
 				get_viewport().set_input_as_handled()
 			elif _can_use_ab_exit():
@@ -445,6 +462,25 @@ func _update_map_interaction_prompt() -> void:
 func _can_activate_checkpoint() -> bool:
 	return _nearest_checkpoint() != null
 
+func _can_collect_map_item() -> bool:
+	return _nearest_map_item() != null
+
+func _collect_nearest_map_item() -> bool:
+	var pickup := _nearest_map_item()
+	if pickup == null:
+		return false
+	var player := _get_player()
+	if player == null:
+		return false
+	var item_id := String(pickup.get("item_id"))
+	var collected := false
+	if pickup.has_method("collect"):
+		collected = bool(pickup.collect(player))
+	if collected:
+		_show_pickup_notice(item_id)
+		_update_map_interaction_prompt()
+	return collected
+
 func _activate_nearest_checkpoint() -> bool:
 	var checkpoint := _nearest_checkpoint()
 	if checkpoint == null:
@@ -492,6 +528,46 @@ func _nearest_checkpoint_prompt() -> Node:
 		var distance := player.global_position.distance_to(checkpoint_node.global_position)
 		if distance < nearest_distance:
 			nearest = checkpoint
+			nearest_distance = distance
+	return nearest
+
+func _nearest_map_item() -> Node:
+	var player := _get_player()
+	if player == null:
+		return null
+	var nearest: Node = null
+	var nearest_distance := INF
+	for pickup in get_tree().get_nodes_in_group("map_item_pickup"):
+		if pickup == null or pickup.is_queued_for_deletion() or not pickup.has_method("is_player_in_range"):
+			continue
+		if not pickup.is_player_in_range(player):
+			continue
+		var pickup_node := pickup as Node2D
+		if pickup_node == null:
+			continue
+		var distance := player.global_position.distance_to(pickup_node.global_position)
+		if distance < nearest_distance:
+			nearest = pickup
+			nearest_distance = distance
+	return nearest
+
+func _nearest_map_item_prompt() -> Node:
+	var player := _get_player()
+	if player == null:
+		return null
+	var nearest: Node = null
+	var nearest_distance := INF
+	for pickup in get_tree().get_nodes_in_group("map_item_pickup"):
+		if pickup == null or pickup.is_queued_for_deletion() or not pickup.has_method("is_player_in_prompt_range"):
+			continue
+		if not pickup.is_player_in_prompt_range(player):
+			continue
+		var pickup_node := pickup as Node2D
+		if pickup_node == null:
+			continue
+		var distance := player.global_position.distance_to(pickup_node.global_position)
+		if distance < nearest_distance:
+			nearest = pickup
 			nearest_distance = distance
 	return nearest
 
@@ -713,21 +789,53 @@ func _position_prompt_on_screen(anchor_value: Variant) -> void:
 func _current_prompt_target() -> Dictionary:
 	var best_target := {}
 	var best_distance := INF
+	var pickup := _nearest_map_item_prompt()
+	if pickup != null:
+		var pickup_anchor: Vector2 = (pickup as Node2D).global_position
+		if pickup.has_method("get_prompt_anchor_position"):
+			pickup_anchor = pickup.get_prompt_anchor_position()
+		var pickup_distance: float = _get_player().global_position.distance_to((pickup as Node2D).global_position)
+		best_target = {
+			"text": ITEM_PICKUP_PROMPT_TEXT,
+			"anchor": pickup_anchor,
+		}
+		best_distance = pickup_distance
 	var checkpoint := _nearest_checkpoint_prompt()
 	if checkpoint != null:
 		var checkpoint_anchor: Vector2 = (checkpoint as Node2D).global_position
 		if checkpoint.has_method("get_prompt_anchor_position"):
 			checkpoint_anchor = checkpoint.get_prompt_anchor_position()
 		var checkpoint_distance: float = _get_player().global_position.distance_to((checkpoint as Node2D).global_position)
-		best_target = {
-			"text": CHECKPOINT_PROMPT_TEXT,
-			"anchor": checkpoint_anchor,
-		}
-		best_distance = checkpoint_distance
+		if checkpoint_distance < best_distance:
+			best_target = {
+				"text": CHECKPOINT_PROMPT_TEXT,
+				"anchor": checkpoint_anchor,
+			}
+			best_distance = checkpoint_distance
 	var door_target := _current_door_prompt_target()
 	if not door_target.is_empty() and float(door_target.get("distance", INF)) < best_distance:
 		best_target = door_target
 	return best_target
+
+func _show_pickup_notice(item_id: String) -> void:
+	if pickup_notice == null:
+		return
+	if pickup_notice_tween != null and pickup_notice_tween.is_valid():
+		pickup_notice_tween.kill()
+	if pickup_notice_icon != null:
+		pickup_notice_icon.texture = load(String(ITEM_ICON_PATHS.get(item_id, ""))) as Texture2D
+	if pickup_notice_label != null:
+		pickup_notice_label.text = "獲得 x1"
+	pickup_notice.visible = true
+	pickup_notice.modulate.a = 0.0
+	pickup_notice_tween = create_tween()
+	pickup_notice_tween.tween_property(pickup_notice, "modulate:a", 1.0, PICKUP_NOTICE_FADE_TIME)
+	pickup_notice_tween.tween_interval(PICKUP_NOTICE_HOLD_TIME)
+	pickup_notice_tween.tween_property(pickup_notice, "modulate:a", 0.0, PICKUP_NOTICE_FADE_TIME)
+	pickup_notice_tween.tween_callback(func() -> void:
+		if pickup_notice != null:
+			pickup_notice.visible = false
+	)
 
 func _current_door_prompt_target() -> Dictionary:
 	var player := _get_player()
