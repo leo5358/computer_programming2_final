@@ -221,7 +221,7 @@ const VISUAL_CENTER_X_BOSS := 64.0
 const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 
 # --- Boss Parameters ---
-@export var posture_gain_on_direct_damage_boss := 9.0
+@export var posture_gain_on_direct_damage_boss := 11.0
 @export var leash_range_boss := 420.0
 @export var detection_range_boss := 340.0
 @export var attack_start_distance_boss := 112.0
@@ -259,9 +259,9 @@ const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 @export var hit_spark_time_boss := 0.16
 @export var hit_freeze_time_boss := 0.055
 @export var hurt_feedback_time_boss := 0.66
-@export var posture_gain_on_perfect_parried_boss := 8.0
-@export var posture_gain_on_partial_guarded_boss := 5.0
-@export var posture_gain_on_guard_success_boss := 5.0
+@export var posture_gain_on_perfect_parried_boss := 10.0
+@export var posture_gain_on_partial_guarded_boss := 6.0
+@export var posture_gain_on_guard_success_boss := 6.0
 @export var posture_break_idle_reset_delay_boss := 6.0
 @export var posture_break_hit_reset_delay_boss := 3.0
 @export var deflect_feedback_time_boss := 0.28

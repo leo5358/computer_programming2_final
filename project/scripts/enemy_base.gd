@@ -245,7 +245,8 @@ func receive_player_attack(damage: float, posture_damage: float) -> Variant:
 		return {"guarded": true}
 	_spawn_damage_number(damage)
 	health = max(0.0, health - damage)
-	posture = clamp(posture + posture_damage, 0.0, max_posture)
+	var p_damage: float = ceil(max_posture * 0.15)
+	posture = clamp(posture + p_damage, 0.0, max_posture)
 	_mark_combat_pressure()
 	receive_alert()
 	if posture >= max_posture:
@@ -269,7 +270,8 @@ func _start_direct_hurt_feedback() -> void:
 func receive_block_feedback(perfect: bool) -> void:
 	if defeated_flag:
 		return
-	posture = clamp(posture + (perfect_parry_posture_damage if perfect else normal_block_posture_damage), 0.0, max_posture)
+	var p_damage: float = ceil(max_posture * (0.06 if perfect else 0.09))
+	posture = clamp(posture + p_damage, 0.0, max_posture)
 	_mark_combat_pressure()
 	_interrupt_attack()
 	attack_cooldown = max(attack_cooldown, parried_recovery_duration if perfect else attack_cooldown_duration * 0.45)
@@ -405,7 +407,8 @@ func _should_guard_player_attack() -> bool:
 
 func _guard_player_attack() -> void:
 	receive_alert()
-	posture = clamp(posture + guard_posture_damage, 0.0, max_posture)
+	var p_damage: float = ceil(max_posture * 0.05)
+	posture = clamp(posture + p_damage, 0.0, max_posture)
 	_mark_combat_pressure()
 	state = EnemyState.DEFLECT
 	deflect_timer = deflect_duration

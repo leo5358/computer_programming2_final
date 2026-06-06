@@ -297,6 +297,8 @@ var posture_visibility_snapshot := 0.0
 var heartbeat_combat_timer := 0.0
 var heartbeat_direct_checkpoint_respawn := false
 var heartbeat_precise: float = CombatMathScript.MIN_HEARTBEAT
+var posture_recovery_pause_timer := 0.0
+var was_stunned_by_damage := false
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var body_collision_shape: CollisionShape2D = $CollisionShape2D
@@ -367,7 +369,7 @@ func _physics_process(delta: float) -> void:
 	_update_movement(delta)
 	_update_action_state(delta)
 	_update_combat(delta)
-	_update_posture_decay(delta)
+	_update_posture_and_heartbeat(delta)
 
 	if attack_buff_timer > 0.0:
 		attack_buff_timer -= delta
@@ -381,6 +383,7 @@ func _physics_process(delta: float) -> void:
 
 func register_posture_contact() -> void:
 	posture_combat_timer = posture_disengage_delay
+	posture_recovery_pause_timer = 1.4
 
 func is_posture_in_combat() -> bool:
 	return posture_combat_timer > 0.0
@@ -389,19 +392,35 @@ func is_posture_bar_visible() -> bool:
 	posture_visibility_snapshot = posture
 	return posture > 0.0
 
+func _update_posture_and_heartbeat(delta: float) -> void:
+	_update_posture_decay(delta)
+	_update_heartbeat(delta)
+
 func _update_posture_decay(delta: float) -> void:
 	var remaining_delta := delta
 	if posture_combat_timer > 0.0:
 		var consumed: float = min(remaining_delta, posture_combat_timer)
 		posture_combat_timer -= consumed
 		remaining_delta -= consumed
-	if state == PlayerState.DEAD or state == PlayerState.STUNNED:
+	
+	posture_recovery_pause_timer = max(0.0, posture_recovery_pause_timer - delta)
+	
+	if state == PlayerState.DEAD or state == PlayerState.STUNNED or posture_recovery_pause_timer > 0.0:
 		return
 	if posture <= 0.0 or remaining_delta <= 0.0:
 		return
 	var health_ratio: float = clamp(health / max(max_health, 0.001), 0.0, 1.0)
 	var recovery_rate := max_posture * posture_recovery_percent_per_second * health_ratio
 	posture = max(0.0, posture - recovery_rate * remaining_delta)
+
+func _update_heartbeat(delta: float) -> void:
+	if heartbeat_combat_timer > 0.0:
+		heartbeat_combat_timer = max(0.0, heartbeat_combat_timer - delta)
+		_add_heartbeat_pressure(heartbeat_combat_rise_per_second * delta)
+		if state == PlayerState.DEAD:
+			return
+	else:
+		_adjust_heartbeat_toward_current_target(delta)
 
 func _update_inputs() -> void:
 	if _try_use_item_hotkey():
@@ -694,6 +713,10 @@ func _update_action_state(delta: float) -> void:
 	elif state == PlayerState.STUNNED:
 		action_timer -= delta
 		if action_timer <= 0.0:
+			if was_stunned_by_damage:
+				if heartbeat > 120:
+					_set_heartbeat_value(120.0)
+			was_stunned_by_damage = false
 			posture = min(posture, max_posture * 0.55)
 			is_invulnerable = false
 			sprite.speed_scale = 1.0
@@ -708,12 +731,8 @@ func _update_combat(delta: float) -> void:
 			_start_block_release()
 
 	if heartbeat_combat_timer > 0.0:
-		heartbeat_combat_timer = max(0.0, heartbeat_combat_timer - delta)
-		_add_heartbeat_pressure(heartbeat_combat_rise_per_second * delta)
 		if state == PlayerState.DEAD:
 			return
-	else:
-		_adjust_heartbeat_toward_current_target(delta)
 
 func _add_heartbeat_pressure(amount: float) -> void:
 	_sync_heartbeat_precision_from_display()
@@ -1263,9 +1282,11 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 		perfect_parry = true
 		if attacker != null and attacker.has_method("can_be_perfect_parried_by"):
 			perfect_parry = attacker.can_be_perfect_parried_by(self)
+	var took_damage_this_hit := false
 	if perfect_parry or (is_parrying and can_guard and can_block) or (is_blocking and can_guard and can_block):
 		var perfect := perfect_parry
-		posture = math.add_posture(posture, 5.0 if perfect else posture_damage * 2.0)
+		var p_gain := 7.0 if perfect else 11.0
+		posture = math.add_posture(posture, p_gain)
 		_add_heartbeat_pressure(heartbeat_guard_gain)
 		if state == PlayerState.DEAD:
 			return
@@ -1287,8 +1308,10 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 			_trigger_block_feedback()
 			_trigger_guard_impact_vfx(attacker)
 	else:
+		var health_before := health
 		health = math.apply_damage(health, damage)
-		posture = math.add_posture(posture, posture_damage * 1.35)
+		took_damage_this_hit = health < health_before
+		posture = math.add_posture(posture, 18.0)
 		if state == PlayerState.DEAD:
 			return
 		if health <= 0.0:
@@ -1306,6 +1329,8 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 
 	if posture >= max_posture:
 		_enter_stunned()
+		if took_damage_this_hit:
+			was_stunned_by_damage = true
 
 	stats_changed.emit()
 	if health <= 0.0:
@@ -1349,6 +1374,7 @@ func _set_state(next_state: int) -> void:
 
 func _enter_stunned(animation_name: StringName = &"posture_knockdown", duration := -1.0, animation_speed := -1.0, keep_posture_at_break := true) -> void:
 	_set_state(PlayerState.STUNNED)
+	was_stunned_by_damage = false
 	stunned_animation = animation_name
 	stunned_animation_speed = posture_break_animation_speed if animation_speed < 0.0 else animation_speed
 	if keep_posture_at_break:
@@ -1770,7 +1796,7 @@ func _receive_attack_deflected() -> void:
 	attack_lunge_timer = 0.0
 	attack_combo_step = 0
 	register_posture_contact()
-	posture = math.add_posture(posture, attack_deflected_posture_damage)
+	posture = math.add_posture(posture, 6.0)
 	_add_heartbeat_pressure(6.0)
 	if state == PlayerState.DEAD:
 		return
