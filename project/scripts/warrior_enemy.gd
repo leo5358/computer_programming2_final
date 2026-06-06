@@ -84,11 +84,11 @@ func _ready() -> void:
 	whiff_cooldown_multiplier = 0.42
 	posture_recovery_pause = 1.25
 	posture_recovery_rate = 12.0
-	perfect_parry_posture_damage = 20.0
-	normal_block_posture_damage = 8.0
+	posture_gain_on_perfect_parried_percent = 6.0
+	posture_gain_on_partial_guarded_percent = 9.0
 	parried_recovery_duration = 1.55
 	guard_chance = 0.5
-	guard_posture_damage = 3.0
+	posture_gain_on_guard_success_percent = 5.0
 	deflect_duration = 0.28
 	guard_lockout_duration = 0.45
 	direct_hit_thrust_lockout_time = 0.72

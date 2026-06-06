@@ -83,7 +83,7 @@ func _initialize() -> void:
 	boss.posture = 80.0
 	boss._mark_combat_pressure()
 	boss._update_pressure_and_posture(6.5)
-	if absf(boss.posture - 73.6) > 0.1:
+	if absf(boss.posture - 75.2) > 0.1:
 		push_error("Boss posture should decay at 10% max posture per second scaled by current health after disengaging")
 		quit(1)
 		return

@@ -69,17 +69,19 @@ enum EnemyState {
 @export_range(0.0, 1.0, 0.01) var posture_recovery_percent_per_second := 0.05
 @export var perfect_parry_input_leeway := 0.16
 @export var is_perilous_attack := false
-@export var perfect_parry_posture_damage := 22.0
-@export var normal_block_posture_damage := 10.0
+@export var posture_gain_on_direct_damage_percent := 15.0
+@export var posture_gain_on_perfect_parried_percent := 6.0
+@export var posture_gain_on_partial_guarded_percent := 9.0
+@export var posture_gain_on_guard_success_percent := 5.0
+@export var posture_break_idle_reset_delay := 6.0
+@export var posture_break_hit_reset_delay := 3.0
 @export var parried_recovery_duration := 1.25
 @export var hit_recoil_force := 120.0
 @export var direct_hit_hurt_time := 0.28
 @export var direct_hit_recoil_force := 210.0
 @export var direct_hit_thrust_lockout_time := 0.65
 @export var parry_recoil_force := 155.0
-@export var dodge_posture_damage := 8.0
 @export_range(0.0, 1.0, 0.05) var guard_chance := 0.0
-@export var guard_posture_damage := 8.0
 @export var deflect_duration := 0.28
 @export var guard_lockout_duration := 0.45
 @export var corpse_lifetime := 5.0
@@ -99,6 +101,8 @@ var target: Node2D
 var is_alerted := false
 var defeated_flag := false
 var posture_broken := false
+var posture_break_reset_timer := 0.0
+var posture_break_took_followup_hit := false
 var attack_elapsed := 0.0
 var attack_cooldown := 0.5
 var attack_has_connected := false
@@ -197,6 +201,10 @@ func _physics_process(delta: float) -> void:
 		velocity.x = 0.0
 	elif posture_broken:
 		velocity.x = 0.0
+		posture_break_reset_timer = max(0.0, posture_break_reset_timer - delta)
+		if posture_break_reset_timer <= 0.0:
+			_reset_enemy_posture_break_state()
+			state = EnemyState.HOLD if is_alerted else EnemyState.PATROL
 	elif state == EnemyState.ATTACK:
 		_update_attack(delta)
 	elif state == EnemyState.DEFLECT:
@@ -240,16 +248,24 @@ func receive_ash_ball_stun(duration: float) -> void:
 func receive_player_attack(damage: float, posture_damage: float) -> Variant:
 	if defeated_flag:
 		return false
+	if posture_broken:
+		health = max(0.0, health - damage)
+		if not posture_break_took_followup_hit:
+			posture_break_took_followup_hit = true
+			posture_break_reset_timer = posture_break_hit_reset_delay
+		if health <= 0.0:
+			_defeat()
+		return true
 	if damage < health and _should_guard_player_attack():
 		_guard_player_attack()
 		return {"guarded": true}
 	_spawn_damage_number(damage)
 	health = max(0.0, health - damage)
-	posture = clamp(posture + posture_damage, 0.0, max_posture)
+	posture = clamp(posture + _enemy_posture_amount_from_percent(posture_gain_on_direct_damage_percent), 0.0, max_posture)
 	_mark_combat_pressure()
 	receive_alert()
 	if posture >= max_posture:
-		_break_posture()
+		_start_enemy_posture_break(posture_break_idle_reset_delay)
 	elif health <= 0.0:
 		_defeat()
 	else:
@@ -269,7 +285,13 @@ func _start_direct_hurt_feedback() -> void:
 func receive_block_feedback(perfect: bool) -> void:
 	if defeated_flag:
 		return
-	posture = clamp(posture + (perfect_parry_posture_damage if perfect else normal_block_posture_damage), 0.0, max_posture)
+	posture = clamp(
+		posture + _enemy_posture_amount_from_percent(
+			posture_gain_on_perfect_parried_percent if perfect else posture_gain_on_partial_guarded_percent
+		),
+		0.0,
+		max_posture
+	)
 	_mark_combat_pressure()
 	_interrupt_attack()
 	attack_cooldown = max(attack_cooldown, parried_recovery_duration if perfect else attack_cooldown_duration * 0.45)
@@ -278,7 +300,7 @@ func receive_block_feedback(perfect: bool) -> void:
 	hit_recoil_timer = 0.16 if perfect else 0.08
 	velocity.x = -facing * (parry_recoil_force if perfect else hit_recoil_force * 0.5)
 	if posture >= max_posture:
-		_break_posture()
+		_start_enemy_posture_break(posture_break_idle_reset_delay)
 
 func can_be_perfect_dodged_by(player: Node2D) -> bool:
 	if defeated_flag or posture_broken or player == null:
@@ -292,7 +314,7 @@ func can_be_perfect_dodged_by(player: Node2D) -> bool:
 func receive_dodge_feedback() -> void:
 	if defeated_flag:
 		return
-	posture = clamp(posture + dodge_posture_damage, 0.0, max_posture)
+	posture = clamp(posture + _enemy_posture_amount_from_percent(posture_gain_on_perfect_parried_percent), 0.0, max_posture)
 	_mark_combat_pressure()
 	_interrupt_attack()
 	dodge_spark_timer = 0.18
@@ -301,7 +323,7 @@ func receive_dodge_feedback() -> void:
 	hit_recoil_timer = 0.12
 	velocity.x = -facing * hit_recoil_force
 	if posture >= max_posture:
-		_break_posture()
+		_start_enemy_posture_break(posture_break_idle_reset_delay)
 
 func can_be_executed() -> bool:
 	return posture_broken and not defeated_flag
@@ -326,6 +348,8 @@ func reset_combat_state() -> void:
 	is_alerted = false
 	defeated_flag = false
 	posture_broken = false
+	posture_break_reset_timer = 0.0
+	posture_break_took_followup_hit = false
 	attack_elapsed = 0.0
 	attack_cooldown = 0.5
 	attack_has_connected = false
@@ -405,7 +429,7 @@ func _should_guard_player_attack() -> bool:
 
 func _guard_player_attack() -> void:
 	receive_alert()
-	posture = clamp(posture + guard_posture_damage, 0.0, max_posture)
+	posture = clamp(posture + _enemy_posture_amount_from_percent(posture_gain_on_guard_success_percent), 0.0, max_posture)
 	_mark_combat_pressure()
 	state = EnemyState.DEFLECT
 	deflect_timer = deflect_duration
@@ -420,7 +444,7 @@ func _guard_player_attack() -> void:
 	velocity.x = -facing * hit_recoil_force * 0.45
 	_set_attack_visual(false, false)
 	if posture >= max_posture:
-		_break_posture()
+		_start_enemy_posture_break(posture_break_idle_reset_delay)
 
 func _update_deflect(delta: float) -> void:
 	velocity.x = 0.0
@@ -580,7 +604,7 @@ func is_posture_in_combat() -> bool:
 
 func is_posture_bar_visible() -> bool:
 	posture_visibility_snapshot = posture
-	return posture > 0.0
+	return posture > 0.0 or posture_broken
 
 func _update_pressure_and_posture(delta: float) -> void:
 	var remaining_delta := delta
@@ -597,6 +621,27 @@ func _update_pressure_and_posture(delta: float) -> void:
 	var recovery_rate := max_posture * posture_recovery_percent_per_second * health_ratio
 	posture = max(0.0, posture - recovery_rate * remaining_delta)
 
+func _enemy_posture_amount_from_percent(percent: float) -> float:
+	return ceil(max_posture * (percent / 100.0))
+
+func _reset_enemy_posture_break_state() -> void:
+	posture = 0.0
+	posture_broken = false
+	posture_break_reset_timer = 0.0
+	posture_break_took_followup_hit = false
+	if execute_label != null:
+		execute_label.visible = false
+
+func _start_enemy_posture_break(reset_delay: float) -> void:
+	posture = max_posture
+	posture_broken = true
+	posture_break_reset_timer = reset_delay
+	posture_break_took_followup_hit = false
+	state = EnemyState.POSTURE_BROKEN
+	_interrupt_attack()
+	if execute_label != null:
+		execute_label.visible = true
+
 func _set_attack_visual(show_visual: bool, active: bool) -> void:
 	if attack_visual != null:
 		attack_visual.visible = show_visual
@@ -605,11 +650,7 @@ func _set_attack_visual(show_visual: bool, active: bool) -> void:
 		warning_label.visible = show_visual and is_perilous_attack
 
 func _break_posture() -> void:
-	posture_broken = true
-	state = EnemyState.POSTURE_BROKEN
-	_interrupt_attack()
-	if execute_label != null:
-		execute_label.visible = true
+	_start_enemy_posture_break(posture_break_idle_reset_delay)
 
 func _defeat() -> void:
 	defeated_flag = true
