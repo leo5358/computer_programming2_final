@@ -146,14 +146,14 @@ enum PlayerState {
 @export var wall_climb_requires_jump := true
 @export var jump_to_ledge_climb_lockout := 0.28
 @export var world_boundary_climb_margin := 24.0
-@export var max_health := 100.0
+@export var max_health := 120.0
 @export var max_posture := 100.0
 @export var posture_disengage_delay := 6.0
 @export_range(0.0, 1.0, 0.01) var posture_recovery_percent_per_second := 0.08
 @export var max_lives := 3
 @export var world_death_bounds_enabled := true
 @export var world_death_bounds := Rect2(-1024.0, -2048.0, 22000.0, 4096.0)
-@export var base_attack_damage := 16.0
+@export var base_attack_damage := 13.0
 @export var attack_posture_damage := 18.0
 @export var block_posture_damage := 14.0
 @export var perfect_block_posture_damage := 36.0

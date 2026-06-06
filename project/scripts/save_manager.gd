@@ -7,7 +7,7 @@ var current_save_data := {}
 func _ready() -> void:
 	load_game()
 
-func save_game(map_id: String, position: Vector2, health: float = 100.0) -> void:
+func save_game(map_id: String, position: Vector2, health: float = 120.0) -> void:
 	current_save_data = {
 		"map_id": map_id,
 		"pos_x": position.x,
@@ -59,7 +59,7 @@ func get_saved_position() -> Vector2:
 	)
 
 func get_saved_health() -> float:
-	return current_save_data.get("health", 100.0)
+	return current_save_data.get("health", 120.0)
 
 func delete_save() -> void:
 	current_save_data = {}

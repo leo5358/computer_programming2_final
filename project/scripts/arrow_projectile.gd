@@ -3,7 +3,7 @@ extends CharacterBody2D
 const CombatServerScript = preload("res://scripts/combat_server.gd")
 
 @export var speed := 420.0
-@export var damage := 12.0
+@export var damage := 23.0
 @export var posture_damage := 14.0
 @export var lifetime := 2.2
 

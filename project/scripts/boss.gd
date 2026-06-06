@@ -37,7 +37,7 @@ const ATTACK_PROFILES_BOSS := {
 		"cue_start": 0.62,
 		"hit_start": 0.78,
 		"hit_end": 0.88,
-		"damage": 18.0,
+		"damage": 45.0,
 		"posture_damage": 28.0,
 		"attack_type": 0, # NORMAL
 		"perilous": false,
@@ -47,7 +47,7 @@ const ATTACK_PROFILES_BOSS := {
 		"cue_start": 1.32,
 		"hit_start": 1.54,
 		"hit_end": 1.665,
-		"damage": 28.0,
+		"damage": 45.0,
 		"posture_damage": 42.0,
 		"attack_type": 0, # NORMAL
 		"perilous": false,
@@ -57,7 +57,7 @@ const ATTACK_PROFILES_BOSS := {
 		"cue_start": 0.42,
 		"hit_start": 0.82,
 		"hit_end": 0.98,
-		"damage": 24.0,
+		"damage": 45.0,
 		"posture_damage": 36.0,
 		"attack_type": 1, # THRUST
 		"perilous": true,
@@ -469,13 +469,13 @@ func _ready() -> void:
 	_update_overhead_bars()
 	
 	display_name = "Corrupted Guardian"
-	max_health = 140.0
+	max_health = 400.0
 	max_posture = 160.0
 	patrol_speed = 58.0
 	patrol_distance = 120.0
 	chase_speed = 86.0
 	attack_range = 142.0
-	attack_damage = 18.0
+	attack_damage = 45.0
 	attack_posture_damage = 28.0
 	attack_cooldown_duration = 1.38
 	posture_recovery_pause = 1.6
