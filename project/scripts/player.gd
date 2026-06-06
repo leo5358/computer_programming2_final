@@ -134,7 +134,7 @@ enum PlayerState {
 @export var combat_backpedal_speed_multiplier := 0.55
 @export var combat_backpedal_run_multiplier := 0.45
 @export var dash_impulse := 560.0
-@export var jump_velocity := -430.0
+@export var jump_velocity := -559.0
 @export var coyote_time := 0.1
 @export var wall_climb_speed := 130.0
 @export var wall_slide_speed := 80.0
