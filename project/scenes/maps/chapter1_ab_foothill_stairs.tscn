@@ -35,6 +35,7 @@
 [ext_resource type="Texture2D" uid="uid://dp4ool7c17xme" path="res://assets/maps/chapter1/props/lantern.png" id="33_lqjsx"]
 [ext_resource type="Script" uid="uid://dauwr7kxq7rjl" path="res://scripts/camera_shake.gd" id="36_camera_shake"]
 [ext_resource type="PackedScene" path="res://scenes/Checkpoint.tscn" id="checkpoint_scene"]
+[ext_resource type="Script" path="res://scripts/enemy_spawn_point.gd" id="enemy_spawn_point_script"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ih6mn"]
 texture = ExtResource("20_6f4q3")
@@ -350,6 +351,53 @@ position = Vector2(8563, 96)
 position = Vector2(13751, 83)
 
 [node name="EnemySpawns" type="Node2D" parent="."]
+
+[node name="FoothillWarrior01" type="Node2D" parent="EnemySpawns"]
+position = Vector2(2197, 475.5)
+script = ExtResource("enemy_spawn_point_script")
+
+[node name="FoothillArcher01" type="Node2D" parent="EnemySpawns"]
+position = Vector2(3798, 79.9)
+script = ExtResource("enemy_spawn_point_script")
+enemy_type = "archer"
+
+[node name="FoothillArcher02" type="Node2D" parent="EnemySpawns"]
+position = Vector2(6548, 273.4)
+script = ExtResource("enemy_spawn_point_script")
+enemy_type = "archer"
+
+[node name="FoothillTorchman02" type="Node2D" parent="EnemySpawns"]
+position = Vector2(5687.1, 499.4)
+script = ExtResource("enemy_spawn_point_script")
+enemy_type = "torchman"
+
+[node name="FoothillTorchman03" type="Node2D" parent="EnemySpawns"]
+position = Vector2(4829.4, 491.4)
+script = ExtResource("enemy_spawn_point_script")
+enemy_type = "torchman"
+
+[node name="FoothillWarrior02" type="Node2D" parent="EnemySpawns"]
+position = Vector2(8083, 627.7)
+script = ExtResource("enemy_spawn_point_script")
+
+[node name="FoothillArcher03" type="Node2D" parent="EnemySpawns"]
+position = Vector2(12581, 262.7)
+script = ExtResource("enemy_spawn_point_script")
+enemy_type = "archer"
+
+[node name="FoothillTorchman01" type="Node2D" parent="EnemySpawns"]
+position = Vector2(11808, 262.7)
+script = ExtResource("enemy_spawn_point_script")
+enemy_type = "torchman"
+
+[node name="FoothillWarrior03" type="Node2D" parent="EnemySpawns"]
+position = Vector2(15004, -119.3)
+script = ExtResource("enemy_spawn_point_script")
+
+[node name="FoothillArcher04" type="Node2D" parent="EnemySpawns"]
+position = Vector2(10236, -240.4)
+script = ExtResource("enemy_spawn_point_script")
+enemy_type = "archer"
 
 [node name="BackgroundFar" type="Node2D" parent="." unique_id=257268548]
 
