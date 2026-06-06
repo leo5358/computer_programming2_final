@@ -2,7 +2,7 @@ extends "res://scripts/enemy_base.gd"
 
 const ARROW_SCENE: PackedScene = preload("res://scenes/Arrow.tscn")
 
-@export var arrow_spawn_offset := Vector2(52.0, -46.0)
+@export var arrow_spawn_offset := Vector2(91.0, -90)
 
 func _ready() -> void:
 	display_name = "Archer"
