@@ -22,27 +22,6 @@ size = Vector2(140, 1165.75)
 
 [node name="EnemySpawns" type="Node2D" parent="."]
 
-[node name="TorchmanEntryScout" type="Node2D" parent="EnemySpawns"]
-position = Vector2(330, 530.5)
-script = ExtResource("enemy_spawn_point_script")
-enemy_type = "torchman"
-facing = -1.0
-spawn_group_id = "plaza_entry_combo"
-
-[node name="WarriorEntryGuard" type="Node2D" parent="EnemySpawns"]
-position = Vector2(680, 530.5)
-script = ExtResource("enemy_spawn_point_script")
-enemy_type = "warrior"
-facing = -1.0
-spawn_group_id = "plaza_entry_combo"
-
-[node name="ArcherEntryRear" type="Node2D" parent="EnemySpawns"]
-position = Vector2(740, 530.5)
-script = ExtResource("enemy_spawn_point_script")
-enemy_type = "archer"
-facing = -1.0
-spawn_group_id = "plaza_entry_combo"
-
 [node name="BackgroundFar" type="Node2D" parent="." unique_id=1049019642]
 
 [node name="NightSky" type="Polygon2D" parent="BackgroundFar" unique_id=839787389]
