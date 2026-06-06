@@ -56,8 +56,10 @@ const EAT_ITEM_IDS := {
 	"capsule": true,
 }
 const GOURD_HEAL_PERCENT := 0.30
-const ADRENALINE_HEARTBEAT_BOOST := 25.0
-const BLOOD_PRESSURE_HEARTBEAT_DROP := 25.0
+const PILL_HEARTBEAT_RISE_MULTIPLIER := 0.60
+const PILL_EFFECT_DURATION := 20.0
+const CAPSULE_HEARTBEAT_RISE_MULTIPLIER := 1.20
+const CAPSULE_EFFECT_DURATION := 15.0
 const SMOKE_BOMB_BOSS_PAUSE_TIME := 2.5
 const SMOKE_BOMB_MINOR_STUN_TIME := 1.25
 const PLAYER_STRIP_FRAME_REGIONS := {
@@ -300,6 +302,8 @@ var heartbeat_combat_timer := 0.0
 var heartbeat_cooldown_delay_timer := 0.0
 var heartbeat_direct_checkpoint_respawn := false
 var heartbeat_precise: float = CombatMathScript.MIN_HEARTBEAT
+var heartbeat_modifier_item_id := ""
+var heartbeat_modifier_time_left := 0.0
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var body_collision_shape: CollisionShape2D = $CollisionShape2D
@@ -717,10 +721,11 @@ func _update_combat(delta: float) -> void:
 			return
 	else:
 		_adjust_heartbeat_toward_current_target(delta)
+	_update_heartbeat_modifier(delta)
 
 func _add_heartbeat_pressure(amount: float) -> void:
 	_sync_heartbeat_precision_from_display()
-	_set_heartbeat_value(math.add_heartbeat(heartbeat_precise, amount))
+	_set_heartbeat_value(math.add_heartbeat(heartbeat_precise, _apply_heartbeat_rise_modifier(amount)))
 	_check_heartbeat_death()
 
 func _check_heartbeat_death() -> bool:
@@ -745,6 +750,7 @@ func _adjust_heartbeat_toward_current_target(delta: float) -> void:
 	if heartbeat_precise < target_heartbeat:
 		heartbeat_cooldown_delay_timer = 0.0
 		var rise_amount: float = target_heartbeat * _current_heartbeat_rise_percent_per_second() * delta
+		rise_amount = _apply_heartbeat_rise_modifier(rise_amount)
 		_set_heartbeat_value(min(target_heartbeat, heartbeat_precise + rise_amount))
 		return
 	if heartbeat_cooldown_delay_timer < heartbeat_cooldown_delay:
@@ -771,6 +777,41 @@ func _current_heartbeat_rise_percent_per_second() -> float:
 func _mark_heartbeat_combat_activity() -> void:
 	heartbeat_combat_timer = heartbeat_combat_linger_time
 	heartbeat_cooldown_delay_timer = 0.0
+
+func _update_heartbeat_modifier(delta: float) -> void:
+	if heartbeat_modifier_time_left <= 0.0:
+		return
+	heartbeat_modifier_time_left = max(0.0, heartbeat_modifier_time_left - delta)
+	if heartbeat_modifier_time_left <= 0.0:
+		_clear_heartbeat_modifier()
+
+func _apply_heartbeat_rise_modifier(amount: float) -> float:
+	if amount <= 0.0:
+		return amount
+	return amount * _current_heartbeat_rise_multiplier()
+
+func _current_heartbeat_rise_multiplier() -> float:
+	match heartbeat_modifier_item_id:
+		"pill":
+			return PILL_HEARTBEAT_RISE_MULTIPLIER
+		"capsule":
+			return CAPSULE_HEARTBEAT_RISE_MULTIPLIER
+	return 1.0
+
+func _apply_heartbeat_modifier_item(item_id: String) -> void:
+	match item_id:
+		"pill":
+			heartbeat_modifier_item_id = item_id
+			heartbeat_modifier_time_left = PILL_EFFECT_DURATION
+		"capsule":
+			heartbeat_modifier_item_id = item_id
+			heartbeat_modifier_time_left = CAPSULE_EFFECT_DURATION
+		_:
+			_clear_heartbeat_modifier()
+
+func _clear_heartbeat_modifier() -> void:
+	heartbeat_modifier_item_id = ""
+	heartbeat_modifier_time_left = 0.0
 
 func _set_heartbeat_value(value: float) -> void:
 	heartbeat_precise = clamp(value, CombatMathScript.MIN_HEARTBEAT, CombatMathScript.MAX_HEARTBEAT)
@@ -962,9 +1003,9 @@ func _apply_consumable_effect(item_id: String) -> void:
 		"gourd":
 			health = min(max_health, health + max_health * GOURD_HEAL_PERCENT)
 		"pill":
-			_set_heartbeat_value(max(CombatMathScript.MIN_HEARTBEAT, heartbeat_precise - BLOOD_PRESSURE_HEARTBEAT_DROP))
+			_apply_heartbeat_modifier_item(item_id)
 		"capsule":
-			_add_heartbeat_pressure(ADRENALINE_HEARTBEAT_BOOST)
+			_apply_heartbeat_modifier_item(item_id)
 
 func _use_kunai() -> bool:
 	if not _can_start_action():
@@ -1066,6 +1107,7 @@ func settle_world_interaction(anchor_position: Vector2, refill_items: bool = fal
 		_set_heartbeat_value(CombatMathScript.MIN_HEARTBEAT)
 		heartbeat_combat_timer = 0.0
 		heartbeat_cooldown_delay_timer = 0.0
+		_clear_heartbeat_modifier()
 	global_position = anchor_position
 	_set_state(PlayerState.IDLE)
 	_update_visuals()
@@ -1954,6 +1996,7 @@ func reset_combat_state() -> void:
 	heartbeat_combat_timer = 0.0
 	heartbeat_cooldown_delay_timer = 0.0
 	heartbeat_direct_checkpoint_respawn = false
+	_clear_heartbeat_modifier()
 	state = PlayerState.IDLE
 	previous_state = PlayerState.IDLE
 	is_blocking = false
