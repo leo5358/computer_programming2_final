@@ -26,10 +26,15 @@ var sample_index := 0
 var is_suppressed := false
 var follow_target: Node2D = null
 var smoothed_lookahead_x := 0.0
+var cutscene_override_active := false
+var cutscene_focus_position := Vector2.ZERO
+var cutscene_focus_zoom := Vector2.ONE
+var pre_cutscene_zoom := Vector2.ONE
 
 func _ready() -> void:
 	add_to_group("feedback_camera")
 	base_offset = offset
+	pre_cutscene_zoom = zoom
 	if not follow_target_path.is_empty():
 		var target_node: Node = get_node_or_null(follow_target_path)
 		if target_node is Node2D:
@@ -61,7 +66,33 @@ func shake(amount: float, duration: float) -> void:
 	amplitude = max(amplitude, amount)
 	shake_time = max(shake_time, duration)
 
+func begin_cutscene_override(focus_position: Vector2, focus_zoom: Vector2) -> void:
+	cutscene_override_active = true
+	cutscene_focus_position = focus_position
+	cutscene_focus_zoom = focus_zoom
+	pre_cutscene_zoom = zoom
+	global_position = focus_position
+	zoom = focus_zoom
+
+func set_cutscene_focus(focus_position: Vector2, focus_zoom: Vector2) -> void:
+	cutscene_focus_position = focus_position
+	cutscene_focus_zoom = focus_zoom
+	if cutscene_override_active:
+		global_position = focus_position
+		zoom = focus_zoom
+
+func end_cutscene_override() -> void:
+	cutscene_override_active = false
+	zoom = pre_cutscene_zoom
+
+func is_cutscene_override_active() -> bool:
+	return cutscene_override_active
+
 func _update_follow(delta: float) -> void:
+	if cutscene_override_active:
+		global_position = cutscene_focus_position
+		zoom = cutscene_focus_zoom
+		return
 	if follow_target == null:
 		return
 

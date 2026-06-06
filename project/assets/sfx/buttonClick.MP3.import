@@ -2,13 +2,13 @@
 
 importer="mp3"
 type="AudioStreamMP3"
-uid="uid://3d1tqqu26lwy"
-path="res://.godot/imported/buttonClick.MP3-b57a209fde20d0697982b37b2446aca2.mp3str"
+uid="uid://7rvydi3a8c75"
+path="res://.godot/imported/ButtonClick.MP3-bd44a44264db417b22ea0fa750ceb84e.mp3str"
 
 [deps]
 
-source_file="res://assets/sfx/buttonClick.MP3"
-dest_files=["res://.godot/imported/buttonClick.MP3-b57a209fde20d0697982b37b2446aca2.mp3str"]
+source_file="res://assets/sfx/ButtonClick.MP3"
+dest_files=["res://.godot/imported/ButtonClick.MP3-bd44a44264db417b22ea0fa750ceb84e.mp3str"]
 
 [params]
 

@@ -1129,6 +1129,13 @@ func _apply_attack_hit() -> void:
 	var was_deflected := false
 	for body in attack_area.get_overlapping_bodies():
 		if body.has_method("can_be_executed") and body.can_be_executed() and body.has_method("execute"):
+			if body.is_in_group("boss") and body.has_method("receive_player_attack"):
+				var boss_result: Variant = body.receive_player_attack(damage, posture_damage)
+				if not (boss_result is bool and boss_result == false):
+					hit_confirmed = true
+					if boss_result is Dictionary and bool(boss_result.get("guarded", false)):
+						was_deflected = true
+				continue
 			body.execute()
 			hit_confirmed = true
 			continue
