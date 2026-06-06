@@ -11,6 +11,7 @@
 [ext_resource type="Script" uid="uid://4r5sqpspbi1" path="res://scripts/combat_autopilot.gd" id="12_autopilot"]
 [ext_resource type="Script" uid="uid://br8ww2sjvclqu" path="res://scripts/item_ui.gd" id="13_item_ui"]
 [ext_resource type="Script" path="res://scripts/death_overlay.gd" id="14_death_overlay"]
+[ext_resource type="Script" path="res://scripts/revive_overlay.gd" id="20_revive_overlay"]
 [ext_resource type="Script" uid="uid://df53ccqrr0fiv" path="res://scripts/player_posture_hud.gd" id="15_posture_hud"]
 [ext_resource type="Script" path="res://scripts/player_vitals_hud.gd" id="16_vitals_hud"]
 [ext_resource type="Script" path="res://scripts/boss_hud.gd" id="17_boss_hud"]
@@ -90,6 +91,9 @@ script = ExtResource("17_boss_hud")
 
 [node name="DeathOverlay" type="CanvasLayer" parent="." unique_id=1820423079]
 script = ExtResource("14_death_overlay")
+
+[node name="ReviveOverlay" type="CanvasLayer" parent="."]
+script = ExtResource("20_revive_overlay")
 
 [node name="PauseOverlay" type="CanvasLayer" parent="."]
 script = ExtResource("18_pause_overlay")

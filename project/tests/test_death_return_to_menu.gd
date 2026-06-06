@@ -52,6 +52,7 @@ func _initialize() -> void:
 		push_error("Main should expose debug kill for death overlay flow")
 		quit(1)
 		return
+	player.set("lives", 1)
 	main._debug_kill_player()
 	await process_frame
 	if not bool(death_overlay.get("is_active")):

@@ -172,6 +172,7 @@ func _initialize() -> void:
 
 	var pause_overlay: CanvasLayer = main.get_node_or_null("PauseOverlay")
 	var death_overlay: CanvasLayer = main.get_node_or_null("DeathOverlay")
+	var revive_overlay: CanvasLayer = main.get_node_or_null("ReviveOverlay")
 	if pause_overlay == null:
 		push_error("Main should include PauseOverlay for ESC pause")
 		quit(1)
@@ -180,6 +181,12 @@ func _initialize() -> void:
 		push_error("Main should include DeathOverlay for checkpoint death flow checks")
 		quit(1)
 		return
+	if revive_overlay == null:
+		push_error("Main should include ReviveOverlay for mid-death revive decisions")
+		quit(1)
+		return
+	revive_overlay.set("fade_duration", 0.01)
+	revive_overlay.set("countdown_duration", 0.2)
 	if not main.has_method("_open_pause_menu") or not main.has_method("_resume_from_pause"):
 		push_error("Main should expose pause menu open and resume flow")
 		quit(1)
@@ -272,8 +279,50 @@ func _initialize() -> void:
 		push_error("Debug player death should force HP to zero")
 		quit(1)
 		return
+	await create_timer(1.15).timeout
+	await process_frame
+	if revive_overlay == null or not revive_overlay.visible:
+		push_error("Player death with extra lives should show the revive overlay after the death animation")
+		quit(1)
+		return
+	if death_overlay.visible:
+		push_error("Player death with extra lives should not show the final death overlay")
+		quit(1)
+		return
+	var death_position := (player as Node2D).global_position
+	revive_overlay.confirm_selection()
+	await process_frame
+	if revive_overlay.visible:
+		push_error("Confirming revive should hide the revive overlay")
+		quit(1)
+		return
+	if float(player.get("health")) != float(player.get("max_health")):
+		push_error("Confirming revive should refill player health")
+		quit(1)
+		return
+	if int(player.get("lives")) != int(player.get("max_lives")) - 1:
+		push_error("Confirming revive should consume one revive life")
+		quit(1)
+		return
+	if int(player.get("heartbeat")) != 70:
+		push_error("Confirming revive should reset heartbeat to 70")
+		quit(1)
+		return
+	if (player as Node2D).global_position.distance_to(death_position) > 1.0:
+		push_error("Confirming revive should keep the player at the defeat position")
+		quit(1)
+		return
+
+	player.set("lives", 1)
+	player.set("health", player.get("max_health"))
+	main._debug_kill_player()
+	await process_frame
 	if death_overlay == null or not death_overlay.visible:
-		push_error("Player death should show the death overlay")
+		push_error("Player death on the last life should show the final death overlay")
+		quit(1)
+		return
+	if revive_overlay.visible:
+		push_error("Player death on the last life should not show the revive overlay")
 		quit(1)
 		return
 	var bgm: AudioStreamPlayer = main.get_node_or_null("BgmPlayer")
