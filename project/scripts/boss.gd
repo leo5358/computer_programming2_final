@@ -224,8 +224,8 @@ const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 
 # --- Boss Parameters ---
 @export var posture_gain_on_direct_damage_boss := 11.0
-@export var leash_range_boss := 420.0
-@export var detection_range_boss := 340.0
+@export var leash_range_boss := 900.0
+@export var detection_range_boss := 900.0
 @export var attack_start_distance_boss := 112.0
 @export var attack_hold_distance_boss := 78.0
 @export var close_spacing_distance_boss := 58.0
