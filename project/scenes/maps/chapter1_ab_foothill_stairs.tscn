@@ -36,7 +36,7 @@
 [ext_resource type="Script" uid="uid://dauwr7kxq7rjl" path="res://scripts/camera_shake.gd" id="36_camera_shake"]
 [ext_resource type="PackedScene" path="res://scenes/Checkpoint.tscn" id="checkpoint_scene"]
 [ext_resource type="Script" uid="uid://cpcc1qiklukr2" path="res://scripts/enemy_spawn_point.gd" id="enemy_spawn_point_script"]
-[ext_resource type="PackedScene" uid="uid://lyh0gtdp8yqp" path="res://scenes/MapItemPickup.tscn" id="map_item_pickup_scene"]
+[ext_resource type="PackedScene" path="res://scenes/MapItemPickup.tscn" id="map_item_pickup_scene"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ih6mn"]
 texture = ExtResource("20_6f4q3")

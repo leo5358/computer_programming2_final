@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://lyh0gtdp8yqp"]
 
-[ext_resource type="Script" uid="uid://craum50ij1drd" path="res://scripts/map_item_pickup.gd" id="1_map_item_pickup"]
+[ext_resource type="Script" path="res://scripts/map_item_pickup.gd" id="1_map_item_pickup"]
 [ext_resource type="Texture2D" uid="uid://ch0uemq0liddf" path="res://assets/items/bag/bag.png" id="2_bag"]
 
 [node name="MapItemPickup" type="Node2D" unique_id=249895282]

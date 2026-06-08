@@ -16,7 +16,7 @@
 [ext_resource type="Script" uid="uid://b3k6oyodjbf6s" path="res://scripts/boss_hud.gd" id="17_boss_hud"]
 [ext_resource type="Script" uid="uid://bmt4xgaj2jbij" path="res://scripts/pause_overlay.gd" id="18_pause_overlay"]
 [ext_resource type="Script" uid="uid://d3n0ks83a88x8" path="res://scripts/heartbeat_feedback.gd" id="19_heartbeat_feedback"]
-[ext_resource type="Script" uid="uid://bmy2uj5gufbk2" path="res://scripts/revive_overlay.gd" id="20_revive_overlay"]
+[ext_resource type="Script" path="res://scripts/revive_overlay.gd" id="20_revive_overlay"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(1762, 48)

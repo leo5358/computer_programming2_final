@@ -11,7 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://dmpimxksau067" path="res://assets/maps/chapter1/props/shimenawa_curtain.png" id="9_hh8eg"]
 [ext_resource type="Script" uid="uid://dauwr7kxq7rjl" path="res://scripts/camera_shake.gd" id="10_camera_shake"]
 [ext_resource type="PackedScene" path="res://scenes/Checkpoint.tscn" id="checkpoint_scene"]
-[ext_resource type="PackedScene" uid="uid://lyh0gtdp8yqp" path="res://scenes/MapItemPickup.tscn" id="map_item_pickup_scene"]
+[ext_resource type="PackedScene" path="res://scenes/MapItemPickup.tscn" id="map_item_pickup_scene"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yblr1"]
 size = Vector2(3066.5, 249.5)
