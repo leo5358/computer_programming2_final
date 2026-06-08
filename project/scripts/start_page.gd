@@ -33,6 +33,8 @@ var button_click_sfx: AudioStreamPlayer
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	get_tree().paused = false
 	for node_name in MENU_NODE_NAMES:
 		_menu_nodes.append(get_node(NodePath(node_name)) as Sprite2D)
 

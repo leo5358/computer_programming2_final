@@ -223,6 +223,7 @@ func _save_and_return_to_start_page() -> void:
 func _finish_save_and_return_to_start_page() -> void:
 	clear_test_enemies()
 	_set_player_transition_locked(false)
+	get_tree().paused = false
 	get_tree().change_scene_to_file(START_PAGE_SCENE_PATH)
 
 func _save_current_checkpoint_progress() -> void:
@@ -296,6 +297,7 @@ func _return_to_start_page() -> void:
 		var sm = get_node("/root/SaveManager")
 		if sm.has_method("delete_save"):
 			sm.delete_save()
+	get_tree().paused = false
 	get_tree().change_scene_to_file(START_PAGE_SCENE_PATH)
 
 func _get_respawn_snapshot() -> Dictionary:
