@@ -4,8 +4,8 @@ const HEARTBEAT_SFX_PATH := "res://assets/sfx/heartbeat.MP3"
 
 @export var min_heartbeat: float = 70.0
 @export var max_heartbeat: float = 250.0
-@export var visual_start_heartbeat: float = 115.0
-@export var audio_start_heartbeat: float = 105.0
+@export var visual_start_heartbeat: float = 135.0
+@export var audio_start_heartbeat: float = 135.0
 @export var edge_thickness: float = 90.0
 @export var max_edge_alpha: float = 0.42
 @export var min_volume_db: float = -24.0
