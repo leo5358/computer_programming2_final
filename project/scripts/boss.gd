@@ -776,8 +776,7 @@ func _guard_player_attack_boss_internal() -> void:
 	hit_flash_timer = 0.08
 	velocity.x = -facing * hit_recoil_force * 0.45
 	if hit_spark != null:
-		hit_spark.position.x = 18.0 * facing
-		hit_spark.visible = true
+		hit_spark.visible = false
 	if posture >= max_posture:
 		_start_boss_posture_break(posture_break_idle_reset_delay_boss)
 	stats_changed.emit()
@@ -912,7 +911,7 @@ func _start_boss_posture_break(reset_delay: float) -> void:
 	if debug_response_label_node != null:
 		debug_response_label_node.visible = false
 	if hit_spark != null:
-		hit_spark.visible = true
+		hit_spark.visible = false
 	hit_spark_timer = max(hit_spark_timer, hit_spark_time_boss)
 	_force_play_boss_animation("deflect2" if deflect_toggle_boss else "deflect1")
 	stats_changed.emit()
@@ -1328,9 +1327,10 @@ func _update_attack_visual_boss_internal(show_visual: bool, active: bool) -> voi
 	if attack_visual == null:
 		return
 	_update_attack_hitbox_boss_internal()
-	attack_visual.visible = show_visual and (active or is_attack_parry_window_open())
-	_update_perilous_warning_boss_internal(show_visual and is_attack_parry_window_open())
-	if not show_visual:
+	var effective_show := show_visual and GameSettings.is_easy_mode
+	attack_visual.visible = effective_show and (active or is_attack_parry_window_open())
+	_update_perilous_warning_boss_internal(effective_show and is_attack_parry_window_open())
+	if not effective_show:
 		return
 	var rect_shape := attack_collision_shape.shape as RectangleShape2D if attack_collision_shape != null else null
 	if rect_shape != null and attack_area != null:
@@ -1341,6 +1341,7 @@ func _update_attack_visual_boss_internal(show_visual: bool, active: bool) -> voi
 		attack_visual.color = Color(1.0, 0.08, 0.05, 0.68) if active else Color(1.0, 0.12, 0.05, 0.50)
 	else:
 		attack_visual.color = Color(1.0, 0.22, 0.08, 0.62) if active else Color(1.0, 0.86, 0.08, 0.48)
+
 
 func _update_perilous_warning_boss_internal(show_warning: bool) -> void:
 	var show := show_warning and is_current_attack_perilous()
@@ -1421,8 +1422,7 @@ func _start_chop_parried_recovery_boss_internal() -> void:
 	hit_spark_timer = max(hit_spark_timer, hit_spark_time_boss)
 	hit_flash_timer = max(hit_flash_timer, hit_flash_time_boss)
 	if hit_spark != null:
-		hit_spark.position.x = 18.0 * facing
-		hit_spark.visible = true
+		hit_spark.visible = false
 	_shake_camera_boss_internal(chop_parry_camera_shake_boss, chop_parry_hitstop_time_boss)
 
 func _chop_recovery_start_time_boss_internal() -> float:
@@ -1448,8 +1448,7 @@ func _trigger_hit_feedback_boss_internal() -> void:
 	var recoil_velocity := Vector2(-facing * hit_recoil_force, velocity.y)
 	velocity = recoil_velocity
 	if hit_spark != null:
-		hit_spark.position.x = 18.0 * facing
-		hit_spark.visible = true
+		hit_spark.visible = false
 	_begin_local_hitstop(hit_freeze_time_boss)
 	stored_velocity_boss = recoil_velocity
 	velocity = recoil_velocity
@@ -1463,7 +1462,7 @@ func _update_hit_feedback_boss_internal(delta: float) -> void:
 	hit_flash_timer = max(0.0, hit_flash_timer - delta)
 	_update_hit_flicker(delta)
 	if hit_spark != null:
-		hit_spark.visible = hit_spark_timer > 0.0
+		hit_spark.visible = false
 	if sprite != null:
 		sprite.modulate = _hit_feedback_modulate(Color(1.75, 1.75, 1.28, 1.0))
 

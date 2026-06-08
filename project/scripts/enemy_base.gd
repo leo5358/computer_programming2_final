@@ -279,7 +279,14 @@ func receive_block_feedback(perfect: bool) -> void:
 	var p_damage: float = ceil(max_posture * (0.06 if perfect else 0.09))
 	posture = clamp(posture + p_damage, 0.0, max_posture)
 	_mark_combat_pressure()
-	_interrupt_attack()
+	# If parried while still in windup or active phase, skip to recovery so the
+	# warrior still plays the tail-end of the animation instead of snapping to idle.
+	if state == EnemyState.ATTACK and attack_elapsed < current_attack_hit_end:
+		attack_elapsed = current_attack_hit_end
+		attack_has_connected = true  # prevent any further hit attempts
+		_set_attack_visual(false, false)
+	else:
+		_interrupt_attack()
 	attack_cooldown = max(attack_cooldown, parried_recovery_duration if perfect else attack_cooldown_duration * 0.45)
 	hit_flash_timer = 0.08
 	hit_spark_timer = 0.20 if perfect else 0.10
@@ -538,7 +545,9 @@ func _update_attack(delta: float) -> void:
 	_maybe_convert_windup_to_thrust()
 	if current_attack_step_time > 0.0 and attack_elapsed <= current_attack_step_time:
 		velocity.x = facing * current_attack_step_speed
-	else:
+	elif hit_recoil_timer <= 0.0:
+		# Only zero out horizontal velocity when there is no active recoil
+		# (e.g. from a parry). This lets the brief knockback play out.
 		velocity.x = 0.0
 	var active := attack_elapsed >= current_attack_hit_start and attack_elapsed <= current_attack_hit_end
 	_set_attack_visual(attack_elapsed >= current_attack_cue_start and attack_elapsed <= current_attack_hit_end, active)
@@ -548,7 +557,8 @@ func _update_attack(delta: float) -> void:
 		var whiffed := not attack_has_connected
 		_interrupt_attack()
 		var use_short_whiff_cooldown := whiffed and attack_area == null
-		attack_cooldown = attack_cooldown_duration * (whiff_cooldown_multiplier if use_short_whiff_cooldown else 1.0)
+		# Use max() so parried_recovery_duration set by receive_block_feedback is not overwritten.
+		attack_cooldown = max(attack_cooldown, attack_cooldown_duration * (whiff_cooldown_multiplier if use_short_whiff_cooldown else 1.0))
 		state = EnemyState.HOLD
 
 func _connect_attack() -> void:
@@ -609,11 +619,13 @@ func _update_pressure_and_posture(delta: float) -> void:
 	posture = max(0.0, posture - recovery_rate * remaining_delta)
 
 func _set_attack_visual(show_visual: bool, active: bool) -> void:
+	var effective_show := show_visual and GameSettings.is_easy_mode
 	if attack_visual != null:
-		attack_visual.visible = show_visual
+		attack_visual.visible = effective_show
 		attack_visual.color = Color(1.0, 0.12, 0.04, 0.62) if active else Color(1.0, 0.84, 0.08, 0.48)
 	if warning_label != null:
-		warning_label.visible = show_visual and is_perilous_attack
+		warning_label.visible = effective_show and is_perilous_attack
+
 
 func _break_posture() -> void:
 	posture_broken = true
@@ -653,7 +665,7 @@ func _update_feedback(delta: float) -> void:
 	hit_spark_timer = max(0.0, hit_spark_timer - delta)
 	dodge_spark_timer = max(0.0, dodge_spark_timer - delta)
 	if hit_spark != null:
-		hit_spark.visible = hit_spark_timer > 0.0 or dodge_spark_timer > 0.0
+		hit_spark.visible = false
 	if sprite != null:
 		sprite.modulate = _hit_feedback_modulate(Color(1.65, 1.65, 1.22, 1.0))
 
@@ -805,7 +817,8 @@ func _add_custom_animation(frames: SpriteFrames, animation: StringName) -> void:
 		atlas_texture.atlas = texture
 		atlas_texture.region = frame_spec["region"]
 		atlas_texture.filter_clip = true
-		frames.add_frame(animation, atlas_texture)
+		var frame_duration: float = float(frame_spec.get("duration", 1.0))
+		frames.add_frame(animation, atlas_texture, frame_duration)
 
 func _add_strip(frames: SpriteFrames, animation: StringName, path: String, count: int, fps: float, loop: bool) -> void:
 	if not ResourceLoader.exists(path):

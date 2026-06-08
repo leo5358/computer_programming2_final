@@ -17,13 +17,16 @@ func _ready() -> void:
 			{"path": "res://assets/sprites/warrior/walk.png", "region": Rect2(666.0, 0.0, 94.0, 96.0)},
 		],
 		"attack": [
-			{"path": "res://assets/sprites/warrior/attack.png", "region": Rect2(13.0, 0.0, 94.0, 96.0)},
-			{"path": "res://assets/sprites/warrior/attack.png", "region": Rect2(96.0, 0.0, 96.0, 96.0)},
-			{"path": "res://assets/sprites/warrior/attack.png", "region": Rect2(188.0, 0.0, 94.0, 96.0)},
-			{"path": "res://assets/sprites/warrior/attack.png", "region": Rect2(279.0, 0.0, 93.0, 96.0)},
-			{"path": "res://assets/sprites/warrior/attack1.png", "region": Rect2(373.0, 0.0, 122.0, 96.0)},
-			{"path": "res://assets/sprites/warrior/attack1.png", "region": Rect2(525.0, 0.0, 102.0, 96.0)},
-			{"path": "res://assets/sprites/warrior/attack1.png", "region": Rect2(651.0, 0.0, 93.0, 96.0)},
+			# 前搖 frame 1-3：共 0.5s，每 frame = 5/3 * 0.1s ≈ 0.1667s
+			{"path": "res://assets/sprites/warrior/attack.png", "region": Rect2(13.0, 0.0, 94.0, 96.0), "duration": 5.0 / 3.0},
+			{"path": "res://assets/sprites/warrior/attack.png", "region": Rect2(96.0, 0.0, 96.0, 96.0), "duration": 5.0 / 3.0},
+			{"path": "res://assets/sprites/warrior/attack.png", "region": Rect2(188.0, 0.0, 94.0, 96.0), "duration": 5.0 / 3.0},
+			# 揮刀 frame 4-5：共 0.3s，每 frame = 1.5 * 0.1s = 0.15s
+			{"path": "res://assets/sprites/warrior/attack.png", "region": Rect2(279.0, 0.0, 93.0, 96.0), "duration": 1.5},
+			{"path": "res://assets/sprites/warrior/attack1.png", "region": Rect2(373.0, 0.0, 122.0, 96.0), "duration": 1.5},
+			# 收刀 frame 6-8：共 0.5s，每 frame = 2.5 * 0.1s = 0.25s
+			{"path": "res://assets/sprites/warrior/attack1.png", "region": Rect2(525.0, 0.0, 102.0, 96.0), "duration": 2.5},
+			{"path": "res://assets/sprites/warrior/attack1.png", "region": Rect2(651.0, 0.0, 93.0, 96.0), "duration": 2.5},
 		],
 		"deflect": [
 			{"path": "res://assets/sprites/warrior/deflect.png", "region": Rect2(9.0, 0.0, 94.0, 96.0)},
@@ -45,7 +48,7 @@ func _ready() -> void:
 			{"path": "res://assets/sprites/warrior/thrust.png", "region": Rect2(672.0, 0.0, 96.0, 96.0)},
 		],
 	}
-	custom_animation_speeds = {"walk": 5.0, "attack": 5.0, "deflect": 14.0, "thrust": 8.0}
+	custom_animation_speeds = {"walk": 5.0, "attack": 10.0, "deflect": 14.0, "thrust": 8.0}
 	custom_animation_loops = {"walk": true, "attack": false, "deflect": false, "thrust": false}
 	max_health = 60.0
 	max_posture = 100.0
@@ -59,10 +62,10 @@ func _ready() -> void:
 	too_close_distance = 48.0
 	vision_range = 340.0
 	vision_height = 104.0
-	attack_cue_start = 0.74
-	attack_hit_start = 0.98
-	attack_hit_end = 1.10
-	attack_total_time = 1.35
+	attack_cue_start = 0.0
+	attack_hit_start = 0.5
+	attack_hit_end = 0.8
+	attack_total_time = 1.3
 	attack_cooldown_duration = 1.55
 	counter_cue_start = 0.10
 	counter_hit_start = 0.24

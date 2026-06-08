@@ -3,7 +3,7 @@ extends Node
 const CombatServerScript = preload("res://scripts/combat_server.gd")
 
 @export var enabled := false
-@export var attack_opportunity_range := 76.0
+@export var attack_opportunity_range := 96.0
 @export var projectile_cut_range := 128.0
 @export var action_cooldown_time := 0.04
 @export var parry_timing_lead := 0.07
@@ -56,7 +56,6 @@ func _physics_process(delta: float) -> void:
 		return
 	if action_cooldown <= 0.0 and _attack_nearest_opening(player):
 		return
-	_move_to_best_position(player)
 
 func _find_best_threat(player: Node2D) -> Dictionary:
 	var best: Dictionary = {}
@@ -198,7 +197,7 @@ func _nearest_attackable_target(player: Node2D) -> Node2D:
 			continue
 		var offset: Vector2 = (actor as Node2D).global_position - player.global_position
 		var distance: float = abs(offset.x)
-		if abs(offset.y) > 56.0 or distance > attack_opportunity_range:
+		if abs(offset.y) > 64.0 or distance > attack_opportunity_range:
 			continue
 		if distance < nearest_distance:
 			nearest = actor as Node2D

@@ -4,7 +4,8 @@ signal resume_requested
 signal save_and_menu_requested
 
 const OPTION_RESUME := 0
-const OPTION_SAVE_MENU := 1
+const OPTION_DIFFICULTY := 1
+const OPTION_SAVE_MENU := 2
 const BUTTON_CLICK_SFX_PATH := "res://assets/sfx/buttonClick.MP3"
 const TITLE_TEXT := "暫停"
 const RESUME_TEXT := "繼續遊戲"
@@ -16,6 +17,7 @@ var is_active := false
 var shade: ColorRect
 var title_label: Label
 var resume_label: Label
+var difficulty_label: Label
 var save_menu_label: Label
 var box: VBoxContainer
 var options: VBoxContainer
@@ -80,8 +82,14 @@ func confirm_selection() -> void:
 	_play_button_click_sfx()
 	if selected_index == OPTION_RESUME:
 		resume_requested.emit()
+	elif selected_index == OPTION_DIFFICULTY:
+		_toggle_difficulty()
 	else:
 		save_and_menu_requested.emit()
+
+func _toggle_difficulty() -> void:
+	GameSettings.is_easy_mode = not GameSettings.is_easy_mode
+	_update_selection()
 
 func _setup_button_click_sfx() -> void:
 	button_click_sfx = get_node_or_null("ButtonClickSfx") as AudioStreamPlayer
@@ -135,15 +143,16 @@ func _build_ui() -> void:
 	options.add_theme_constant_override("separation", 14)
 	box.add_child(options)
 
-	resume_label = _make_option_label("ResumeLabel", RESUME_TEXT)
-	save_menu_label = _make_option_label("SaveMenuLabel", SAVE_MENU_TEXT)
+	resume_label = _make_option_label("ResumeLabel", OPTION_RESUME)
+	difficulty_label = _make_option_label("DifficultyLabel", OPTION_DIFFICULTY)
+	save_menu_label = _make_option_label("SaveMenuLabel", OPTION_SAVE_MENU)
 	options.add_child(resume_label)
+	options.add_child(difficulty_label)
 	options.add_child(save_menu_label)
 
-func _make_option_label(node_name: String, text_value: String) -> Label:
+func _make_option_label(node_name: String, option_index: int) -> Label:
 	var label := Label.new()
 	label.name = node_name
-	label.text = text_value
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.add_theme_font_size_override("font_size", 30)
 	label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.75))
@@ -151,7 +160,6 @@ func _make_option_label(node_name: String, text_value: String) -> Label:
 	label.add_theme_constant_override("shadow_offset_y", 3)
 	label.custom_minimum_size = Vector2(360, 42)
 	label.mouse_filter = Control.MOUSE_FILTER_STOP
-	var option_index := OPTION_RESUME if node_name == "ResumeLabel" else OPTION_SAVE_MENU
 	label.mouse_entered.connect(select_option.bind(option_index))
 	label.gui_input.connect(_on_option_gui_input.bind(option_index))
 	return label
@@ -168,13 +176,29 @@ func _mark_input_handled() -> void:
 	if viewport != null:
 		viewport.set_input_as_handled()
 
+func _get_difficulty_text() -> String:
+	var mode_str := "簡單" if GameSettings.is_easy_mode else "困難"
+	return "難度：%s" % mode_str
+
 func _update_selection() -> void:
-	if resume_label == null or save_menu_label == null:
+	if resume_label == null or difficulty_label == null or save_menu_label == null:
 		return
 	_apply_option_style(resume_label, RESUME_TEXT, selected_index == OPTION_RESUME)
+	_apply_difficulty_style(difficulty_label, selected_index == OPTION_DIFFICULTY)
 	_apply_option_style(save_menu_label, SAVE_MENU_TEXT, selected_index == OPTION_SAVE_MENU)
 
 func _apply_option_style(label: Label, base_text: String, selected: bool) -> void:
 	label.text = "> %s <" % base_text if selected else base_text
 	var color := Color(1.0, 0.86, 0.36, 1.0) if selected else Color(0.75, 0.77, 0.80, 1.0)
 	label.add_theme_color_override("font_color", color)
+
+func _apply_difficulty_style(label: Label, selected: bool) -> void:
+	var base_text := _get_difficulty_text()
+	if selected:
+		label.text = "> %s <" % base_text
+		label.add_theme_color_override("font_color", Color(1.0, 0.86, 0.36, 1.0))
+	else:
+		label.text = base_text
+		## 根據當前難度顯示不同顏色提示：簡單=偏藍綠，困難=偏橙
+		var color := Color(0.55, 0.92, 0.78, 1.0) if GameSettings.is_easy_mode else Color(1.0, 0.55, 0.30, 1.0)
+		label.add_theme_color_override("font_color", color)
