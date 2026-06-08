@@ -5,6 +5,17 @@ class FakePlayer:
 	signal stats_changed
 	var heartbeat := 70.0
 
+class FakeCamera:
+	extends Node2D
+	var shake_count := 0
+	var last_amount := 0.0
+	var last_duration := 0.0
+
+	func shake(amount: float, duration: float) -> void:
+		shake_count += 1
+		last_amount = amount
+		last_duration = duration
+
 func _initialize() -> void:
 	var feedback_script: Script = load("res://scripts/heartbeat_feedback.gd")
 	if feedback_script == null:
@@ -17,15 +28,21 @@ func _initialize() -> void:
 	var player := FakePlayer.new()
 	player.add_to_group("player")
 	root.add_child(player)
+	var camera := FakeCamera.new()
+	camera.add_to_group("feedback_camera")
+	root.add_child(camera)
 	var feedback: CanvasLayer = feedback_script.new()
 	root.add_child(feedback)
 	await process_frame
 
-	var top_edge := feedback.get_node_or_null("Root/TopEdge") as ColorRect
-	var bottom_edge := feedback.get_node_or_null("Root/BottomEdge") as ColorRect
+	var blood_overlay := feedback.get_node_or_null("Root/BloodOverlay") as TextureRect
 	var heartbeat_sfx := feedback.get_node_or_null("HeartbeatSfx") as AudioStreamPlayer
-	if top_edge == null or bottom_edge == null:
-		push_error("Heartbeat feedback should build red screen edge overlays")
+	if blood_overlay == null:
+		push_error("Heartbeat feedback should build a full-screen blood texture overlay")
+		quit(1)
+		return
+	if blood_overlay.texture == null or blood_overlay.texture.resource_path != "res://assets/sprites/vfx/blood.png":
+		push_error("Heartbeat feedback should use the shared blood.png VFX texture")
 		quit(1)
 		return
 	if heartbeat_sfx == null or heartbeat_sfx.stream == null:
@@ -35,15 +52,15 @@ func _initialize() -> void:
 
 	player.heartbeat = 70.0
 	feedback._update_feedback(0.0)
-	var calm_alpha := top_edge.color.a
+	var calm_alpha := blood_overlay.modulate.a
 	if calm_alpha > 0.02:
-		push_error("Calm heartbeat should keep the red edge almost invisible")
+		push_error("Calm heartbeat should keep the blood overlay almost invisible")
 		quit(1)
 		return
 
 	player.heartbeat = 134.0
 	feedback._update_feedback(0.0)
-	if top_edge.color.a > 0.02:
+	if blood_overlay.modulate.a > 0.02:
 		push_error("Heartbeat warning should stay invisible below 135 BPM")
 		quit(1)
 		return
@@ -55,15 +72,16 @@ func _initialize() -> void:
 
 	player.heartbeat = 180.0
 	feedback._update_feedback(0.0)
-	var tense_alpha := top_edge.color.a
+	var tense_alpha := blood_overlay.modulate.a
 	if tense_alpha <= calm_alpha + 0.05:
-		push_error("High heartbeat should visibly intensify the red edge")
+		push_error("High heartbeat should visibly intensify the blood overlay")
 		quit(1)
 		return
-	if bottom_edge.color.a != top_edge.color.a:
-		push_error("All heartbeat edge overlays should share the same intensity")
+	if camera.shake_count != 0:
+		push_error("Heartbeat feedback should not shake the camera at or below 200 BPM")
 		quit(1)
 		return
+	heartbeat_sfx.stop()
 	if absf(feedback._beat_interval_for_heartbeat(180.0) - (60.0 / 180.0)) > 0.001:
 		push_error("Heartbeat audio interval should follow 60 / BPM")
 		quit(1)
@@ -72,6 +90,14 @@ func _initialize() -> void:
 	player.heartbeat = 220.0
 	feedback.heartbeat_timer = 0.0
 	feedback._update_feedback(0.2)
+	if camera.shake_count != 1:
+		push_error("Heartbeat feedback should shake the camera once with the heartbeat thump above 200 BPM")
+		quit(1)
+		return
+	if camera.last_amount <= 0.0 or camera.last_duration <= 0.0:
+		push_error("Heartbeat camera shake should use a visible positive amount and duration")
+		quit(1)
+		return
 	if feedback.heartbeat_timer <= 0.0:
 		push_error("Heartbeat feedback should schedule the next thump after playing")
 		quit(1)
@@ -84,6 +110,12 @@ func _initialize() -> void:
 		pass
 	else:
 		push_error("Heartbeat feedback should know that an already playing thump cannot be restarted")
+		quit(1)
+		return
+	feedback.heartbeat_timer = 0.0
+	feedback._update_feedback(0.2)
+	if camera.shake_count != 1:
+		push_error("Heartbeat camera shake should stay synced to actual thumps instead of replay checks")
 		quit(1)
 		return
 	if heartbeat_sfx.volume_db >= -6.0:
