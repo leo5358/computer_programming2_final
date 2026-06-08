@@ -259,6 +259,36 @@ func _initialize() -> void:
 		push_error("Player should expose enemy collision exception refresh for hit iframe pass-through")
 		quit(1)
 		return
+	if not player.has_method("_is_wall_climb_blocked_by_collider"):
+		push_error("Player should expose wall climb collider filtering")
+		quit(1)
+		return
+	var climb_enemy := CharacterBody2D.new()
+	climb_enemy.add_to_group("enemy")
+	get_root().add_child(climb_enemy)
+	if not player._is_wall_climb_blocked_by_collider(climb_enemy):
+		push_error("Enemy bodies should not count as climbable wall contact")
+		climb_enemy.queue_free()
+		quit(1)
+		return
+	climb_enemy.queue_free()
+	var climb_boss := CharacterBody2D.new()
+	climb_boss.add_to_group("boss")
+	get_root().add_child(climb_boss)
+	if not player._is_wall_climb_blocked_by_collider(climb_boss):
+		push_error("Boss bodies should not count as climbable wall contact")
+		climb_boss.queue_free()
+		quit(1)
+		return
+	climb_boss.queue_free()
+	var climb_wall := StaticBody2D.new()
+	get_root().add_child(climb_wall)
+	if player._is_wall_climb_blocked_by_collider(climb_wall):
+		push_error("Static terrain should still count as climbable wall contact")
+		climb_wall.queue_free()
+		quit(1)
+		return
+	climb_wall.queue_free()
 	player.set_map_climb_bounds(0.0, 15600.0)
 	player.global_position.x = 40.0
 	if not player._is_at_world_horizontal_boundary(-1.0):

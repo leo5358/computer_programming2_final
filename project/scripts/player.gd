@@ -538,7 +538,31 @@ func _apply_horizontal_control(direction: float, delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 
 func _can_wall_interact() -> bool:
-	return is_on_wall() and not is_on_floor() and _can_jump()
+	return is_on_wall() and not is_on_floor() and _can_jump() and _has_climbable_wall_contact()
+
+func _has_climbable_wall_contact() -> bool:
+	var slide_count := get_slide_collision_count()
+	if slide_count == 0:
+		return true
+	var saw_wall_contact := false
+	for index in range(slide_count):
+		var collision: KinematicCollision2D = get_slide_collision(index)
+		if collision == null:
+			continue
+		if collision.get_normal().x == 0.0:
+			continue
+		saw_wall_contact = true
+		if not _is_wall_climb_blocked_by_collider(collision.get_collider()):
+			return true
+	return not saw_wall_contact
+
+func _is_wall_climb_blocked_by_collider(collider: Object) -> bool:
+	var node := collider as Node
+	while node != null:
+		if node.is_in_group("enemy") or node.is_in_group("boss"):
+			return true
+		node = node.get_parent()
+	return false
 
 func _should_use_wall_climb(direction: float) -> bool:
 	return (
