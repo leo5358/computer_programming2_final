@@ -25,6 +25,15 @@ func _initialize() -> void:
 	boss.facing = -1.0
 	boss.attack_cooldown = 0.0
 	boss._physics_process(1.0 / 60.0)
+	if boss.is_attack_winding_up:
+		push_error("Boss should pause before opening with standard attack at sweet-spot range")
+		quit(1)
+		return
+	boss._physics_process(float(boss.get("attack_pressure_commit_time")) + 0.001)
+	if not boss.is_attack_winding_up:
+		push_error("Boss should open with standard attack after pressure pause at sweet-spot range")
+		quit(1)
+		return
 	if boss.current_attack_animation != "attack":
 		push_error("Boss should open with standard attack at sweet-spot range")
 		quit(1)

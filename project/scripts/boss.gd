@@ -1,5 +1,7 @@
 extends "res://scripts/enemy_base.gd"
 
+signal final_execution_requested(boss: Node2D)
+
 # --- Boss Specific Constants ---
 const WALK_PATH_BOSS := "res://assets/sprites/boss/walk.png"
 const ATTACK_PATH_BOSS := "res://assets/sprites/boss/attack.png"
@@ -37,7 +39,7 @@ const ATTACK_PROFILES_BOSS := {
 		"cue_start": 0.62,
 		"hit_start": 0.78,
 		"hit_end": 0.88,
-		"damage": 18.0,
+		"damage": 45.0,
 		"posture_damage": 28.0,
 		"attack_type": 0, # NORMAL
 		"perilous": false,
@@ -47,7 +49,7 @@ const ATTACK_PROFILES_BOSS := {
 		"cue_start": 1.32,
 		"hit_start": 1.54,
 		"hit_end": 1.665,
-		"damage": 28.0,
+		"damage": 45.0,
 		"posture_damage": 42.0,
 		"attack_type": 0, # NORMAL
 		"perilous": false,
@@ -57,7 +59,7 @@ const ATTACK_PROFILES_BOSS := {
 		"cue_start": 0.42,
 		"hit_start": 0.82,
 		"hit_end": 0.98,
-		"damage": 24.0,
+		"damage": 45.0,
 		"posture_damage": 36.0,
 		"attack_type": 1, # THRUST
 		"perilous": true,
@@ -221,9 +223,9 @@ const VISUAL_CENTER_X_BOSS := 64.0
 const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 
 # --- Boss Parameters ---
-@export var posture_damage_taken_boss := 18.0
+@export var posture_gain_on_direct_damage_boss := 11.0
 @export var leash_range_boss := 420.0
-@export var detection_range_boss := 280.0
+@export var detection_range_boss := 340.0
 @export var attack_start_distance_boss := 112.0
 @export var attack_hold_distance_boss := 78.0
 @export var close_spacing_distance_boss := 58.0
@@ -232,6 +234,7 @@ const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 @export var gap_close_thrust_max_distance_boss := 190.0
 @export var chop_gap_close_min_distance_boss := 118.0
 @export var chop_gap_close_max_distance_boss := 340.0
+@export var chop_gap_close_commit_min_distance_boss := 240.0
 @export var chop_lunge_start_boss := 0.78
 @export var chop_lunge_end_boss := 1.54
 @export var chop_lunge_speed_boss := 330.0
@@ -243,6 +246,7 @@ const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 @export var thrust_lunge_speed_boss := 340.0
 @export var combo_link_delay_boss := 0.22
 @export var combo_max_count_boss := 2
+@export var combo_vertical_tolerance_boss := 84.0
 @export var perfect_parry_cooldown_boss := 1.05
 @export var guard_pressure_chop_threshold_boss := 2
 @export var attack_hit_frame_boss := 4
@@ -257,13 +261,16 @@ const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 @export var hit_spark_time_boss := 0.16
 @export var hit_freeze_time_boss := 0.055
 @export var hurt_feedback_time_boss := 0.66
-@export var normal_attack_parry_posture_damage_boss := 36.0
-@export var normal_attack_block_posture_damage_boss := 14.0
+@export var posture_gain_on_perfect_parried_boss := 10.0
+@export var posture_gain_on_partial_guarded_boss := 6.0
+@export var posture_gain_on_guard_success_boss := 6.0
+@export var posture_break_idle_reset_delay_boss := 6.0
+@export var posture_break_hit_reset_delay_boss := 3.0
 @export var deflect_feedback_time_boss := 0.28
 @export var perfect_deflect_feedback_time_boss := 0.50
 @export var forced_counter_deflect_window_boss := 0.95
 @export var debug_fixed_attack_profile_boss := ""
-@export var minimum_health_from_player_attack_boss := 1.0
+@export var minimum_health_from_player_attack_boss := 0.0
 @export var attack_recovery_time_boss := 0.58
 @export var attack_pressure_commit_time_boss := 0.45
 @export var chop_parry_hitstop_time_boss := 0.20
@@ -295,6 +302,9 @@ var forced_counter_timer_boss := 0.0
 var attack_pressure_timer_boss := 0.0
 var is_chop_parried_recovery_boss := false
 var smoke_bomb_pause_timer_boss := 0.0
+var posture_break_reset_timer_boss := 0.0
+var posture_break_took_followup_hit_boss := false
+var final_execution_requested_boss := false
 
 var attack_pressure_timer: float:
 	get:
@@ -442,9 +452,9 @@ var perfect_parry_cooldown: float:
 
 var normal_attack_parry_posture_damage: float:
 	get:
-		return normal_attack_parry_posture_damage_boss
+		return posture_gain_on_perfect_parried_boss
 	set(value):
-		normal_attack_parry_posture_damage_boss = value
+		posture_gain_on_perfect_parried_boss = value
 
 var minimum_health_from_player_attack: float:
 	get:
@@ -464,21 +474,23 @@ func _ready() -> void:
 	
 	add_to_group("boss")
 	remove_from_group("minor_enemy")
+	_update_overhead_bars()
 	
 	display_name = "Corrupted Guardian"
-	max_health = 140.0
-	max_posture = 160.0
+	max_health = 400.0
+	max_posture = 120.0
 	patrol_speed = 58.0
 	patrol_distance = 120.0
 	chase_speed = 86.0
 	attack_range = 142.0
-	attack_damage = 18.0
+	attack_damage = 45.0
 	attack_posture_damage = 28.0
 	attack_cooldown_duration = 1.38
 	posture_recovery_pause = 1.6
 	posture_recovery_rate = 5.0
+	posture_recovery_percent_per_second = 0.10
 	guard_chance = 0.8
-	guard_posture_damage = 1.2
+	minimum_health_from_player_attack_boss = 0.0
 	guard_lockout_duration = 0.32
 	perfect_parry_input_leeway = 0.30
 	patrol_direction = 1.0
@@ -528,10 +540,18 @@ func _physics_process(delta: float) -> void:
 		return
 		
 	if defeated_flag:
-		velocity.x = 0.0
+		velocity = Vector2.ZERO
+		align_sprite_to_ground_boss()
+		_update_visuals_boss_internal()
+		stats_changed.emit()
+		return
 	elif posture_broken:
 		velocity.x = 0.0
+		posture_break_reset_timer_boss = max(0.0, posture_break_reset_timer_boss - delta)
 		play_boss_animation(current_animation_boss)
+		if posture_break_reset_timer_boss <= 0.0:
+			_reset_boss_posture_break_state()
+			play_boss_animation("idle")
 	elif feedback_timer_boss > 0.0:
 		velocity.x = 0.0
 	elif hit_recoil_timer > 0.0:
@@ -587,6 +607,9 @@ func _start_normal_attack(profile_name: String = "", combo_followup: bool = fals
 func _update_attack_state(delta: float) -> void:
 	_update_attack_state_boss_internal(delta)
 
+func _should_start_attack() -> bool:
+	return _should_start_attack_boss_internal()
+
 func _update_attack_visual(show_visual: bool, active: bool) -> void:
 	_update_attack_visual_boss_internal(show_visual, active)
 
@@ -607,10 +630,43 @@ func execute() -> void:
 		defeated_flag = true
 		health = 0.0
 		posture_broken = false
+		final_execution_requested_boss = false
 		_interrupt_attack_boss_internal()
 		play_boss_animation("death")
-		set_collision_layer_value(1, false)
+		if execute_label != null:
+			execute_label.visible = false
+		_disable_boss_collision()
 		stats_changed.emit()
+
+func complete_final_execution_death() -> void:
+	defeated_flag = true
+	health = 0.0
+	posture = max_posture
+	posture_broken = false
+	final_execution_requested_boss = false
+	_interrupt_attack_boss_internal()
+	if execute_label != null:
+		execute_label.visible = false
+	_disable_boss_collision()
+	stats_changed.emit()
+
+func _disable_boss_collision() -> void:
+	collision_layer = 0
+	collision_mask = 0
+
+func receive_dodge_feedback() -> void:
+	if defeated_flag:
+		return
+	posture = clamp(posture + dodge_posture_damage, 0.0, max_posture)
+	_mark_combat_pressure()
+	_interrupt_attack_boss_internal()
+	dodge_spark_timer = 0.18
+	hit_flash_timer = 0.08
+	hit_spark_timer = 0.16
+	hit_recoil_timer = 0.12
+	velocity.x = -facing * hit_recoil_force
+	if posture >= max_posture:
+		_start_boss_posture_break(posture_break_idle_reset_delay_boss)
 
 func receive_smoke_bomb_pause(duration: float) -> void:
 	if defeated_flag:
@@ -648,8 +704,15 @@ func align_sprite_to_ground_boss() -> void:
 func receive_player_attack(damage: float, posture_damage: float) -> Variant:
 	if defeated_flag:
 		return false
-	if posture_broken:
-		execute()
+	if can_be_executed():
+		health = max(0.0, health - damage)
+		if posture_broken and not posture_break_took_followup_hit_boss:
+			posture_break_took_followup_hit_boss = true
+			posture_break_reset_timer_boss = posture_break_hit_reset_delay_boss
+		if not final_execution_requested_boss:
+			final_execution_requested_boss = true
+			final_execution_requested.emit(self)
+		stats_changed.emit()
 		return true
 	has_engaged_player_boss = true
 	_mark_combat_pressure()
@@ -667,15 +730,17 @@ func receive_player_attack(damage: float, posture_damage: float) -> Variant:
 		return {"guarded": true}
 		
 	_spawn_damage_number_boss(damage)
-	health = max(minimum_health_from_player_attack_boss, health - damage)
-	posture = clamp(posture + max(posture_damage, posture_damage_taken_boss), 0.0, max_posture)
+	health = max(0.0, health - damage)
+	posture = clamp(posture + _boss_posture_amount_from_percent(posture_gain_on_direct_damage_boss), 0.0, max_posture)
 	
 	_force_play_boss_animation("hurt")
 	feedback_timer_boss = max(feedback_timer_boss, hurt_feedback_time_boss)
 	_trigger_hit_feedback_boss_internal()
 	
 	if posture >= max_posture:
-		_break_posture_boss_internal()
+		_start_boss_posture_break(posture_break_idle_reset_delay_boss)
+	elif health <= 0.0:
+		execute()
 	stats_changed.emit()
 	return true
 
@@ -698,7 +763,7 @@ func _should_guard_player_attack_boss_internal() -> bool:
 
 func _guard_player_attack_boss_internal() -> void:
 	_mark_combat_pressure()
-	posture = clamp(posture + guard_posture_damage, 0.0, max_posture)
+	posture = clamp(posture + _boss_posture_amount_from_percent(posture_gain_on_guard_success_boss), 0.0, max_posture)
 	_interrupt_attack_boss_internal()
 	_queue_forced_counter_boss()
 	deflect_toggle_boss = not deflect_toggle_boss
@@ -714,7 +779,7 @@ func _guard_player_attack_boss_internal() -> void:
 		hit_spark.position.x = 18.0 * facing
 		hit_spark.visible = true
 	if posture >= max_posture:
-		_break_posture_boss_internal()
+		_start_boss_posture_break(posture_break_idle_reset_delay_boss)
 	stats_changed.emit()
 
 func receive_block_feedback(_perfect: bool) -> void:
@@ -729,9 +794,10 @@ func _receive_block_feedback_boss_internal(_perfect: bool) -> void:
 	has_engaged_player_boss = true
 	_mark_combat_pressure()
 	var perfect := _perfect
-	posture = clamp(posture + (normal_attack_parry_posture_damage_boss if perfect else normal_attack_block_posture_damage_boss), 0.0, max_posture)
+	var posture_percent := posture_gain_on_perfect_parried_boss if _perfect else posture_gain_on_partial_guarded_boss
+	posture = clamp(posture + _boss_posture_amount_from_percent(posture_percent), 0.0, max_posture)
 	if posture >= max_posture:
-		_break_posture_boss_internal()
+		_start_boss_posture_break(posture_break_idle_reset_delay_boss)
 		stats_changed.emit()
 		return
 	if perfect and current_attack_animation == "chop" and (is_attack_winding_up_boss or is_attack_active_boss):
@@ -785,6 +851,9 @@ func reset_combat_state() -> void:
 	guard_lockout_timer = 0.0
 	has_engaged_player_boss = false
 	posture_recovery_pause_timer = 0.0
+	posture_break_reset_timer_boss = 0.0
+	posture_break_took_followup_hit_boss = false
+	final_execution_requested_boss = false
 	forced_counter_profile_boss = ""
 	consecutive_guard_count_boss = 0
 	forced_counter_timer_boss = 0.0
@@ -802,20 +871,40 @@ func reset_combat_state() -> void:
 		debug_response_label_node.visible = false
 	if perilous_label_node != null:
 		perilous_label_node.visible = false
-	set_collision_layer_value(1, true)
+	collision_layer = default_collision_layer
+	collision_mask = default_collision_mask
 	play_boss_animation("walk")
 	stats_changed.emit()
 
 func _break_posture_boss_internal() -> void:
+	_start_boss_posture_break(posture_break_idle_reset_delay_boss)
+
+func _boss_posture_amount_from_percent(percent: float) -> float:
+	return ceil(max_posture * (percent / 100.0))
+
+func _reset_boss_posture_break_state() -> void:
+	posture = 0.0
+	posture_broken = false
+	posture_break_reset_timer_boss = 0.0
+	posture_break_took_followup_hit_boss = false
+	final_execution_requested_boss = false
+	if execute_label != null:
+		execute_label.visible = false
+	if hit_spark != null:
+		hit_spark.visible = false
+
+func _start_boss_posture_break(reset_delay: float) -> void:
 	if posture_broken or defeated_flag:
 		return
 	posture = max_posture
 	posture_broken = true
+	posture_break_reset_timer_boss = reset_delay
+	posture_break_took_followup_hit_boss = false
 	_interrupt_attack_boss_internal()
 	feedback_timer_boss = max(feedback_timer_boss, perfect_deflect_feedback_time_boss)
 	velocity = Vector2.ZERO
 	if execute_label != null:
-		execute_label.visible = true
+		execute_label.visible = false
 	if attack_visual != null:
 		attack_visual.visible = false
 	if debug_response_label_node != null:
@@ -1025,6 +1114,8 @@ func _can_start_chop_gap_close_from_distance_boss_internal(distance: float) -> b
 		return true
 	if guard_pressure_count_boss >= guard_pressure_chop_threshold_boss:
 		return true
+	if distance < chop_gap_close_commit_min_distance_boss:
+		return false
 	return _should_use_chop_gap_close_boss_internal()
 
 func _should_use_chop_gap_close_boss_internal() -> bool:
@@ -1035,7 +1126,7 @@ func _should_use_chop_gap_close_boss_internal() -> bool:
 	if abs(offset.y) > 56.0:
 		return false
 	var distance := absf(offset.x)
-	if distance < chop_gap_close_min_distance_boss or distance > chop_gap_close_max_distance_boss:
+	if distance < chop_gap_close_commit_min_distance_boss or distance > chop_gap_close_max_distance_boss:
 		return false
 	return true
 
@@ -1047,7 +1138,7 @@ func _update_attack_pressure_boss_internal(delta: float) -> bool:
 		if attack_pressure_timer_boss <= 0.0 and _should_start_attack_boss_internal():
 			_start_normal_attack_boss_internal()
 		return true
-	if forced_counter_profile_boss.is_empty() and _should_start_attack_boss_internal():
+	if forced_counter_profile_boss.is_empty() and guard_pressure_count_boss < guard_pressure_chop_threshold_boss and _should_start_attack_boss_internal():
 		attack_pressure_timer_boss = attack_pressure_commit_time_boss
 		velocity.x = 0.0
 		_update_engaged_hold_boss_internal()
@@ -1184,7 +1275,7 @@ func _is_player_in_combo_range_boss_internal() -> bool:
 	if player == null:
 		return false
 	var offset: Vector2 = player.global_position - global_position
-	if abs(offset.y) > 56.0:
+	if abs(offset.y) > combo_vertical_tolerance_boss:
 		return false
 	var distance := absf(offset.x)
 	return distance >= close_spacing_distance_boss and distance <= attack_start_distance_boss
@@ -1254,10 +1345,7 @@ func _update_perilous_warning_boss_internal(show_warning: bool) -> void:
 	if perilous_label_node != null:
 		perilous_label_node.visible = show
 	if debug_response_label_node != null:
-		debug_response_label_node.visible = show
-		if show:
-			debug_response_label_node.text = "危"
-			debug_response_label_node.modulate = Color(1.0, 0.08, 0.04, 1.0)
+		debug_response_label_node.visible = false
 
 func _update_attack_hitbox_boss_internal() -> void:
 	if attack_area == null or attack_collision_shape == null:
@@ -1440,7 +1528,7 @@ func _defeat() -> void:
 	defeated_flag = true
 	health = 0.0
 	posture = max_posture
-	set_collision_layer_value(1, false)
+	_disable_boss_collision()
 	if execute_label != null:
 		execute_label.visible = false
 	if debug_response_label_node != null:

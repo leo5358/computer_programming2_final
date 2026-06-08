@@ -2,8 +2,10 @@ extends "res://scripts/enemy_base.gd"
 
 @export var ally_call_range := 420.0
 @export var flee_until_distance := 160.0
+@export var isolated_attack_range := 88.0
 
 var has_called_allies := false
+var has_nearby_allies := false
 
 func _ready() -> void:
 	display_name = "Torchman"
@@ -80,19 +82,24 @@ func _update_combat_movement() -> void:
 	var distance: float = abs(offset_x)
 	if absf(offset_x) > 4.0:
 		facing = sign(offset_x)
-	if not has_called_allies and distance > attack_range:
-		state = EnemyState.FLEE
-		velocity.x = -sign(offset_x) * flee_speed
-		_call_nearby_allies()
-		return
 	if distance <= attack_range and attack_cooldown <= 0.0:
 		_start_attack()
-	else:
-		state = EnemyState.CHASE
-		velocity.x = facing * chase_speed
+		return
+	if not has_called_allies:
+		has_nearby_allies = _call_nearby_allies() > 0
+	if distance <= isolated_attack_range and attack_cooldown <= 0.0:
+		_start_attack()
+		return
+	if distance > attack_range and has_nearby_allies and distance < flee_until_distance:
+		state = EnemyState.FLEE
+		velocity.x = -sign(offset_x) * flee_speed
+		return
+	state = EnemyState.CHASE
+	velocity.x = facing * chase_speed
 
-func _call_nearby_allies() -> void:
+func _call_nearby_allies() -> int:
 	has_called_allies = true
+	var alerted_count := 0
 	for enemy in get_tree().get_nodes_in_group("minor_enemy"):
 		if enemy == self:
 			continue
@@ -102,7 +109,10 @@ func _call_nearby_allies() -> void:
 			continue
 		if enemy.has_method("receive_alert"):
 			enemy.receive_alert(self)
+			alerted_count += 1
+	return alerted_count
 
 func reset_combat_state() -> void:
 	has_called_allies = false
+	has_nearby_allies = false
 	super()

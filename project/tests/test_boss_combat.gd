@@ -28,7 +28,7 @@ func _initialize() -> void:
 		push_error("Boss should register itself in the boss group")
 		quit(1)
 		return
-	if boss.health != 140.0 or boss.posture != 0.0 or boss.defeated_flag:
+	if boss.health != 400.0 or boss.posture != 0.0 or boss.defeated_flag:
 		push_error("Boss V0 should start with clean combat stats")
 		quit(1)
 		return

@@ -5,6 +5,7 @@ signal main_menu_requested
 
 const OPTION_RETRY := 0
 const OPTION_MAIN_MENU := 1
+const BUTTON_CLICK_SFX_PATH := "res://assets/sfx/buttonClick.MP3"
 const TITLE_TEXT := "心音斷絕"
 const RETRY_TEXT := "重新挑戰"
 const MAIN_MENU_TEXT := "返回主選單"
@@ -17,12 +18,14 @@ var title_label: Label
 var retry_label: Label
 var main_menu_label: Label
 var box: VBoxContainer
-var options: HBoxContainer
+var options: VBoxContainer
+var button_click_sfx: AudioStreamPlayer
 
 func _ready() -> void:
 	layer = 35
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_ui()
+	_setup_button_click_sfx()
 	hide_overlay_immediate()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -34,13 +37,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	match event.keycode:
 		KEY_UP, KEY_W:
 			move_selection(-1)
-			get_viewport().set_input_as_handled()
+			_mark_input_handled()
 		KEY_DOWN, KEY_S:
 			move_selection(1)
-			get_viewport().set_input_as_handled()
+			_mark_input_handled()
 		KEY_ENTER, KEY_KP_ENTER:
 			confirm_selection()
-			get_viewport().set_input_as_handled()
+			_mark_input_handled()
 
 func show_death() -> void:
 	visible = true
@@ -65,11 +68,37 @@ func move_selection(direction: int) -> void:
 	selected_index = wrapi(selected_index + direction, OPTION_RETRY, OPTION_MAIN_MENU + 1)
 	_update_selection()
 
+func select_option(index: int) -> void:
+	if not is_active:
+		return
+	selected_index = clampi(index, OPTION_RETRY, OPTION_MAIN_MENU)
+	_update_selection()
+
+func confirm_option(index: int) -> void:
+	select_option(index)
+	if is_active:
+		confirm_selection()
+
 func confirm_selection() -> void:
+	_play_button_click_sfx()
 	if selected_index == OPTION_RETRY:
 		retry_requested.emit()
 	else:
 		main_menu_requested.emit()
+
+func _setup_button_click_sfx() -> void:
+	button_click_sfx = get_node_or_null("ButtonClickSfx") as AudioStreamPlayer
+	if button_click_sfx == null:
+		button_click_sfx = AudioStreamPlayer.new()
+		button_click_sfx.name = "ButtonClickSfx"
+		add_child(button_click_sfx)
+	button_click_sfx.process_mode = Node.PROCESS_MODE_ALWAYS
+	if ResourceLoader.exists(BUTTON_CLICK_SFX_PATH):
+		button_click_sfx.stream = load(BUTTON_CLICK_SFX_PATH)
+
+func _play_button_click_sfx() -> void:
+	if button_click_sfx != null and button_click_sfx.stream != null and button_click_sfx.is_inside_tree():
+		button_click_sfx.play()
 
 func _build_ui() -> void:
 	shade = ColorRect.new()
@@ -103,10 +132,10 @@ func _build_ui() -> void:
 	title_label.add_theme_constant_override("shadow_offset_y", 4)
 	box.add_child(title_label)
 
-	options = HBoxContainer.new()
+	options = VBoxContainer.new()
 	options.name = "Options"
 	options.alignment = BoxContainer.ALIGNMENT_CENTER
-	options.add_theme_constant_override("separation", 60)
+	options.add_theme_constant_override("separation", 14)
 	box.add_child(options)
 
 	retry_label = _make_option_label("RetryLabel", RETRY_TEXT)
@@ -120,7 +149,24 @@ func _make_option_label(node_name: String, text_value: String) -> Label:
 	label.text = text_value
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.add_theme_font_size_override("font_size", 32)
+	label.mouse_filter = Control.MOUSE_FILTER_STOP
+	label.custom_minimum_size = Vector2(360, 44)
+	var option_index := OPTION_RETRY if node_name == "RetryLabel" else OPTION_MAIN_MENU
+	label.mouse_entered.connect(select_option.bind(option_index))
+	label.gui_input.connect(_on_option_gui_input.bind(option_index))
 	return label
+
+func _on_option_gui_input(event: InputEvent, option_index: int) -> void:
+	if not is_active:
+		return
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		confirm_option(option_index)
+		_mark_input_handled()
+
+func _mark_input_handled() -> void:
+	var viewport := get_viewport()
+	if viewport != null:
+		viewport.set_input_as_handled()
 
 func _update_selection() -> void:
 	if retry_label == null or main_menu_label == null:

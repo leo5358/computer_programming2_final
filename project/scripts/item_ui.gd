@@ -1,22 +1,22 @@
 extends CanvasLayer
 
-const ITEM_ORDER: Array[String] = ["gourd", "kunai", "pill", "capsule", "ash_balls"]
+const ATTACK_ITEM_IDS: Array[String] = ["kunai", "ash_balls"]
+const HEAL_ITEM_IDS: Array[String] = ["gourd", "pill", "capsule"]
 const ITEM_ICON_PATHS := {
-	"gourd": "res://assets/items/gourd_seed/gourd_seed.png",
+	"gourd": "res://assets/items/gourd/gourd.png",
 	"kunai": "res://assets/items/kunai/kunai.png",
 	"pill": "res://assets/items/pill/pill.png",
 	"capsule": "res://assets/items/capsule/capsule.png",
 	"ash_balls": "res://assets/items/ash_balls/ash_balls.png",
 }
 
-@export var icon_size := Vector2(56, 56)
-@export var slot_size := Vector2(66, 66)
 @export var right_margin := 8.0
 @export var bottom_margin := 18.0
 
 var player: Node = null
 var count_labels: Dictionary = {}
-var slot_borders: Array[ColorRect] = []
+var slot_icons: Dictionary = {}
+var slot_frames: Dictionary = {}
 
 func _ready() -> void:
 	layer = 12
@@ -29,10 +29,18 @@ func _process(_delta: float) -> void:
 	_update_counts()
 
 func get_display_count(item_id: String) -> int:
-	var label := count_labels.get(item_id) as Label
-	if label == null:
+	if player == null or not player.has_method("get_item_count"):
 		return 0
-	return int(label.text)
+	return int(player.get_item_count(item_id))
+
+func get_visible_item_id(slot_id: String) -> String:
+	match slot_id:
+		"attack":
+			return _get_selected_attack_item_id()
+		"heal":
+			return _get_selected_heal_item_id()
+		_:
+			return ""
 
 func _build_ui() -> void:
 	var root := Control.new()
@@ -41,43 +49,52 @@ func _build_ui() -> void:
 	root.anchor_top = 1.0
 	root.anchor_right = 1.0
 	root.anchor_bottom = 1.0
-	root.offset_left = -(slot_size.x * ITEM_ORDER.size() + 12.0 * float(ITEM_ORDER.size() - 1) + right_margin)
-	root.offset_top = -(slot_size.y + bottom_margin)
-	root.offset_right = -right_margin
-	root.offset_bottom = -bottom_margin
 	add_child(root)
 
-	var row := HBoxContainer.new()
-	row.name = "ItemRow"
-	row.add_theme_constant_override("separation", 12)
-	row.set_anchors_preset(Control.PRESET_FULL_RECT)
-	root.add_child(row)
+	var attack_slot := _create_display_slot("AttackSlot", Vector2(96.0, 96.0), Vector2(68.0, 68.0))
+	var heal_slot := _create_display_slot("HealSlot", Vector2(70.0, 70.0), Vector2(42.0, 42.0))
 
-	for item_id in ITEM_ORDER:
-		row.add_child(_create_item_slot(item_id))
+	var strip_width := heal_slot.custom_minimum_size.x + attack_slot.custom_minimum_size.x + 10.0
+	var strip_height := maxf(heal_slot.custom_minimum_size.y, attack_slot.custom_minimum_size.y)
 
-func _create_item_slot(item_id: String) -> Control:
+	var strip := Control.new()
+	strip.name = "ItemStrip"
+	strip.anchor_left = 1.0
+	strip.anchor_top = 1.0
+	strip.anchor_right = 1.0
+	strip.anchor_bottom = 1.0
+	strip.offset_left = -(strip_width + right_margin)
+	strip.offset_top = -(strip_height + bottom_margin)
+	strip.offset_right = -right_margin
+	strip.offset_bottom = -bottom_margin
+	root.add_child(strip)
+
+	heal_slot.position = Vector2(0.0, strip_height - heal_slot.custom_minimum_size.y)
+	attack_slot.position = Vector2(heal_slot.custom_minimum_size.x + 10.0, strip_height - attack_slot.custom_minimum_size.y)
+	strip.add_child(heal_slot)
+	strip.add_child(attack_slot)
+
+func _create_display_slot(slot_name: String, slot_size: Vector2, icon_size: Vector2) -> Control:
 	var slot := Control.new()
-	slot.name = "%sSlot" % item_id.capitalize()
+	slot.name = slot_name
 	slot.custom_minimum_size = slot_size
 
 	var border := ColorRect.new()
 	border.name = "Border"
-	border.color = Color(0.9, 0.82, 0.55, 0.75)
+	border.color = Color(0.92, 0.82, 0.46, 0.95)
 	border.position = Vector2.ZERO
 	border.size = slot_size
 	slot.add_child(border)
 
 	var inner := ColorRect.new()
 	inner.name = "InnerMask"
-	inner.color = Color(0.0, 0.0, 0.0, 1.0)
-	inner.position = Vector2(2.0, 2.0)
-	inner.size = slot_size - Vector2(4.0, 4.0)
+	inner.color = Color(0.0, 0.0, 0.0, 0.94)
+	inner.position = Vector2(3.0, 3.0)
+	inner.size = slot_size - Vector2(6.0, 6.0)
 	slot.add_child(inner)
 
 	var icon := TextureRect.new()
 	icon.name = "Icon"
-	icon.texture = load(String(ITEM_ICON_PATHS[item_id])) as Texture2D
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.size = icon_size
@@ -86,10 +103,10 @@ func _create_item_slot(item_id: String) -> Control:
 
 	var count_label := Label.new()
 	count_label.name = "Count"
-	count_label.offset_left = 34.0
-	count_label.offset_top = 34.0
-	count_label.offset_right = 64.0
-	count_label.offset_bottom = 64.0
+	count_label.offset_left = slot_size.x - 36.0
+	count_label.offset_top = slot_size.y - 34.0
+	count_label.offset_right = slot_size.x - 6.0
+	count_label.offset_bottom = slot_size.y - 4.0
 	count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	count_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 	count_label.text = "10"
@@ -100,8 +117,10 @@ func _create_item_slot(item_id: String) -> Control:
 	count_label.add_theme_constant_override("shadow_offset_y", 2)
 	slot.add_child(count_label)
 
-	count_labels[item_id] = count_label
-	slot_borders.append(border)
+	var slot_id := "attack" if slot_name == "AttackSlot" else "heal"
+	count_labels[slot_id] = count_label
+	slot_icons[slot_id] = icon
+	slot_frames[slot_id] = border
 	return slot
 
 func _bind_player() -> void:
@@ -117,21 +136,26 @@ func _bind_player() -> void:
 func _update_counts() -> void:
 	if player == null or not player.has_method("get_item_count"):
 		return
-	for item_id in ITEM_ORDER:
-		var label := count_labels.get(item_id) as Label
-		if label != null:
-			label.text = str(int(player.get_item_count(item_id)))
-	var selected_index := 0
-	if player.get("selected_item_index") != null:
-		selected_index = int(player.get("selected_item_index"))
-	for index in slot_borders.size():
-		var border := slot_borders[index]
-		if border == null:
-			continue
-		var selected := index == selected_index
-		border.color = Color(1.0, 0.88, 0.28, 1.0) if selected else Color(0.68, 0.62, 0.45, 0.72)
-		var thickness := 5.0 if selected else 2.0
-		var inner := border.get_parent().get_node_or_null("InnerMask") as ColorRect
-		if inner != null:
-			inner.position = Vector2(thickness, thickness)
-			inner.size = slot_size - Vector2(thickness * 2.0, thickness * 2.0)
+	_update_slot("attack", _get_selected_attack_item_id())
+	_update_slot("heal", _get_selected_heal_item_id())
+
+func _update_slot(slot_id: String, item_id: String) -> void:
+	var icon := slot_icons.get(slot_id) as TextureRect
+	if icon != null:
+		icon.texture = load(String(ITEM_ICON_PATHS.get(item_id, ""))) as Texture2D
+	var count_label := count_labels.get(slot_id) as Label
+	if count_label != null:
+		count_label.text = str(int(player.get_item_count(item_id)))
+	var border := slot_frames.get(slot_id) as ColorRect
+	if border != null:
+		border.color = Color(0.98, 0.86, 0.36, 1.0) if slot_id == "attack" else Color(0.84, 0.78, 0.48, 0.95)
+
+func _get_selected_attack_item_id() -> String:
+	if player != null and player.has_method("get_selected_attack_item_id"):
+		return String(player.get_selected_attack_item_id())
+	return ATTACK_ITEM_IDS[0]
+
+func _get_selected_heal_item_id() -> String:
+	if player != null and player.has_method("get_selected_heal_item_id"):
+		return String(player.get_selected_heal_item_id())
+	return HEAL_ITEM_IDS[0]

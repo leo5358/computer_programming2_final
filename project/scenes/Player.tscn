@@ -46,3 +46,5 @@ texture_filter = 1
 [node name="DashSfx" type="AudioStreamPlayer2D" parent="."]
 
 [node name="PerfectDodgeSfx" type="AudioStreamPlayer2D" parent="."]
+
+[node name="KunaiSfx" type="AudioStreamPlayer2D" parent="."]

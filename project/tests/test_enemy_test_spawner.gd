@@ -26,15 +26,22 @@ func _initialize() -> void:
 		push_error("Enemy test field should include the chapter 1 foothill stairs map")
 		quit(1)
 		return
+	await process_frame
+	var baseline_map_enemy_count := get_nodes_in_group("map_spawned_enemy").size()
+	if baseline_map_enemy_count != 0:
+		push_error("Enemy test field should start without AB foothill map enemies while encounters are being re-placed")
+		quit(1)
+		return
 
 	main._spawn_enemy(main.WARRIOR_SCENE, Vector2(460, 360))
 	await process_frame
-	if get_nodes_in_group("minor_enemy").size() != 1:
+	if get_nodes_in_group("minor_enemy").size() != baseline_map_enemy_count + 1:
 		push_error("Spawner should create a minor enemy")
 		quit(1)
 		return
 
-	var enemy: Node = get_nodes_in_group("minor_enemy")[0]
+	var minor_enemies := get_nodes_in_group("minor_enemy")
+	var enemy: Node = minor_enemies[minor_enemies.size() - 1]
 	if not enemy.has_method("get_vision_rect"):
 		push_error("Spawned enemy should expose vision rect for debug mode")
 		quit(1)
@@ -55,6 +62,7 @@ func _initialize() -> void:
 		quit(1)
 		return
 	main.reset_test_field()
+	await process_frame
 	await process_frame
 	if not main.has_method("_spawn_debug_boss"):
 		push_error("Spawner should expose debug Boss spawning for key 0")
@@ -82,8 +90,13 @@ func _initialize() -> void:
 
 	main.reset_test_field()
 	await process_frame
-	if get_nodes_in_group("minor_enemy").size() != 0 or get_nodes_in_group("boss").size() != 0:
-		push_error("Reset should clear all spawned enemies and bosses")
+	await process_frame
+	if get_nodes_in_group("map_spawned_enemy").size() != baseline_map_enemy_count:
+		push_error("Reset should keep AB foothill map enemies empty")
+		quit(1)
+		return
+	if get_nodes_in_group("minor_enemy").size() != baseline_map_enemy_count or get_nodes_in_group("boss").size() != 0:
+		push_error("Reset should clear debug-spawned enemies and bosses")
 		quit(1)
 		return
 	if main.get_node_or_null("TrainingDummy") != null:
@@ -96,8 +109,164 @@ func _initialize() -> void:
 		push_error("Main should include player for debug death test")
 		quit(1)
 		return
+	var checkpoint_prompt: Label = main.get_node_or_null("MapTransitionUI/PromptLabel")
+	if checkpoint_prompt == null:
+		push_error("Main should include a map interaction prompt label")
+		quit(1)
+		return
+	var rear_checkpoint := main.get_node_or_null("Chapter1Map/Checkpoints/CheckpointRear") as Node2D
+	if rear_checkpoint == null:
+		push_error("AB foothill should include the rear checkpoint for rest testing")
+		quit(1)
+		return
+	player.set("item_counts", {
+		"kunai": 2,
+		"ash_balls": 3,
+		"gourd": 4,
+		"pill": 5,
+		"capsule": 6,
+	})
+	player.set("health", 23.0)
+	player.set("lives", 1)
+	player.set("posture", 57.0)
+	player.emit_signal("stats_changed")
+	player.global_position = rear_checkpoint.global_position + Vector2(220.0, 0.0)
+	main._update_map_interaction_prompt()
+	if not checkpoint_prompt.visible or checkpoint_prompt.text != "按下F在此處休息(存檔)":
+		push_error("Checkpoint rest prompt should appear near the checkpoint within 300 pixels")
+		quit(1)
+		return
+	player.global_position = rear_checkpoint.global_position
+	await process_frame
+	if not await main._activate_nearest_checkpoint():
+		push_error("Checkpoint interaction should succeed when standing on the checkpoint art")
+		quit(1)
+		return
+	if get_nodes_in_group("map_spawned_enemy").size() != baseline_map_enemy_count:
+		push_error("Checkpoint rest should keep AB foothill map enemies empty")
+		quit(1)
+		return
+	if int(player.get("heartbeat")) != 70:
+		push_error("Checkpoint rest should calm heartbeat back to the base rate")
+		quit(1)
+		return
+	if player.get_item_count("kunai") != 10 or player.get_item_count("capsule") != 10:
+		push_error("Checkpoint rest should refill all item counts to their defaults")
+		quit(1)
+		return
+	if not is_equal_approx(float(player.get("health")), float(player.get("max_health"))):
+		push_error("Checkpoint rest should refill player health to max")
+		quit(1)
+		return
+	if int(player.get("lives")) != int(player.get("max_lives")):
+		push_error("Checkpoint rest should refill player revive lives to max")
+		quit(1)
+		return
+	if not is_zero_approx(float(player.get("posture"))):
+		push_error("Checkpoint rest should reset player posture bar to zero")
+		quit(1)
+		return
+
+	var pause_overlay: CanvasLayer = main.get_node_or_null("PauseOverlay")
+	var death_overlay: CanvasLayer = main.get_node_or_null("DeathOverlay")
+	var revive_overlay: CanvasLayer = main.get_node_or_null("ReviveOverlay")
+	if pause_overlay == null:
+		push_error("Main should include PauseOverlay for ESC pause")
+		quit(1)
+		return
+	if death_overlay == null:
+		push_error("Main should include DeathOverlay for checkpoint death flow checks")
+		quit(1)
+		return
+	if revive_overlay == null:
+		push_error("Main should include ReviveOverlay for mid-death revive decisions")
+		quit(1)
+		return
+	revive_overlay.set("fade_duration", 0.01)
+	revive_overlay.set("countdown_duration", 0.2)
+	if not main.has_method("_open_pause_menu") or not main.has_method("_resume_from_pause"):
+		push_error("Main should expose pause menu open and resume flow")
+		quit(1)
+		return
+	main._open_pause_menu()
+	await process_frame
+	if not paused:
+		push_error("Opening pause menu should pause the scene tree")
+		quit(1)
+		return
+	if not pause_overlay.visible:
+		push_error("Opening pause menu should show PauseOverlay")
+		quit(1)
+		return
+	main._resume_from_pause()
+	await process_frame
+	if paused:
+		push_error("Resuming pause menu should unpause the scene tree")
+		quit(1)
+		return
+	if pause_overlay.visible:
+		push_error("Resuming pause menu should hide PauseOverlay")
+		quit(1)
+		return
+	if not main.has_method("_save_current_checkpoint_progress"):
+		push_error("Main should expose checkpoint save for pause return-to-menu")
+		quit(1)
+		return
+	if save_manager != null and save_manager.has_method("delete_save"):
+		save_manager.delete_save()
+	player.set("spawn_position", Vector2(888, 571))
+	player.set("health", 76.0)
+	main._save_current_checkpoint_progress()
+	if save_manager == null or not save_manager.has_save():
+		push_error("Pause save should create a checkpoint save when none exists")
+		quit(1)
+		return
+	if save_manager.get_saved_position().distance_to(Vector2(888, 571)) > 1.0:
+		push_error("Pause save should use the player's checkpoint spawn position")
+		quit(1)
+		return
+	if save_manager.has_method("delete_save"):
+		save_manager.delete_save()
 	if not main.has_method("_debug_kill_player"):
 		push_error("Spawner should expose debug player death for checkpoint testing")
+		quit(1)
+		return
+	save_manager.save_game("ab_foothill", Vector2(777.0, 571.0), 88.0)
+	player.spawn_position = Vector2(777.0, 571.0)
+	player.global_position = Vector2(1200.0, 571.0)
+	player.heartbeat = 249.0
+	player._start_attack()
+	await process_frame
+	if player.state != player.PlayerState.DEAD:
+		push_error("Heartbeat death should still enter the player death state during the fade-out")
+		quit(1)
+		return
+	var fade_rect: ColorRect = main.get_node_or_null("MapTransitionUI/FadeRect")
+	if fade_rect == null or not fade_rect.visible:
+		push_error("Heartbeat death should show the blackout fade")
+		quit(1)
+		return
+	if absf(fade_rect.color.a - 0.2) > 0.05:
+		push_error("Heartbeat death blackout should start near 20 percent opacity")
+		quit(1)
+		return
+	await create_timer(2.3).timeout
+	if death_overlay == null or not death_overlay.visible:
+		push_error("Heartbeat death should hand off to the death overlay after the blackout completes")
+		quit(1)
+		return
+	if player.global_position.distance_to(Vector2(1200.0, 571.0)) > 1.0:
+		push_error("Heartbeat death should wait on the death overlay instead of auto-respawning")
+		quit(1)
+		return
+	main._retry_from_checkpoint()
+	await process_frame
+	if player.global_position.distance_to(Vector2(777.0, 571.0)) > 1.0:
+		push_error("Retry from heartbeat death should still return to the saved checkpoint")
+		quit(1)
+		return
+	if fade_rect.visible:
+		push_error("Retry should clear the blackout fade after respawn")
 		quit(1)
 		return
 	player.set("health", player.get("max_health"))
@@ -107,9 +276,50 @@ func _initialize() -> void:
 		push_error("Debug player death should force HP to zero")
 		quit(1)
 		return
-	var death_overlay: CanvasLayer = main.get_node_or_null("DeathOverlay")
+	await create_timer(1.15).timeout
+	await process_frame
+	if revive_overlay == null or not revive_overlay.visible:
+		push_error("Player death with extra lives should show the revive overlay after the death animation")
+		quit(1)
+		return
+	if death_overlay.visible:
+		push_error("Player death with extra lives should not show the final death overlay")
+		quit(1)
+		return
+	var death_position := (player as Node2D).global_position
+	revive_overlay.confirm_selection()
+	await process_frame
+	if revive_overlay.visible:
+		push_error("Confirming revive should hide the revive overlay")
+		quit(1)
+		return
+	if float(player.get("health")) != float(player.get("max_health")):
+		push_error("Confirming revive should refill player health")
+		quit(1)
+		return
+	if int(player.get("lives")) != int(player.get("max_lives")) - 1:
+		push_error("Confirming revive should consume one revive life")
+		quit(1)
+		return
+	if int(player.get("heartbeat")) != 70:
+		push_error("Confirming revive should reset heartbeat to 70")
+		quit(1)
+		return
+	if (player as Node2D).global_position.distance_to(death_position) > 1.0:
+		push_error("Confirming revive should keep the player at the defeat position")
+		quit(1)
+		return
+
+	player.set("lives", 1)
+	player.set("health", player.get("max_health"))
+	main._debug_kill_player()
+	await process_frame
 	if death_overlay == null or not death_overlay.visible:
-		push_error("Player death should show the death overlay")
+		push_error("Player death on the last life should show the final death overlay")
+		quit(1)
+		return
+	if revive_overlay.visible:
+		push_error("Player death on the last life should not show the revive overlay")
 		quit(1)
 		return
 	var bgm: AudioStreamPlayer = main.get_node_or_null("BgmPlayer")
@@ -121,6 +331,8 @@ func _initialize() -> void:
 		push_error("Main should expose retry from checkpoint")
 		quit(1)
 		return
+	if save_manager != null and save_manager.has_method("delete_save"):
+		save_manager.delete_save()
 	player.set("spawn_position", Vector2(720, 571))
 	bgm.stop()
 	bgm.play(12.0)

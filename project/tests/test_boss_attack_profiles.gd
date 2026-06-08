@@ -83,6 +83,11 @@ func _initialize() -> void:
 		push_error("Parrying Boss chop should knock the player away from the Boss")
 		quit(1)
 		return
+	player._physics_process(player.hitstop_timer + 0.01)
+	if player.velocity.x >= -player.heavy_parry_rebound + 1.0:
+		push_error("Parrying Boss chop should keep heavy recoil after hitstop ends")
+		quit(1)
+		return
 	var hit_impact := player.get_node_or_null("HitImpactVfx") as AnimatedSprite2D
 	if hit_impact == null or not hit_impact.visible or hit_impact.animation != "chop":
 		push_error("Parrying Boss chop should show the chop hit impact VFX")
@@ -144,9 +149,14 @@ func _initialize() -> void:
 		return
 	boss.attack_elapsed = 0.420
 	boss._update_attack_visual(true, false)
-	var warning_label := boss.get_node_or_null("DebugResponseLabel") as Label
+	var warning_label := boss.perilous_label_node as Label
+	var debug_response_label := boss.get_node_or_null("DebugResponseLabel") as Label
 	if warning_label == null or not warning_label.visible:
 		push_error("Thrust cue should show the perilous warning label")
+		quit(1)
+		return
+	if debug_response_label != null and debug_response_label.visible:
+		push_error("Thrust cue should not also reuse DebugResponseLabel as a second perilous warning")
 		quit(1)
 		return
 	boss.attack_elapsed = 0.810

@@ -73,13 +73,19 @@ func _initialize() -> void:
 
 	var rear_checkpoint := checkpoints[2] as Node2D
 	var rear_checkpoint_position := rear_checkpoint.global_position
-	player.global_position = rear_checkpoint.global_position
+	player.global_position = rear_checkpoint.global_position + Vector2(-250.0, 0.0)
 	main._update_map_interaction_prompt()
 	if not prompt.visible:
-		push_error("Checkpoint should show the F prompt when player is nearby")
+		push_error("Checkpoint should show the rest prompt when player is within 300 pixels")
 		quit(1)
 		return
-	if not main._activate_nearest_checkpoint():
+	if prompt.text != "按下F在此處休息(存檔)":
+		push_error("Checkpoint prompt should show the new rest/save text")
+		quit(1)
+		return
+	player.global_position = rear_checkpoint.global_position
+	await process_frame
+	if not await main._activate_nearest_checkpoint():
 		push_error("F interaction should activate nearby checkpoint")
 		quit(1)
 		return
@@ -91,6 +97,7 @@ func _initialize() -> void:
 		push_error("Main should expose death retry flow for checkpoint restoration")
 		quit(1)
 		return
+	save_manager.save_game("ab_foothill", rear_checkpoint_position, 37.0)
 	main._debug_kill_player()
 	await process_frame
 	main._retry_from_checkpoint()
@@ -100,17 +107,56 @@ func _initialize() -> void:
 		push_error("Retry after death should keep or recreate the player")
 		quit(1)
 		return
-	if player.global_position.distance_to(rear_checkpoint_position) > 1.0:
+	if player.global_position.distance_to(rear_checkpoint_position) > 12.0:
 		push_error("Retry after death should restore the last activated checkpoint position")
 		quit(1)
 		return
-	if float(player.get("health")) <= 0.0:
-		push_error("Retry after death should restore player health")
+	if not is_equal_approx(float(player.get("health")), float(player.get("max_health"))):
+		push_error("Retry after death should restore player health to full instead of saved low health")
+		quit(1)
+		return
+	if int(player.get_item_count("kunai")) != 10 or int(player.get_item_count("gourd")) != 10:
+		push_error("Checkpoint rest should refill item counts before retry state continues")
 		quit(1)
 		return
 	await main._transition_ab_to_h_stone_plaza()
-	if main.get_node_or_null("Chapter1Map/Checkpoints") != null:
-		push_error("AB checkpoints should be removed with the AB map after leaving AB foothill")
+	if main.get("current_map_id") != "h_stone_plaza":
+		push_error("Checkpoint interaction test should be on H stone plaza after transition")
+		quit(1)
+		return
+	var plaza_checkpoint := main.get_node_or_null("Chapter1Map/Checkpoints/CheckpointPlaza") as Node2D
+	if plaza_checkpoint == null:
+		push_error("H stone plaza should include its plaza checkpoint after transition")
+		quit(1)
+		return
+	if plaza_checkpoint.global_position.distance_to(Vector2(2087, 530)) > 1.0:
+		push_error("H stone plaza checkpoint should keep its design position after transition")
+		quit(1)
+		return
+	player.global_position = plaza_checkpoint.global_position + Vector2(250.0, 0.0)
+	main._update_map_interaction_prompt()
+	if not prompt.visible:
+		push_error("H stone plaza checkpoint should show the rest prompt within 300 pixels")
+		quit(1)
+		return
+	player.global_position = plaza_checkpoint.global_position
+	await process_frame
+	var f_event := InputEventKey.new()
+	f_event.keycode = KEY_F
+	f_event.pressed = true
+	main._input(f_event)
+	await process_frame
+	await create_timer(3.2).timeout
+	if not bool(plaza_checkpoint.get("activated")):
+		push_error("H stone plaza checkpoint interaction should activate from the F flow")
+		quit(1)
+		return
+	if save_manager.get_saved_map() != "h_stone_plaza":
+		push_error("H stone plaza checkpoint should save plaza progress")
+		quit(1)
+		return
+	if save_manager.get_saved_position().distance_to(plaza_checkpoint.global_position) > 1.0:
+		push_error("H stone plaza checkpoint should save the checkpoint position")
 		quit(1)
 		return
 

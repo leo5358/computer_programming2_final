@@ -36,11 +36,7 @@ func _initialize() -> void:
 
 	boss.reset_combat_state()
 	boss.guard_chance = 0.0
-	boss.receive_block_feedback(true)
-	boss.receive_block_feedback(true)
-	boss.receive_block_feedback(true)
-	boss.receive_block_feedback(true)
-	boss.receive_block_feedback(true)
+	boss.posture = boss.max_posture - (boss.max_posture * 0.05)
 	boss.receive_block_feedback(true)
 	if not boss.posture_broken:
 		push_error("Boss should enter posture-broken state when posture reaches max")
@@ -52,6 +48,16 @@ func _initialize() -> void:
 		return
 	if boss.current_animation != "hurt" and boss.current_animation != "deflect1" and boss.current_animation != "deflect2":
 		push_error("Boss posture break should leave a readable stunned/parried animation")
+		quit(1)
+		return
+
+	boss._physics_process(boss.posture_break_idle_reset_delay_boss + 0.1)
+	if boss.posture_broken or boss.can_be_executed():
+		push_error("Boss posture break should reset after the idle delay")
+		quit(1)
+		return
+	if absf(boss.posture) > 0.01:
+		push_error("Boss posture reset should clear posture back to zero")
 		quit(1)
 		return
 

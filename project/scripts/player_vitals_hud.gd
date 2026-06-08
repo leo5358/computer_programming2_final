@@ -2,8 +2,8 @@ extends CanvasLayer
 
 const DEATH_ICON_PATH := "res://assets/items/death/death.png"
 const HEART_ICON_PATH := "res://assets/items/heart/heart.png"
-const MIN_HEARTBEAT := 65.0
-const MAX_HEARTBEAT := 120.0
+const MIN_HEARTBEAT := 70.0
+const MAX_HEARTBEAT := 250.0
 
 @export var icon_size := Vector2(42.0, 42.0)
 @export var heart_size := Vector2(34.0, 34.0)

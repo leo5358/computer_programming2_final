@@ -16,6 +16,25 @@ func _initialize() -> void:
 		push_error("CombatRuntime should exist")
 		quit(1)
 		return
+	if not InputMap.has_action("reset_combat"):
+		push_error("Project input map should include reset_combat")
+		quit(1)
+		return
+	var has_f3_key := false
+	var has_r_key := false
+	for event in InputMap.action_get_events("reset_combat"):
+		if event is InputEventKey and event.keycode == KEY_F3:
+			has_f3_key = true
+		if event is InputEventKey and event.keycode == KEY_R:
+			has_r_key = true
+	if not has_f3_key:
+		push_error("reset_combat should remain bound to F3")
+		quit(1)
+		return
+	if has_r_key:
+		push_error("reset_combat should no longer be bound to R")
+		quit(1)
+		return
 
 	runtime.register_input(1, 900)
 	var attack_id: int = runtime.notify_attack_active(0, 1000)
@@ -46,7 +65,7 @@ func _initialize() -> void:
 	boss.global_position += Vector2(48.0, 0.0)
 
 	runtime.reset_combat()
-	if abs(player.heartbeat - 65.0) > 0.001:
+	if abs(player.heartbeat - 70.0) > 0.001:
 		push_error("Reset combat should restore player heartbeat")
 		quit(1)
 		return

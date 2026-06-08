@@ -38,3 +38,7 @@ docs/
 
 # Spec
 spec.md
+
+#agent files
+.gemini/
+.antigravitycli/

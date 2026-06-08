@@ -5,5 +5,5 @@ compatibility_minimum = "4.1.0"
 [libraries]
 windows.debug.x86_64 = "res://bin/libgdexample.windows.template_debug.x86_64.dll"
 windows.release.x86_64 = "res://bin/libgdexample.windows.template_debug.x86_64.dll"
-macos.debug = "res://bin/libgdexample.macos.template_debug.arm64.dylib"
-macos.release = "res://bin/libgdexample.macos.template_debug.arm64.dylib"
+macos.debug = "res://bin/libgdexample.macos.template_debug.universal.dylib"
+macos.release = "res://bin/libgdexample.macos.template_debug.universal.dylib"

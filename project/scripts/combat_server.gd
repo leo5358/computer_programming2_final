@@ -28,18 +28,18 @@ enum AttackType {
 	GRAB,
 }
 
-const BPM_MIN := 65.0
-const BPM_MAX := 200.0
+const BPM_MIN := 70.0
+const BPM_MAX := 250.0
 const INPUT_BUFFER_MS := 150
 const PARRY_EARLY_MS := 100
 const PARRY_LATE_MS := 50
 
 var native_server: Object
-var player_hp := 100.0
+var player_hp := 120.0
 var player_posture := 0.0
 var player_bpm := BPM_MIN
 var player_state := EntityState.IDLE
-var boss_hp := 140.0
+var boss_hp := 400.0
 var boss_posture := 0.0
 var boss_state := EntityState.IDLE
 var boss_ai_state := 0
@@ -61,11 +61,11 @@ func reset_combat() -> void:
 		native_server.reset_combat()
 		return
 
-	player_hp = 100.0
+	player_hp = 120.0
 	player_posture = 0.0
 	player_bpm = BPM_MIN
 	player_state = EntityState.IDLE
-	boss_hp = 140.0
+	boss_hp = 400.0
 	boss_posture = 0.0
 	boss_state = EntityState.IDLE
 	boss_ai_state = 0

@@ -4,11 +4,15 @@ const TARGET_GROUPS := ["player", "boss", "minor_enemy"]
 const LINE_NAME := "HurtboxDebugLine"
 const ATTACK_LINE_NAME := "AttackHitboxDebugLine"
 const VISION_LINE_NAME := "VisionDebugLine"
+const COORDINATE_LAYER_NAME := "CoordinateHudLayer"
+const PLAYER_COORDINATE_LABEL_NAME := "PlayerCoordinateLabel"
 
 var visible_lines := false
+var coordinate_label: Label
 
 func _ready() -> void:
 	add_to_group("hurtbox_debug_overlay")
+	coordinate_label = _ensure_coordinate_label()
 	_set_lines_visible(false)
 
 func _input(event: InputEvent) -> void:
@@ -19,12 +23,16 @@ func _input(event: InputEvent) -> void:
 func _process(_delta: float) -> void:
 	if visible_lines:
 		_refresh_visible_lines()
+		_update_player_coordinate_label()
 
 func toggle_hurtbox_debug() -> void:
 	visible_lines = not visible_lines
 	_set_lines_visible(visible_lines)
 
 func _set_lines_visible(show_lines: bool) -> void:
+	_ensure_coordinate_label().visible = show_lines
+	if show_lines:
+		_update_player_coordinate_label()
 	for target in _targets():
 		var line := _ensure_debug_line(target)
 		line.visible = show_lines
@@ -94,6 +102,48 @@ func _ensure_vision_debug_line(target: Node2D) -> Line2D:
 		line.default_color = Color(1.0, 0.85, 0.1, 0.75)
 		target.add_child(line)
 	return line
+
+func _ensure_coordinate_label() -> Label:
+	if coordinate_label != null:
+		return coordinate_label
+	var layer := get_node_or_null(COORDINATE_LAYER_NAME) as CanvasLayer
+	if layer == null:
+		layer = CanvasLayer.new()
+		layer.name = COORDINATE_LAYER_NAME
+		layer.layer = 30
+		add_child(layer)
+	coordinate_label = layer.get_node_or_null(PLAYER_COORDINATE_LABEL_NAME) as Label
+	if coordinate_label == null:
+		coordinate_label = Label.new()
+		coordinate_label.name = PLAYER_COORDINATE_LABEL_NAME
+		coordinate_label.offset_left = 16.0
+		coordinate_label.offset_top = 16.0
+		coordinate_label.offset_right = 320.0
+		coordinate_label.offset_bottom = 44.0
+		coordinate_label.set("theme_override_font_sizes/font_size", 18)
+		coordinate_label.set("theme_override_colors/font_color", Color(0.8, 1.0, 0.75, 1.0))
+		coordinate_label.set("theme_override_colors/font_outline_color", Color(0.0, 0.0, 0.0, 1.0))
+		coordinate_label.set("theme_override_constants/outline_size", 3)
+		layer.add_child(coordinate_label)
+	coordinate_label.visible = false
+	return coordinate_label
+
+func _update_player_coordinate_label() -> void:
+	var label := _ensure_coordinate_label()
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player == null:
+		label.text = "Player Hitbox: x=-- y=--"
+		return
+	var collision_shape := player.get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if collision_shape == null:
+		label.text = "Player Hitbox: x=-- y=--"
+		return
+	var rect_shape := collision_shape.shape as RectangleShape2D
+	if rect_shape == null:
+		label.text = "Player Hitbox: x=-- y=--"
+		return
+	var hitbox_bottom_center: Vector2 = collision_shape.global_transform * Vector2(0.0, rect_shape.size.y * 0.5)
+	label.text = "Player Hitbox: x=%.1f y=%.1f" % [hitbox_bottom_center.x, hitbox_bottom_center.y]
 
 func _update_line_shape(target: Node2D, line: Line2D) -> void:
 	var collision_shape := target.get_node_or_null("CollisionShape2D") as CollisionShape2D

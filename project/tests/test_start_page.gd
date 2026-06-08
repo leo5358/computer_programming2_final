@@ -21,6 +21,15 @@ func _initialize() -> void:
 			push_error("Start page should include menu node: %s" % node_path)
 			quit(1)
 			return
+	var click_sfx := start_page.get_node_or_null("ButtonClickSfx") as AudioStreamPlayer
+	if click_sfx == null or click_sfx.stream == null:
+		push_error("Start page should include button click SFX")
+		quit(1)
+		return
+	if click_sfx.stream.resource_path != "res://assets/sfx/buttonClick.MP3":
+		push_error("Start page button click SFX should use assets/sfx/buttonClick.MP3")
+		quit(1)
+		return
 	var selector: CanvasItem = start_page.get_node("menu_selector")
 	var selector_glow: CanvasItem = start_page.get_node("menu_selector_glow")
 	if selector.visible or selector_glow.visible:
@@ -37,8 +46,8 @@ func _initialize() -> void:
 		push_error("Start page should have BGM stream")
 		quit(1)
 		return
-	if start_bgm.stream.resource_path != "res://assets/audio/BGMs/start_page_music.mp3":
-		push_error("Start page should use assets/audio/BGMs/start_page_music.mp3")
+	if start_bgm.stream.resource_path != "res://assets/BGMs/start_page_music.mp3":
+		push_error("Start page should use assets/BGMs/start_page_music.mp3")
 		quit(1)
 		return
 	if "loop" in start_bgm.stream and not bool(start_bgm.stream.loop):
@@ -100,6 +109,10 @@ func _initialize() -> void:
 		return
 	start_page._selected_index = 1
 	start_page._confirm_selection()
+	if not click_sfx.playing:
+		push_error("Confirming a start page option should play button click SFX")
+		quit(1)
+		return
 	await process_frame
 	if save_manager.has_save():
 		push_error("New Game should clear existing checkpoint save")

@@ -62,9 +62,29 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+	var health_before_followup: float = boss.health
 	var result: Variant = boss.receive_player_attack(16.0, 18.0)
+	if result != true:
+		push_error("Player attack should still connect during boss posture broken state")
+		quit(1)
+		return
+	if boss.defeated_flag:
+		push_error("Boss should not die from a weak follow-up hit during posture break")
+		quit(1)
+		return
+	if boss.health >= health_before_followup:
+		push_error("Broken boss should take direct health damage from follow-up hits")
+		quit(1)
+		return
+	if not bool(boss.get("posture_break_took_followup_hit_boss")):
+		push_error("Broken boss should shorten its reset timer after a follow-up hit")
+		quit(1)
+		return
+
+	boss.health = 12.0
+	result = boss.receive_player_attack(16.0, 18.0)
 	if result != true or not bool(boss.defeated_flag) or boss.health > 0.0:
-		push_error("Player attack should execute Boss during posture broken state")
+		push_error("Boss should die once a posture-break follow-up fully depletes health")
 		quit(1)
 		return
 

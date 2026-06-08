@@ -25,7 +25,7 @@ func _initialize() -> void:
 		push_error("Main scene should include map-aware BgmPlayer")
 		quit(1)
 		return
-	if bgm.get_bgm_path() != "res://assets/audio/BGMs/general_music.mp3":
+	if bgm.get_bgm_path() != "res://assets/BGMs/general_music.mp3":
 		push_error("AB foothill should start with general BGM")
 		quit(1)
 		return
@@ -34,10 +34,14 @@ func _initialize() -> void:
 		quit(1)
 		return
 
-	player.global_position.x = 15300.0
+	player.global_position = Vector2(15060.0, 571.0)
 	await process_frame
 	if not prompt.visible:
 		push_error("AB foothill exit should show F prompt inside interaction range")
+		quit(1)
+		return
+	if prompt.text != "按下F進入":
+		push_error("AB foothill exit should show the new door-enter prompt text")
 		quit(1)
 		return
 
@@ -46,6 +50,25 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+	player.global_position = Vector2(14990.0, 571.0)
+	await process_frame
+	main._update_map_interaction_prompt()
+	if prompt.visible:
+		push_error("AB foothill exit prompt should not show outside Door center x ± 300")
+		quit(1)
+		return
+	player.global_position = Vector2(15170.0, 571.0)
+	await process_frame
+	if not prompt.visible:
+		push_error("AB foothill exit prompt should show again inside Door center x ± 300")
+		quit(1)
+		return
+	if main._can_use_ab_exit():
+		push_error("AB foothill exit should not trigger interaction outside Door center x ± 150")
+		quit(1)
+		return
+	player.global_position = Vector2(15341.0, 571.0)
+	await process_frame
 	await main._transition_ab_to_h_stone_plaza()
 
 	if main.get("current_map_id") != "h_stone_plaza":
@@ -60,40 +83,66 @@ func _initialize() -> void:
 		push_error("Player should spawn at H stone plaza entrance")
 		quit(1)
 		return
-	if bgm.get_bgm_path() != "res://assets/audio/BGMs/general_music.mp3":
+	player.global_position.x = 2998.0
+	if not player._is_at_world_horizontal_boundary(1.0):
+		push_error("H stone plaza should set player climb boundary to x=3000")
+		quit(1)
+		return
+	if bgm.get_bgm_path() != "res://assets/BGMs/general_music.mp3":
 		push_error("H stone plaza should keep general BGM after transition")
 		quit(1)
 		return
-	player.global_position.x = 2850.0
-	var boss_gate_position := player.global_position
+	player.global_position = Vector2(2550.0, 530.5)
 	await process_frame
 	main._update_map_interaction_prompt()
 	if not prompt.visible:
 		push_error("H stone plaza exit should show F prompt inside interaction range")
 		quit(1)
 		return
+	if prompt.text != "按下F進入":
+		push_error("H stone plaza exit should show the new door-enter prompt text")
+		quit(1)
+		return
+	player.global_position = Vector2(2500.0, 530.5)
+	await process_frame
+	main._update_map_interaction_prompt()
+	if prompt.visible:
+		push_error("H stone plaza exit prompt should not show outside ShimenawaCurtain center x ± 300")
+		quit(1)
+		return
+	player.global_position = Vector2(2650.0, 530.5)
+	await process_frame
+	main._update_map_interaction_prompt()
+	if not prompt.visible:
+		push_error("H stone plaza exit prompt should show again inside ShimenawaCurtain center x ± 300")
+		quit(1)
+		return
+	if main._can_use_h_stone_plaza_exit():
+		push_error("H stone plaza exit should not trigger interaction outside ShimenawaCurtain center x ± 150")
+		quit(1)
+		return
+	player.global_position = Vector2(2825.16, 530.5)
 
 	if not main.has_method("_transition_h_stone_plaza_to_boss_interior"):
 		push_error("Main scene should expose H stone plaza to boss interior transition")
 		quit(1)
 		return
 
-	await main._transition_h_stone_plaza_to_boss_interior()
+	if save_manager != null and save_manager.has_method("delete_save"):
+		save_manager.delete_save()
+	var boss_f_event := InputEventKey.new()
+	boss_f_event.keycode = KEY_F
+	boss_f_event.pressed = true
+	main._input(boss_f_event)
+	await process_frame
+	await create_timer(1.7).timeout
 
 	if main.get("current_map_id") != "boss_interior":
 		push_error("Interacting with H stone plaza exit should switch to boss interior")
 		quit(1)
 		return
-	if save_manager == null or not save_manager.has_save():
-		push_error("Entering boss interior should save the boss gate checkpoint")
-		quit(1)
-		return
-	if save_manager.get_saved_map() != "h_stone_plaza":
-		push_error("Boss gate checkpoint should save H stone plaza, not boss interior")
-		quit(1)
-		return
-	if save_manager.get_saved_position().distance_to(boss_gate_position) > 1.0:
-		push_error("Boss gate checkpoint should restore the player to the F interaction point before boss")
+	if save_manager != null and save_manager.has_save():
+		push_error("Entering boss interior should not create a checkpoint save")
 		quit(1)
 		return
 	if main.get_node_or_null("Chapter1Map/Camera") == null:
@@ -104,7 +153,12 @@ func _initialize() -> void:
 		push_error("Player should spawn at boss interior entrance")
 		quit(1)
 		return
-	if bgm.get_bgm_path() != "res://assets/audio/BGMs/boss_music.mp3":
+	player.global_position.x = 1998.0
+	if not player._is_at_world_horizontal_boundary(1.0):
+		push_error("Boss interior should set player climb boundary to x=2000")
+		quit(1)
+		return
+	if bgm.get_bgm_path() != "res://assets/BGMs/boss_music.mp3":
 		push_error("Boss interior should switch to boss BGM after transition")
 		quit(1)
 		return

@@ -2,7 +2,7 @@ extends "res://scripts/enemy_base.gd"
 
 const ARROW_SCENE: PackedScene = preload("res://scenes/Arrow.tscn")
 
-@export var arrow_spawn_offset := Vector2(52.0, -46.0)
+@export var arrow_spawn_offset := Vector2(91.0, -90)
 
 func _ready() -> void:
 	display_name = "Archer"
@@ -51,21 +51,22 @@ func _ready() -> void:
 	}
 	custom_animation_speeds = {"idle": 5.0, "attack": 8.0, "hurt": 8.0, "death": 8.0}
 	custom_animation_loops = {"idle": true, "attack": false, "hurt": false, "death": false}
-	max_health = 38.0
+	max_health = 64.0
 	max_posture = 75.0
-	attack_damage = 16.0
+	attack_damage = 23.0
 	attack_posture_damage = 18.0
 	patrol_speed = 34.0
 	chase_speed = 72.0
-	attack_range = 260.0
-	ideal_distance = 220.0
-	too_close_distance = 120.0
-	vision_range = 440.0
-	vision_height = 112.0
-	attack_cue_start = 0.42
-	attack_hit_start = 0.66
-	attack_hit_end = 0.74
-	attack_total_time = 0.95
+	attack_range = 380.0
+	ideal_distance = 340.0
+	too_close_distance = 100.0
+	vision_range = 520.0
+	vision_height = 140.0
+	attack_cooldown_duration = 0.6
+	attack_cue_start = 0.38
+	attack_hit_start = 0.60
+	attack_hit_end = 0.68
+	attack_total_time = 0.88
 	super()
 
 func _update_combat_movement() -> void:
@@ -73,14 +74,16 @@ func _update_combat_movement() -> void:
 	var distance: float = abs(offset_x)
 	if absf(offset_x) > 4.0:
 		facing = sign(offset_x)
-	if distance < too_close_distance:
+	
+	if distance <= attack_range and attack_cooldown <= 0.0:
+		_start_attack()
+		velocity.x = 0.0
+	elif distance < too_close_distance:
 		state = EnemyState.FLEE
 		velocity.x = -sign(offset_x) * chase_speed
 	elif distance > ideal_distance:
 		state = EnemyState.CHASE
 		velocity.x = facing * chase_speed
-	elif attack_cooldown <= 0.0:
-		_start_attack()
 	else:
 		state = EnemyState.HOLD
 		velocity.x = 0.0

@@ -73,16 +73,33 @@ libxrandr-dev libxi-dev libgl-dev libasound2-dev libpulse-dev
 
 ## Controls & Hotkeys
 
+### Combat & Movement
+| Action | Key / Input | Description |
+| :--- | :---: | :--- |
+| **Move Left / Right** | `A` / `D` or `←` / `→` | Character movement |
+| **Run** | `Shift` (Hold) | Increase movement speed |
+| **Jump / Wall Climb** | `Space` | Jump; hold while pushing into a wall to climb |
+| **Attack** | `J` or `LMB` | Basic offensive strike (Mouse Left Click) |
+| **Parry / Block** | `K` or `RMB` | Press for Parry, Hold for Block (Mouse Right Click) |
+| **Dash / Dodge** | `L` | Short invulnerability window; can trigger Perfect Dodge |
+| **Perfect Dodge** | `Shift` (Tap) | Trigger a precise dodge when an attack is incoming |
+
+### Items & Tools
 | Action | Key | Description |
 | :--- | :---: | :--- |
-| **Move Left / Right** | `A` / `D` | Character movement |
-| **Attack** | `J` | Basic offensive strike |
-| **Parry / Block** | `K` | Press for Parry, Hold for Block |
-| **Dash / Dodge** | `L` | Short invulnerability window |
-| **Jump / Wall Climb** | `Space` | Jump; hold while pushing into a wall to climb |
+| **Select Item** | `1` - `5` | Switch between Kunai, Ash Ball, Gourd, etc. |
+| **Use Attack Item** | `E` | Throw Kunai or use offensive items |
+| **Use Heal Item** | `R` | Use Gourd (recover 30% HP) or other healing items |
+
+### System & Debug
+| Action | Key | Description |
+| :--- | :---: | :--- |
 | **Toggle Debug** | `F1` | Show/Hide internal combat data |
 | **Force BPM** | `F2` | Set BPM to 200 (Adrenaline test) |
-| **Reset Combat** | `F5` / `R` | Instantly reset the boss encounter |
+| **Reset Combat** | `F5` | Instantly reset the encounter |
+| **Toggle Mute** | `M` | Mute/Unmute Background Music |
+| **Hurtbox Debug** | `B` | Toggle visualization of collision boxes |
+| **Autopilot** | `P` | Toggle AI-assisted combat verification |
 
 ---
 

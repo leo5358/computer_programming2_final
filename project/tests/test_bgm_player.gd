@@ -25,7 +25,7 @@ func _initialize() -> void:
 		push_error("BgmPlayer script should expose its configured bgm path")
 		quit(1)
 		return
-	if bgm.get_bgm_path() != "res://assets/audio/BGMs/general_music.mp3":
+	if bgm.get_bgm_path() != "res://assets/BGMs/general_music.mp3":
 		push_error("BgmPlayer should load general BGM by default")
 		quit(1)
 		return
@@ -46,12 +46,12 @@ func _initialize() -> void:
 		quit(1)
 		return
 	bgm.set_map_bgm("h_stone_plaza")
-	if bgm.get_bgm_path() != "res://assets/audio/BGMs/general_music.mp3":
+	if bgm.get_bgm_path() != "res://assets/BGMs/general_music.mp3":
 		push_error("H stone plaza should keep general BGM")
 		quit(1)
 		return
 	bgm.set_map_bgm("boss_interior")
-	if bgm.get_bgm_path() != "res://assets/audio/BGMs/boss_music.mp3":
+	if bgm.get_bgm_path() != "res://assets/BGMs/boss_music.mp3":
 		push_error("Boss interior should use boss BGM")
 		quit(1)
 		return
@@ -64,7 +64,7 @@ func _initialize() -> void:
 		quit(1)
 		return
 	bgm.set_map_bgm("ab_foothill")
-	if bgm.get_bgm_path() != "res://assets/audio/BGMs/general_music.mp3":
+	if bgm.get_bgm_path() != "res://assets/BGMs/general_music.mp3":
 		push_error("AB foothill should use general BGM")
 		quit(1)
 		return

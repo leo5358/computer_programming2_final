@@ -5,6 +5,17 @@ func _ready() -> void:
 	sprite_root = "res://assets/sprites/warrior"
 	attack_sprite_name = "attack.png"
 	custom_animation_frames = {
+		"walk": [
+			{"path": "res://assets/sprites/warrior/walk.png", "region": Rect2(12.0, 0.0, 96.0, 96.0)},
+			{"path": "res://assets/sprites/warrior/walk.png", "region": Rect2(102.0, 0.0, 94.0, 96.0)},
+			{"path": "res://assets/sprites/warrior/walk.png", "region": Rect2(196.0, 0.0, 94.0, 96.0)},
+			{"path": "res://assets/sprites/warrior/walk.png", "region": Rect2(572.0, 0.0, 94.0, 96.0)},
+			{"path": "res://assets/sprites/warrior/walk.png", "region": Rect2(290.0, 0.0, 94.0, 96.0)},
+			{"path": "res://assets/sprites/warrior/walk.png", "region": Rect2(384.0, 0.0, 94.0, 96.0)},
+			{"path": "res://assets/sprites/warrior/walk.png", "region": Rect2(478.0, 0.0, 94.0, 96.0)},
+			{"path": "res://assets/sprites/warrior/walk.png", "region": Rect2(572.0, 0.0, 94.0, 96.0)},
+			{"path": "res://assets/sprites/warrior/walk.png", "region": Rect2(666.0, 0.0, 94.0, 96.0)},
+		],
 		"attack": [
 			{"path": "res://assets/sprites/warrior/attack.png", "region": Rect2(13.0, 0.0, 94.0, 96.0)},
 			{"path": "res://assets/sprites/warrior/attack.png", "region": Rect2(96.0, 0.0, 96.0, 96.0)},
@@ -34,8 +45,8 @@ func _ready() -> void:
 			{"path": "res://assets/sprites/warrior/thrust.png", "region": Rect2(672.0, 0.0, 96.0, 96.0)},
 		],
 	}
-	custom_animation_speeds = {"attack": 5.0, "deflect": 14.0, "thrust": 8.0}
-	custom_animation_loops = {"attack": false, "deflect": false, "thrust": false}
+	custom_animation_speeds = {"walk": 5.0, "attack": 5.0, "deflect": 14.0, "thrust": 8.0}
+	custom_animation_loops = {"walk": true, "attack": false, "deflect": false, "thrust": false}
 	max_health = 60.0
 	max_posture = 100.0
 	attack_damage = 13.0

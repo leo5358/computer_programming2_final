@@ -61,10 +61,12 @@ enum EnemyState {
 @export var thrust_hitbox_size := Vector2(112.0, 42.0)
 @export var thrust_hitbox_offset := Vector2(62.0, -34.0)
 @export var pressure_duration := 2.0
+@export var posture_disengage_delay := 6.0
 @export var pressure_thrust_range_multiplier := 1.25
 @export var whiff_cooldown_multiplier := 0.45
 @export var posture_recovery_pause := 1.4
 @export var posture_recovery_rate := 10.0
+@export_range(0.0, 1.0, 0.01) var posture_recovery_percent_per_second := 0.05
 @export var perfect_parry_input_leeway := 0.16
 @export var is_perilous_attack := false
 @export var perfect_parry_posture_damage := 22.0
@@ -111,6 +113,7 @@ var counter_after_deflect := false
 var pressure_timer := 0.0
 var posture_recovery_pause_timer := 0.0
 var corpse_timer := 0.0
+var corpse_has_landed := false
 var attack_area_base_position := Vector2.ZERO
 var attack_hitbox_base_size := Vector2.ZERO
 var current_attack_profile := "attack"
@@ -130,8 +133,10 @@ var overhead_hp_back: ColorRect
 var overhead_hp_fill: ColorRect
 var overhead_posture_back: ColorRect
 var overhead_posture_fill: ColorRect
+var posture_visibility_snapshot := 0.0
 
 @onready var sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+@onready var body_collision_shape: CollisionShape2D = get_node_or_null("CollisionShape2D") as CollisionShape2D
 @onready var attack_area: Area2D = get_node_or_null("AttackArea") as Area2D
 @onready var attack_collision_shape: CollisionShape2D = get_node_or_null("AttackArea/CollisionShape2D") as CollisionShape2D
 @onready var attack_visual: ColorRect = get_node_or_null("AttackVisual") as ColorRect
@@ -139,9 +144,14 @@ var overhead_posture_fill: ColorRect
 @onready var execute_label: Label = get_node_or_null("ExecuteLabel") as Label
 @onready var warning_label: Label = get_node_or_null("WarningLabel") as Label
 
+var default_collision_layer := 0
+var default_collision_mask := 0
+
 func _ready() -> void:
 	add_to_group("enemy")
 	add_to_group("minor_enemy")
+	default_collision_layer = collision_layer
+	default_collision_mask = collision_mask
 	spawn_position = global_position
 	health = max_health
 	posture = 0.0
@@ -159,6 +169,7 @@ func _ready() -> void:
 		warning_label.visible = false
 	_setup_overhead_bars()
 	_update_overhead_bars()
+	posture_visibility_snapshot = posture
 	stats_changed.emit()
 
 func _physics_process(delta: float) -> void:
@@ -169,6 +180,13 @@ func _physics_process(delta: float) -> void:
 		corpse_timer = max(0.0, corpse_timer - delta)
 		if corpse_timer <= 0.0:
 			queue_free()
+			return
+		if corpse_has_landed or is_on_floor():
+			corpse_has_landed = true
+			velocity = Vector2.ZERO
+			_update_visuals()
+			_update_overhead_bars()
+			stats_changed.emit()
 			return
 	if not is_on_floor():
 		velocity.y += gravity * delta
@@ -188,6 +206,8 @@ func _physics_process(delta: float) -> void:
 		_update_movement_state(delta)
 
 	move_and_slide()
+	if defeated_flag and is_on_floor():
+		corpse_has_landed = true
 	_update_visuals()
 	_update_overhead_bars()
 	stats_changed.emit()
@@ -225,7 +245,8 @@ func receive_player_attack(damage: float, posture_damage: float) -> Variant:
 		return {"guarded": true}
 	_spawn_damage_number(damage)
 	health = max(0.0, health - damage)
-	posture = clamp(posture + posture_damage, 0.0, max_posture)
+	var p_damage: float = ceil(max_posture * 0.15)
+	posture = clamp(posture + p_damage, 0.0, max_posture)
 	_mark_combat_pressure()
 	receive_alert()
 	if posture >= max_posture:
@@ -249,7 +270,8 @@ func _start_direct_hurt_feedback() -> void:
 func receive_block_feedback(perfect: bool) -> void:
 	if defeated_flag:
 		return
-	posture = clamp(posture + (perfect_parry_posture_damage if perfect else normal_block_posture_damage), 0.0, max_posture)
+	var p_damage: float = ceil(max_posture * (0.06 if perfect else 0.09))
+	posture = clamp(posture + p_damage, 0.0, max_posture)
 	_mark_combat_pressure()
 	_interrupt_attack()
 	attack_cooldown = max(attack_cooldown, parried_recovery_duration if perfect else attack_cooldown_duration * 0.45)
@@ -322,10 +344,12 @@ func reset_combat_state() -> void:
 	counter_after_deflect = false
 	pressure_timer = 0.0
 	posture_recovery_pause_timer = 0.0
+	posture_visibility_snapshot = posture
 	corpse_timer = 0.0
+	corpse_has_landed = false
 	velocity = Vector2.ZERO
 	global_position = spawn_position
-	set_collision_layer_value(1, true)
+	_set_body_collision_enabled(true)
 	_set_attack_visual(false, false)
 	if execute_label != null:
 		execute_label.visible = false
@@ -383,7 +407,8 @@ func _should_guard_player_attack() -> bool:
 
 func _guard_player_attack() -> void:
 	receive_alert()
-	posture = clamp(posture + guard_posture_damage, 0.0, max_posture)
+	var p_damage: float = ceil(max_posture * 0.05)
+	posture = clamp(posture + p_damage, 0.0, max_posture)
 	_mark_combat_pressure()
 	state = EnemyState.DEFLECT
 	deflect_timer = deflect_duration
@@ -550,19 +575,30 @@ func _maybe_convert_windup_to_thrust() -> void:
 		_start_thrust_attack()
 
 func _mark_combat_pressure() -> void:
-	pressure_timer = pressure_duration
+	pressure_timer = posture_disengage_delay
 	posture_recovery_pause_timer = posture_recovery_pause
 
+func is_posture_in_combat() -> bool:
+	return pressure_timer > 0.0
+
+func is_posture_bar_visible() -> bool:
+	posture_visibility_snapshot = posture
+	return posture > 0.0
+
 func _update_pressure_and_posture(delta: float) -> void:
-	pressure_timer = max(0.0, pressure_timer - delta)
+	var remaining_delta := delta
+	if pressure_timer > 0.0:
+		var consumed: float = min(remaining_delta, pressure_timer)
+		pressure_timer -= consumed
+		remaining_delta -= consumed
 	posture_recovery_pause_timer = max(0.0, posture_recovery_pause_timer - delta)
 	if defeated_flag or posture_broken:
 		return
-	if posture_recovery_pause_timer > 0.0 or posture <= 0.0:
+	if posture <= 0.0 or remaining_delta <= 0.0:
 		return
 	var health_ratio: float = clamp(health / max(max_health, 0.001), 0.0, 1.0)
-	var recovery_rate := posture_recovery_rate * (0.35 + 0.65 * health_ratio)
-	posture = max(0.0, posture - recovery_rate * delta)
+	var recovery_rate := max_posture * posture_recovery_percent_per_second * health_ratio
+	posture = max(0.0, posture - recovery_rate * remaining_delta)
 
 func _set_attack_visual(show_visual: bool, active: bool) -> void:
 	if attack_visual != null:
@@ -576,17 +612,28 @@ func _break_posture() -> void:
 	state = EnemyState.POSTURE_BROKEN
 	_interrupt_attack()
 	if execute_label != null:
-		execute_label.visible = true
+		execute_label.visible = false
 
 func _defeat() -> void:
 	defeated_flag = true
 	state = EnemyState.DEAD
 	health = 0.0
 	corpse_timer = corpse_lifetime
+	corpse_has_landed = false
 	velocity = Vector2.ZERO
 	_set_attack_visual(false, false)
-	set_collision_layer_value(1, false)
+	_set_body_collision_enabled(false)
 	defeated.emit()
+
+func _set_body_collision_enabled(enabled: bool) -> void:
+	if enabled:
+		collision_layer = default_collision_layer
+		collision_mask = default_collision_mask
+	else:
+		collision_layer = 0
+		collision_mask = default_collision_mask
+	if body_collision_shape != null:
+		body_collision_shape.disabled = false
 
 func _update_feedback(delta: float) -> void:
 	hit_flash_timer = max(0.0, hit_flash_timer - delta)
@@ -624,7 +671,7 @@ func _create_overhead_bar_rect(rect_name: String, color: Color, position: Vector
 func _update_overhead_bars() -> void:
 	if overhead_root == null:
 		return
-	var show_bars := is_in_group("minor_enemy") and not defeated_flag
+	var show_bars := is_in_group("minor_enemy") and not is_in_group("boss") and not defeated_flag
 	overhead_root.visible = show_bars
 	if not show_bars:
 		return
@@ -633,6 +680,9 @@ func _update_overhead_bars() -> void:
 	var posture_ratio: float = clamp(posture / max(max_posture, 0.001), 0.0, 1.0)
 	overhead_hp_fill.size = Vector2(overhead_bar_size.x * health_ratio, overhead_bar_size.y)
 	overhead_posture_fill.size = Vector2(overhead_bar_size.x * posture_ratio, overhead_bar_size.y)
+	var show_posture := is_posture_bar_visible()
+	overhead_posture_back.visible = show_posture
+	overhead_posture_fill.visible = show_posture
 
 func _update_visuals() -> void:
 	if sprite == null or sprite.sprite_frames == null:

@@ -49,8 +49,17 @@ func _initialize() -> void:
 	boss.attack_cooldown = 0.0
 	boss._physics_process(1.0 / 60.0)
 
+	if boss.is_attack_winding_up:
+		push_error("Boss should pause before attacking from long-weapon sweet spot distance")
+		quit(1)
+		return
+	if float(boss.get("attack_pressure_timer")) <= 0.0:
+		push_error("Boss should show attack pressure before committing from sweet spot distance")
+		quit(1)
+		return
+	boss._physics_process(float(boss.get("attack_pressure_commit_time")) + 0.001)
 	if not boss.is_attack_winding_up:
-		push_error("Boss should attack from long-weapon sweet spot distance")
+		push_error("Boss should attack after pressure pause at long-weapon sweet spot distance")
 		quit(1)
 		return
 	if boss.current_attack_animation != "attack":

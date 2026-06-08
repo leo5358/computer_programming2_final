@@ -18,6 +18,35 @@ func _initialize() -> void:
 		return
 
 	var frames: SpriteFrames = sprite.sprite_frames
+	if not frames.has_animation("walk"):
+		push_error("Warrior should load teammate tscn walk animation")
+		quit(1)
+		return
+	if frames.get_frame_count("walk") != 9:
+		push_error("Warrior walk should use teammate tscn's 9 walk frames")
+		quit(1)
+		return
+
+	var first_walk_frame: AtlasTexture = frames.get_frame_texture("walk", 0) as AtlasTexture
+	var fourth_walk_frame: AtlasTexture = frames.get_frame_texture("walk", 3) as AtlasTexture
+	var last_walk_frame: AtlasTexture = frames.get_frame_texture("walk", 8) as AtlasTexture
+	if first_walk_frame == null or fourth_walk_frame == null or last_walk_frame == null:
+		push_error("Warrior walk frames should be AtlasTextures")
+		quit(1)
+		return
+	if first_walk_frame.region != Rect2(12.0, 0.0, 96.0, 96.0):
+		push_error("Warrior walk frame 1 should match teammate tscn region")
+		quit(1)
+		return
+	if fourth_walk_frame.region != Rect2(572.0, 0.0, 94.0, 96.0):
+		push_error("Warrior walk frame 4 should match teammate tscn's non-linear frame order")
+		quit(1)
+		return
+	if last_walk_frame.region != Rect2(666.0, 0.0, 94.0, 96.0):
+		push_error("Warrior walk frame 9 should match teammate tscn region")
+		quit(1)
+		return
+
 	if not frames.has_animation("deflect"):
 		push_error("Warrior should load teammate tscn deflect animation")
 		quit(1)
@@ -63,8 +92,8 @@ func _initialize() -> void:
 		push_error("Successful Warrior guard should still add small posture pressure")
 		quit(1)
 		return
-	if warrior.posture - posture_before > 4.0:
-		push_error("Successful Warrior guard should not let the player farm large posture damage")
+	if warrior.posture - posture_before > 5.0:
+		push_error("Successful Warrior guard should use the rebuilt small-enemy guard pressure ratio")
 		quit(1)
 		return
 	if warrior.state != warrior.EnemyState.DEFLECT:

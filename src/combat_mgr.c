@@ -2,8 +2,8 @@
 
 #define PLAYER_MAX_HP 100.0f
 #define BOSS_MAX_HP 140.0f
-#define BPM_MIN 65.0f
-#define BPM_MAX 200.0f
+#define BPM_MIN 70.0f
+#define BPM_MAX 250.0f
 #define INPUT_BUFFER_MS 150
 #define PARRY_EARLY_MS 100
 #define PARRY_LATE_MS 50

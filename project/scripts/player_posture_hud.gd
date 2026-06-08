@@ -95,16 +95,20 @@ func _update_posture() -> void:
 		return
 	var max_posture: float = 100.0
 	var posture: float = 0.0
+	var show_posture := false
 	if player != null and is_instance_valid(player):
 		if player.get("max_posture") != null:
 			max_posture = max(float(player.get("max_posture")), 0.001)
 		if player.get("posture") != null:
 			posture = float(player.get("posture"))
+		if player.has_method("is_posture_bar_visible"):
+			show_posture = bool(player.is_posture_bar_visible())
 	var ratio: float = clamp(posture / max_posture, 0.0, 1.0)
 	var track_width: float = track_rect.size.x
 	var total_width: float = track_width * ratio
 	var half_width: float = total_width * 0.5
 	var center_x: float = track_rect.position.x + track_width * 0.5
+	root.visible = show_posture
 	left_fill_rect.position = Vector2(center_x - half_width, track_rect.position.y)
 	left_fill_rect.size = Vector2(half_width, fill_height)
 	right_fill_rect.position = Vector2(center_x, track_rect.position.y)
