@@ -25,6 +25,7 @@ const PLAYER_STRIP_PATHS := {
 	"run": "res://assets/sprites/player/run.png",
 	"attack_a": "res://assets/sprites/player/attack.png",
 	"attack_chop": "res://assets/sprites/player/chop.png",
+	"attack_thrust": "res://assets/sprites/player/thrust.png",
 	"deflect": "res://assets/sprites/player/deflect.png",
 	"deflect_miss": "res://assets/sprites/player/deflect_miss.png",
 	"parry": "res://assets/sprites/player/deflect_miss.png",
@@ -38,6 +39,7 @@ const PLAYER_STRIP_PATHS := {
 	"hurt": "res://assets/sprites/player/hurt.png",
 	"death": "res://assets/sprites/player/death.png",
 }
+const PLAYER_THRUST_WIDE_STRIP_PATH := "res://assets/sprites/player/thrust copy.png"
 const ITEM_ACTION_TIME := 0.8
 const MUDRA_FOCUS_FRAME_START := 3
 const MUDRA_FOCUS_FRAME_END := 5
@@ -82,6 +84,16 @@ const PLAYER_STRIP_FRAME_REGIONS := {
 		[491, 0, 96, 96],
 		[587, 0, 91, 96],
 		[678, 0, 90, 96],
+	],
+	"attack_thrust": [
+		[0, 0, 96, 96],
+		[96, 0, 96, 96],
+		[192, 0, 96, 96],
+		[288, 0, 96, 96],
+		{"path": PLAYER_THRUST_WIDE_STRIP_PATH, "region": [0, 0, 123, 96]},
+		[192, 0, 96, 96],
+		[605, 0, 78, 96],
+		[683, 0, 78, 96],
 	],
 }
 const HIT_IMPACT_SHEET_PATH := "res://assets/sprites/vfx/hit_impact_sheet.png"
@@ -171,6 +183,8 @@ enum PlayerState {
 @export var attack_soft_lock_max_distance := 82.0
 @export var attack_soft_lock_vertical_tolerance := 52.0
 @export var attack_buffer_min_recovery_elapsed := 0.0
+@export var thrust_hold_time := 0.28
+@export var thrust_attack_area_forward_offset := 58.0
 @export var projectile_slash_startup := 0.18
 @export var projectile_slash_forward_range := 128.0
 @export var projectile_slash_back_range := 16.0
@@ -253,6 +267,9 @@ var attack_has_hit := false
 var attack_has_cut_projectile := false
 var attack_combo_step := 0
 var current_attack_animation := "attack_a"
+var attack_hold_timer := 0.0
+var attack_hold_active := false
+var attack_hold_consumed := false
 var hurt_animation := "hurt"
 var attack_lunge_timer := 0.0
 var current_animation := ""
@@ -377,7 +394,7 @@ func _physics_process(delta: float) -> void:
 		coyote_timer = coyote_time
 	wall_climb_lockout_timer = max(0.0, wall_climb_lockout_timer - delta)
 
-	_update_inputs()
+	_update_inputs(delta)
 	_update_movement(delta)
 	_update_action_state(delta)
 	_update_combat(delta)
@@ -435,12 +452,12 @@ func _update_heartbeat(delta: float) -> void:
 	else:
 		_adjust_heartbeat_toward_current_target(delta)
 
-func _update_inputs() -> void:
+func _update_inputs(delta: float = -1.0) -> void:
 	if _try_use_item_hotkey():
 		_clear_ai_action_intents()
 		return
 
-	var attack_requested := Input.is_action_just_pressed("attack") or ai_attack_requested
+	var attack_requested := _consume_attack_request(delta)
 	var parry_requested := Input.is_action_just_pressed("block") or ai_parry_requested
 	var shift_dodge_target: Node2D = null
 	if Input.is_action_just_pressed("perfect_dodge_shift"):
@@ -679,6 +696,7 @@ func _update_action_state(delta: float) -> void:
 				attack_buffer_timer = 0.0
 				_start_attack()
 			else:
+				_clear_attack_hold()
 				_set_state(PlayerState.IDLE)
 
 	elif state == PlayerState.PARRY:
@@ -802,15 +820,23 @@ func _sync_heartbeat_precision_from_display() -> void:
 		heartbeat_precise = heartbeat
 
 func _start_attack() -> void:
+	_start_attack_with_animation("")
+
+func _start_attack_with_animation(animation_override: String) -> void:
 	_register_combat_input(CombatServerScript.InputType.ATTACK)
 	_mark_heartbeat_combat_activity()
 	_add_heartbeat_pressure(heartbeat_attack_gain)
 	if state == PlayerState.DEAD:
 		return
-	current_attack_animation = "attack_chop" if attack_combo_step == 2 else "attack_a"
-	attack_combo_step = (attack_combo_step + 1) % 3
+	if animation_override != "":
+		current_attack_animation = animation_override
+		attack_combo_step = 0
+	else:
+		current_attack_animation = "attack_chop" if attack_combo_step == 2 else "attack_a"
+		attack_combo_step = (attack_combo_step + 1) % 3
 	attack_lunge_timer = attack_lunge_time
 	velocity.x = facing * _attack_step_impulse()
+	attack_area.position.x = _attack_area_forward_offset() * facing
 	_set_state(PlayerState.ATTACK)
 	_force_play_animation(current_attack_animation)
 	action_timer = attack_startup + attack_active_time + attack_recovery
@@ -818,6 +844,48 @@ func _start_attack() -> void:
 	is_attacking = false
 	attack_has_hit = false
 	attack_has_cut_projectile = false
+
+func force_execution_thrust_attack() -> void:
+	current_attack_animation = "attack_thrust"
+	attack_combo_step = 0
+	action_timer = max(action_timer, attack_startup + attack_active_time + attack_recovery)
+	attack_elapsed = 0.0
+	attack_area.position.x = _attack_area_forward_offset() * facing
+	_set_state(PlayerState.ATTACK)
+	_force_play_animation("attack_thrust")
+
+func _consume_attack_request(delta: float = -1.0) -> bool:
+	if ai_attack_requested:
+		_clear_attack_hold()
+		return true
+	if Input.is_action_just_pressed("attack"):
+		attack_hold_active = true
+		attack_hold_timer = 0.0
+		attack_hold_consumed = false
+	elif Input.is_action_pressed("attack") and not attack_hold_active and not attack_hold_consumed:
+		attack_hold_active = true
+		attack_hold_timer = 0.0
+	if attack_hold_active and Input.is_action_pressed("attack"):
+		var hold_delta: float = delta if delta >= 0.0 else get_physics_process_delta_time()
+		attack_hold_timer += hold_delta
+		if not attack_hold_consumed and attack_hold_timer >= thrust_hold_time:
+			if _can_start_attack():
+				attack_hold_consumed = true
+				attack_hold_active = false
+				_start_attack_with_animation("attack_thrust")
+			return false
+	if attack_hold_active and Input.is_action_just_released("attack"):
+		var should_start_normal := not attack_hold_consumed
+		_clear_attack_hold()
+		return should_start_normal
+	if not Input.is_action_pressed("attack") and attack_hold_consumed:
+		_clear_attack_hold()
+	return false
+
+func _clear_attack_hold() -> void:
+	attack_hold_active = false
+	attack_hold_timer = 0.0
+	attack_hold_consumed = false
 
 func _try_use_item_hotkey() -> bool:
 	if _item_select_key_just_pressed(KEY_1, 0):
@@ -1131,6 +1199,11 @@ func _attack_step_impulse() -> float:
 		return attack_soft_lock_impulse
 	return attack_step_impulse if _has_rejected_soft_lock_target() else empty_attack_step_impulse
 
+func _attack_area_forward_offset() -> float:
+	if current_attack_animation == "attack_thrust":
+		return thrust_attack_area_forward_offset
+	return 34.0
+
 func _find_attack_soft_lock_target() -> Node2D:
 	for group_name in ["enemy", "boss"]:
 		for target in get_tree().get_nodes_in_group(group_name):
@@ -1172,6 +1245,7 @@ func _apply_attack_hit() -> void:
 	var was_deflected := false
 	for body in attack_area.get_overlapping_bodies():
 		if body.has_method("can_be_executed") and body.can_be_executed() and body.has_method("execute"):
+			force_execution_thrust_attack()
 			if body.is_in_group("boss") and body.has_method("receive_player_attack"):
 				var boss_result: Variant = body.receive_player_attack(damage, posture_damage)
 				if not (boss_result is bool and boss_result == false):
@@ -1472,6 +1546,7 @@ func _setup_sprite_frames() -> void:
 		_add_strip_animation(frames, "run", 12.0, true)
 		_add_strip_animation(frames, "attack_a", ATTACK_ANIMATION_FPS, false)
 		_add_strip_animation(frames, "attack_chop", ATTACK_ANIMATION_FPS, false)
+		_add_strip_animation(frames, "attack_thrust", ATTACK_ANIMATION_FPS, false)
 		_add_strip_animation(frames, "deflect", 14.0, false)
 		_add_strip_animation(frames, "deflect_miss", 14.0, false)
 		_add_strip_animation(frames, "parry", 14.0, false)
@@ -1538,6 +1613,8 @@ func _player_strips_available() -> bool:
 	for path in PLAYER_STRIP_PATHS.values():
 		if not ResourceLoader.exists(path):
 			return false
+	if not ResourceLoader.exists(PLAYER_THRUST_WIDE_STRIP_PATH):
+		return false
 	return true
 
 func _load_first_available_player_sheet() -> Texture2D:
@@ -1646,12 +1723,27 @@ func _add_strip_animation(frames: SpriteFrames, animation: StringName, fps: floa
 	frames.set_animation_speed(animation, fps)
 	frames.set_animation_loop(animation, loop)
 	if not custom_regions.is_empty():
-		for region in custom_regions:
+		for frame_index in custom_regions.size():
+			var region_entry: Variant = custom_regions[frame_index]
+			var region_values: Array = []
+			var frame_texture: Texture2D = texture
+			if region_entry is Dictionary:
+				var region_dictionary: Dictionary = region_entry
+				var region_variant: Variant = region_dictionary.get("region", [])
+				if region_variant is Array:
+					region_values = region_variant
+				var texture_path: String = String(region_dictionary.get("path", ""))
+				if texture_path != "":
+					frame_texture = load(texture_path) as Texture2D
+			elif region_entry is Array:
+				region_values = region_entry
+			if frame_texture == null or region_values.size() < 4:
+				continue
 			var atlas_texture := AtlasTexture.new()
-			atlas_texture.atlas = texture
-			atlas_texture.region = Rect2(float(region[0]), float(region[1]), float(region[2]), float(region[3]))
+			atlas_texture.atlas = frame_texture
+			atlas_texture.region = Rect2(float(region_values[0]), float(region_values[1]), float(region_values[2]), float(region_values[3]))
 			atlas_texture.filter_clip = true
-			frames.add_frame(animation, atlas_texture, _strip_frame_duration_weight(String(animation), custom_regions.size(), custom_regions.find(region)))
+			frames.add_frame(animation, atlas_texture, _strip_frame_duration_weight(String(animation), custom_regions.size(), frame_index))
 		return
 	for column in frame_count:
 		var atlas_texture := AtlasTexture.new()
@@ -2007,6 +2099,7 @@ func revive_in_place() -> bool:
 	attack_has_cut_projectile = false
 	attack_combo_step = 0
 	current_attack_animation = "attack_a"
+	_clear_attack_hold()
 	hurt_animation = "hurt"
 	attack_lunge_timer = 0.0
 	current_animation = ""
@@ -2184,6 +2277,7 @@ func reset_combat_state() -> void:
 	attack_has_cut_projectile = false
 	attack_combo_step = 0
 	current_attack_animation = "attack_a"
+	_clear_attack_hold()
 	hurt_animation = "hurt"
 	current_item_animation = "mudra"
 	item_counts = DEFAULT_ITEM_COUNTS.duplicate()

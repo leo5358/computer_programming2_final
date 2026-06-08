@@ -919,8 +919,12 @@ func _play_player_final_execution_attack(player: Node2D) -> void:
 	if player == null:
 		await get_tree().create_timer(BOSS_FINAL_EXECUTION_PLAYER_ATTACK_TIME).timeout
 		return
-	if player.has_method("_force_play_animation"):
-		player._force_play_animation("attack_a")
+	var was_physics_processing := player.is_physics_processing()
+	player.set_physics_process(false)
+	if player.has_method("force_execution_thrust_attack"):
+		player.force_execution_thrust_attack()
+	elif player.has_method("_force_play_animation"):
+		player._force_play_animation("attack_thrust")
 	var sprite := player.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
 	if sprite != null:
 		sprite.speed_scale = BOSS_FINAL_EXECUTION_PLAYER_ATTACK_SPEED
@@ -935,6 +939,7 @@ func _play_player_final_execution_attack(player: Node2D) -> void:
 		await get_tree().create_timer(remaining_time).timeout
 	if sprite != null:
 		sprite.speed_scale = 1.0
+	player.set_physics_process(was_physics_processing)
 
 func _play_final_execution_sfx(player: Node2D) -> void:
 	var sfx := player.get_node_or_null("FinalExecutionSfx") as AudioStreamPlayer2D

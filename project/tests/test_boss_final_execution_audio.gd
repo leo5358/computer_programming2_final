@@ -22,22 +22,22 @@ func _initialize() -> void:
 
 	var attack_sfx := player.get_node_or_null("AttackSfx") as AudioStreamPlayer2D
 	if attack_sfx == null:
-		push_error("Final execution player slash should have normal attack SFX")
+		push_error("Final execution player thrust should have normal attack SFX")
 		quit(1)
 		return
 	if attack_sfx.playing:
 		push_error("Final execution attack SFX should wait for the slow-motion impact timing")
 		quit(1)
 		return
-	await create_timer(0.85).timeout
+	await create_timer(1.25).timeout
 	if not attack_sfx.playing:
-		push_error("Final execution player slash should play normal attack SFX after the impact delay")
+		push_error("Final execution player thrust should play normal attack SFX after the impact delay")
 		quit(1)
 		return
 
 	var final_sfx := player.get_node_or_null("FinalExecutionSfx") as AudioStreamPlayer2D
 	if final_sfx == null or final_sfx.stream == null or final_sfx.stream.resource_path != "res://assets/sfx/final.mp3":
-		push_error("Final execution player slash should play final.mp3")
+		push_error("Final execution player thrust should play final.mp3")
 		quit(1)
 		return
 	if not final_sfx.playing:
