@@ -39,6 +39,8 @@ const BOSS_FINAL_EXECUTION_ZOOM_OUT_TIME := 0.65
 const BOSS_FINAL_EXECUTION_DEATH_FRAME_TIME := 0.28
 const BOSS_FINAL_EXECUTION_PLAYER_ATTACK_TIME := 1.55
 const BOSS_FINAL_EXECUTION_PLAYER_ATTACK_SPEED := 0.18
+const BOSS_FINAL_EXECUTION_THRUST_IMPACT_FRAME := 4
+const BOSS_FINAL_EXECUTION_ATTACK_END_PAD := 0.08
 const BOSS_FINAL_EXECUTION_ATTACK_SFX_DELAY := 1.2
 const BOSS_FINAL_EXECUTION_DUCK_BGM_DB := -28.0
 const BOSS_FINAL_EXECUTION_BGM_FADE_OUT_TIME := 1.8
@@ -687,6 +689,7 @@ func _connect_boss_final_execution(boss: Node) -> void:
 		boss.connect("final_execution_requested", callback)
 
 func _on_boss_final_execution_requested(boss: Node2D) -> void:
+	print("[DEBUG] final_execution_requested signal received, boss=", boss, " is_playing=", is_boss_final_execution_playing)
 	await _play_boss_final_execution_cutscene(boss)
 
 func _run_map_transition(next_scene: PackedScene, next_map_id: String, player_spawn: Vector2, release_player_at_end := true, update_bgm_at_switch := true) -> void:
@@ -745,7 +748,16 @@ func _play_boss_intro_cutscene(boss: Node2D) -> void:
 	is_boss_intro_playing = false
 
 func _get_active_map_camera() -> Camera2D:
-	return get_node_or_null("Chapter1Map/Camera") as Camera2D
+	# 先嘗試固定路徑
+	var cam := get_node_or_null("Chapter1Map/Camera") as Camera2D
+	if cam != null:
+		return cam
+	# Fallback：從場景樹搜尋任何啟用中的 Camera2D
+	for node in get_tree().get_nodes_in_group("feedback_camera"):
+		if node is Camera2D:
+			return node as Camera2D
+	# 最後 fallback：搜尋整棵樹
+	return _find_any_camera2d(get_tree().root)
 
 func _set_boss_intro_letterbox_visible(is_visible: bool) -> void:
 	if boss_intro_overlay != null:
@@ -803,12 +815,17 @@ func _restore_boss_after_intro(boss: Node2D) -> void:
 		sprite.speed_scale = 1.0
 
 func _play_boss_final_execution_cutscene(boss: Node2D) -> void:
+	print("[DEBUG] _play_boss_final_execution_cutscene called, is_playing=", is_boss_final_execution_playing, " boss_valid=", is_instance_valid(boss) if boss != null else false)
 	if is_boss_final_execution_playing:
+		print("[DEBUG] SKIPPED: already playing")
 		return
 	if boss == null or not is_instance_valid(boss):
+		print("[DEBUG] SKIPPED: boss is null or invalid")
 		return
 	var camera := _get_active_map_camera()
+	print("[DEBUG] camera found: ", camera)
 	if camera == null:
+		print("[DEBUG] SKIPPED: no camera found — calling complete_final_execution_death directly")
 		if boss.has_method("complete_final_execution_death"):
 			boss.complete_final_execution_death()
 		return
@@ -824,13 +841,18 @@ func _play_boss_final_execution_cutscene(boss: Node2D) -> void:
 
 	var focus_position := _get_final_execution_focus_position(boss, player)
 	var end_zoom: Vector2 = camera.zoom if "zoom" in camera else Vector2.ONE
+	print("[DEBUG] cutscene: starting zoom-in, boss.defeated_flag=", boss.get("defeated_flag"))
 	if camera.has_method("begin_cutscene_override"):
 		camera.begin_cutscene_override(focus_position, end_zoom)
 	await _interpolate_cutscene_zoom(camera, focus_position, end_zoom, BOSS_FINAL_EXECUTION_ZOOM, BOSS_FINAL_EXECUTION_ZOOM_IN_TIME)
 
+	print("[DEBUG] cutscene: zoom-in done, playing death frames 0-3, boss.defeated_flag=", boss.get("defeated_flag"))
 	await _play_boss_death_frame_range(boss, 0, 3)
+	print("[DEBUG] cutscene: death frames 0-3 done, playing player attack")
 	await _play_player_final_execution_attack(player)
+	print("[DEBUG] cutscene: player attack done, playing death frames 4-7")
 	await _play_boss_death_frame_range(boss, 4, 7)
+	print("[DEBUG] cutscene: all done, calling complete_final_execution_death")
 	if boss.has_method("complete_final_execution_death"):
 		boss.complete_final_execution_death()
 	_set_boss_final_death_frame(boss, 7)
@@ -848,6 +870,8 @@ func _play_boss_final_execution_cutscene(boss: Node2D) -> void:
 	_set_player_transition_locked(false)
 	is_transitioning = was_transitioning
 	is_boss_final_execution_playing = false
+	print("[DEBUG] cutscene: fully completed")
+
 
 func _get_final_execution_focus_position(boss: Node2D, player: Node2D) -> Vector2:
 	if player == null:
@@ -870,6 +894,15 @@ func _sync_character_flip(character: Node2D) -> void:
 	var facing_value: Variant = character.get("facing")
 	if facing_value is float or facing_value is int:
 		sprite.flip_h = float(facing_value) < 0.0
+
+func _find_any_camera2d(node: Node) -> Camera2D:
+	if node is Camera2D:
+		return node as Camera2D
+	for child in node.get_children():
+		var result := _find_any_camera2d(child)
+		if result != null:
+			return result
+	return null
 
 func _duck_bgm_for_final_execution() -> void:
 	if not (bgm_player is AudioStreamPlayer):
@@ -926,20 +959,46 @@ func _play_player_final_execution_attack(player: Node2D) -> void:
 	elif player.has_method("_force_play_animation"):
 		player._force_play_animation("attack_thrust")
 	var sprite := player.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	var attack_duration := BOSS_FINAL_EXECUTION_PLAYER_ATTACK_TIME
 	if sprite != null:
-		sprite.speed_scale = BOSS_FINAL_EXECUTION_PLAYER_ATTACK_SPEED
-	var sfx_delay: float = minf(BOSS_FINAL_EXECUTION_ATTACK_SFX_DELAY, BOSS_FINAL_EXECUTION_PLAYER_ATTACK_TIME)
+		var attack_speed := _get_final_execution_player_attack_speed(sprite, &"attack_thrust")
+		sprite.speed_scale = attack_speed
+		attack_duration = _get_final_execution_player_attack_duration(sprite, &"attack_thrust", attack_speed)
+	var sfx_delay: float = minf(BOSS_FINAL_EXECUTION_ATTACK_SFX_DELAY, attack_duration)
 	if sfx_delay > 0.0:
 		await get_tree().create_timer(sfx_delay).timeout
 	if player.has_method("_play_random_attack_hit_sfx"):
 		player._play_random_attack_hit_sfx()
 	_play_final_execution_sfx(player)
-	var remaining_time: float = maxf(0.0, BOSS_FINAL_EXECUTION_PLAYER_ATTACK_TIME - sfx_delay)
+	var remaining_time: float = maxf(0.0, attack_duration - sfx_delay)
 	if remaining_time > 0.0:
 		await get_tree().create_timer(remaining_time).timeout
 	if sprite != null:
 		sprite.speed_scale = 1.0
+	if player.has_method("finish_execution_thrust_attack"):
+		player.finish_execution_thrust_attack()
 	player.set_physics_process(was_physics_processing)
+
+func _get_final_execution_player_attack_speed(sprite: AnimatedSprite2D, animation: StringName) -> float:
+	if sprite.sprite_frames == null or not sprite.sprite_frames.has_animation(animation):
+		return BOSS_FINAL_EXECUTION_PLAYER_ATTACK_SPEED
+	var fps := sprite.sprite_frames.get_animation_speed(animation)
+	var frame_count := sprite.sprite_frames.get_frame_count(animation)
+	if fps <= 0.0 or frame_count <= 1 or BOSS_FINAL_EXECUTION_ATTACK_SFX_DELAY <= 0.0:
+		return BOSS_FINAL_EXECUTION_PLAYER_ATTACK_SPEED
+	var impact_frame: int = clampi(BOSS_FINAL_EXECUTION_THRUST_IMPACT_FRAME, 1, frame_count - 1)
+	var speed_for_impact: float = float(impact_frame) / (fps * BOSS_FINAL_EXECUTION_ATTACK_SFX_DELAY)
+	return maxf(BOSS_FINAL_EXECUTION_PLAYER_ATTACK_SPEED, speed_for_impact)
+
+func _get_final_execution_player_attack_duration(sprite: AnimatedSprite2D, animation: StringName, speed_scale: float) -> float:
+	if sprite.sprite_frames == null or not sprite.sprite_frames.has_animation(animation):
+		return BOSS_FINAL_EXECUTION_PLAYER_ATTACK_TIME
+	var fps := sprite.sprite_frames.get_animation_speed(animation)
+	var frame_count := sprite.sprite_frames.get_frame_count(animation)
+	if fps <= 0.0 or frame_count <= 0 or speed_scale <= 0.0:
+		return BOSS_FINAL_EXECUTION_PLAYER_ATTACK_TIME
+	var full_animation_time: float = float(frame_count) / (fps * speed_scale)
+	return maxf(BOSS_FINAL_EXECUTION_PLAYER_ATTACK_TIME, full_animation_time + BOSS_FINAL_EXECUTION_ATTACK_END_PAD)
 
 func _play_final_execution_sfx(player: Node2D) -> void:
 	var sfx := player.get_node_or_null("FinalExecutionSfx") as AudioStreamPlayer2D

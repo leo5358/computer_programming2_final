@@ -34,6 +34,11 @@ func _initialize() -> void:
 		push_error("Final execution player thrust should play normal attack SFX after the impact delay")
 		quit(1)
 		return
+	var sprite := player.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if sprite == null or sprite.animation != &"attack_thrust" or sprite.frame < 4:
+		push_error("Final execution impact SFX should line up with the visible thrust impact frame")
+		quit(1)
+		return
 
 	var final_sfx := player.get_node_or_null("FinalExecutionSfx") as AudioStreamPlayer2D
 	if final_sfx == null or final_sfx.stream == null or final_sfx.stream.resource_path != "res://assets/sfx/final.mp3":
@@ -47,6 +52,13 @@ func _initialize() -> void:
 
 	while player.get_node_or_null("AnimatedSprite2D").speed_scale < 1.0:
 		await process_frame
+	attack_sfx.stop()
+	for frame in 20:
+		await physics_frame
+	if attack_sfx.playing and attack_sfx.stream != null and attack_sfx.stream.resource_path.begins_with("res://assets/sfx/attack_miss"):
+		push_error("Final execution should not resume player attack state and play a late attack_miss SFX")
+		quit(1)
+		return
 
 	main.queue_free()
 	await process_frame

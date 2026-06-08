@@ -228,6 +228,10 @@ const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 @export var detection_range_boss := 900.0
 @export var attack_start_distance_boss := 112.0
 @export var attack_hold_distance_boss := 78.0
+@export var corner_detect_wall_threshold_boss := 28.0
+@export var corner_retreat_distance_boss := 160.0
+@export var corner_retreat_speed_boss := 110.0
+@export var corner_retreat_duration_boss := 1.2
 @export var close_spacing_distance_boss := 58.0
 @export var spacing_retreat_speed_boss := 72.0
 @export var gap_close_thrust_min_distance_boss := 130.0
@@ -277,6 +281,8 @@ const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 @export var chop_parry_boss_rebound_speed_boss := 520.0
 @export var chop_parry_recoil_time_boss := 0.34
 @export var chop_parry_camera_shake_boss := 42.0
+@export var chop_perfect_parry_posture_bonus_boss := 18.0
+@export var gap_close_thrust_cooldown_duration_boss := 3.5
 
 # --- Boss State ---
 var current_animation_boss := "idle"
@@ -305,6 +311,8 @@ var smoke_bomb_pause_timer_boss := 0.0
 var posture_break_reset_timer_boss := 0.0
 var posture_break_took_followup_hit_boss := false
 var final_execution_requested_boss := false
+var corner_retreat_timer_boss := 0.0
+var gap_close_thrust_cooldown_boss := 0.0
 
 var attack_pressure_timer: float:
 	get:
@@ -561,8 +569,18 @@ func _physics_process(delta: float) -> void:
 	else:
 		_update_pressure_and_posture(delta)
 		attack_cooldown = max(0.0, attack_cooldown - delta)
+		corner_retreat_timer_boss = max(0.0, corner_retreat_timer_boss - delta)
+		gap_close_thrust_cooldown_boss = max(0.0, gap_close_thrust_cooldown_boss - delta)
 		if _update_attack_pressure_boss_internal(delta):
 			pass
+		elif corner_retreat_timer_boss > 0.0:
+			# 角落後退中：持續後退直到計時器結束
+			var player_retreat := get_tree().get_first_node_in_group("player") as Node2D
+			var retreat_dir: float = -facing if player_retreat == null else -sign(player_retreat.global_position.x - global_position.x)
+			velocity.x = retreat_dir * corner_retreat_speed_boss
+			play_boss_animation("walk")
+			if sprite != null:
+				sprite.flip_h = facing < 0.0
 		elif _should_start_attack_boss_internal():
 			_start_normal_attack_boss_internal()
 		elif _should_start_gap_close_thrust_boss_internal():
@@ -627,15 +645,7 @@ func can_be_executed() -> bool:
 
 func execute() -> void:
 	if can_be_executed():
-		defeated_flag = true
-		health = 0.0
-		posture_broken = false
-		final_execution_requested_boss = false
-		_interrupt_attack_boss_internal()
-		play_boss_animation("death")
-		if execute_label != null:
-			execute_label.visible = false
-		_disable_boss_collision()
+		_request_final_execution()
 		stats_changed.emit()
 
 func complete_final_execution_death() -> void:
@@ -649,6 +659,20 @@ func complete_final_execution_death() -> void:
 		execute_label.visible = false
 	_disable_boss_collision()
 	stats_changed.emit()
+
+func _request_final_execution() -> void:
+	if defeated_flag:
+		return
+	if final_execution_requested_boss:
+		return
+	final_execution_requested_boss = true
+	_interrupt_attack_boss_internal()
+	if execute_label != null:
+		execute_label.visible = false
+	if final_execution_requested.get_connections().is_empty():
+		complete_final_execution_death()
+		return
+	final_execution_requested.emit(self)
 
 func _disable_boss_collision() -> void:
 	collision_layer = 0
@@ -709,9 +733,7 @@ func receive_player_attack(damage: float, posture_damage: float) -> Variant:
 		if posture_broken and not posture_break_took_followup_hit_boss:
 			posture_break_took_followup_hit_boss = true
 			posture_break_reset_timer_boss = posture_break_hit_reset_delay_boss
-		if not final_execution_requested_boss:
-			final_execution_requested_boss = true
-			final_execution_requested.emit(self)
+		_request_final_execution()
 		stats_changed.emit()
 		return true
 	has_engaged_player_boss = true
@@ -737,10 +759,12 @@ func receive_player_attack(damage: float, posture_damage: float) -> Variant:
 	feedback_timer_boss = max(feedback_timer_boss, hurt_feedback_time_boss)
 	_trigger_hit_feedback_boss_internal()
 	
-	if posture >= max_posture:
+	if health <= 0.0:
+		health = 1.0
 		_start_boss_posture_break(posture_break_idle_reset_delay_boss)
-	elif health <= 0.0:
-		execute()
+		_request_final_execution()
+	elif posture >= max_posture:
+		_start_boss_posture_break(posture_break_idle_reset_delay_boss)
 	stats_changed.emit()
 	return true
 
@@ -800,6 +824,12 @@ func _receive_block_feedback_boss_internal(_perfect: bool) -> void:
 		stats_changed.emit()
 		return
 	if perfect and current_attack_animation == "chop" and (is_attack_winding_up_boss or is_attack_active_boss):
+		# Chop 是危重招式，perfect parry 額外施加姿態懲罰
+		posture = clamp(posture + _boss_posture_amount_from_percent(chop_perfect_parry_posture_bonus_boss), 0.0, max_posture)
+		if posture >= max_posture:
+			_start_boss_posture_break(posture_break_idle_reset_delay_boss)
+			stats_changed.emit()
+			return
 		_start_chop_parried_recovery_boss_internal()
 		stats_changed.emit()
 		return
@@ -830,6 +860,7 @@ func reset_combat_state() -> void:
 	is_attack_active_boss = false
 	is_attack_recovering_boss = false
 	is_chop_parried_recovery_boss = false
+	corner_retreat_timer_boss = 0.0
 	attack_has_connected = false
 	attack_timer_boss = 0.0
 	attack_elapsed = 0.0
@@ -1064,6 +1095,15 @@ func _update_engaged_hold_boss_internal() -> void:
 	if absf(offset_x) > 8.0:
 		facing = sign(offset_x)
 	var distance := absf(offset_x)
+	# 角落偵測：如果玩家被逼到牆邊，Boss 主動後退讓出空間
+	if _is_player_cornered_boss_internal(player):
+		corner_retreat_timer_boss = corner_retreat_duration_boss
+	if corner_retreat_timer_boss > 0.0:
+		velocity.x = -facing * corner_retreat_speed_boss
+		play_boss_animation("walk")
+		if sprite != null:
+			sprite.flip_h = facing < 0.0
+		return
 	if distance < close_spacing_distance_boss:
 		velocity.x = -facing * spacing_retreat_speed_boss
 		play_boss_animation("walk")
@@ -1081,6 +1121,15 @@ func _update_chase_boss_internal() -> void:
 	var offset_x: float = player.global_position.x - global_position.x
 	if absf(offset_x) <= 8.0:
 		velocity.x = 0.0
+		return
+	# 追擊時偵測玩家是否已被逼到角落，若是則停止追擊改為退後
+	if _is_player_cornered_boss_internal(player):
+		corner_retreat_timer_boss = corner_retreat_duration_boss
+		is_chasing_boss = false
+		velocity.x = -sign(offset_x) * corner_retreat_speed_boss
+		play_boss_animation("walk")
+		if sprite != null:
+			sprite.flip_h = facing < 0.0
 		return
 	is_chasing_boss = true
 	facing = sign(offset_x)
@@ -1151,6 +1200,8 @@ func _should_start_gap_close_thrust_boss_internal() -> bool:
 		return false
 	if attack_cooldown > 0.0:
 		return false
+	if gap_close_thrust_cooldown_boss > 0.0:
+		return false
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	if player == null:
 		return false
@@ -1179,6 +1230,9 @@ func _apply_chop_lunge_boss_internal() -> void:
 
 func _start_normal_attack_boss_internal(profile_name: String = "", combo_followup: bool = false) -> void:
 	var selected_profile := _choose_attack_profile_boss() if profile_name.is_empty() else profile_name
+	# 若這是 gap close thrust，啟動專用冷卻防止連續觸發
+	if selected_profile == "thrust" and not combo_followup:
+		gap_close_thrust_cooldown_boss = gap_close_thrust_cooldown_duration_boss
 	if profile_name == forced_counter_profile_boss:
 		forced_counter_profile_boss = ""
 		forced_counter_timer_boss = 0.0
@@ -1203,6 +1257,28 @@ func _start_normal_attack_boss_internal(profile_name: String = "", combo_followu
 		sprite.speed_scale = 0.0
 	if sprite != null:
 		sprite.flip_h = facing < 0.0
+
+func _is_player_cornered_boss_internal(player: Node2D) -> bool:
+	# 改用 is_on_wall() 判斷：玩家貼牆 且 Boss 正在往玩家方向施壓
+	if player == null:
+		return false
+	# 玩家必須貼著牆
+	if player.has_method("is_on_wall") and not (player as CharacterBody2D).is_on_wall():
+		return false
+	# Boss 必須在玩家的同一側（即 Boss 正在把玩家往牆上推）
+	var offset_x: float = player.global_position.x - global_position.x
+	if absf(offset_x) < 8.0:
+		return false
+	var boss_pushing_dir: float = sign(offset_x) # Boss 追玩家的方向
+	# 玩家的牆壁方向：is_on_wall 為 true 時，玩家 get_wall_normal() 指向遠離牆
+	# 如果牆壁法線與 boss 施壓方向相反，表示玩家被逼到那面牆
+	if player.has_method("get_wall_normal"):
+		var wall_normal: Vector2 = (player as CharacterBody2D).get_wall_normal()
+		# 牆壁法線朝向遠離牆壁，若其 x 與 boss_pushing_dir 相反，代表 boss 正在把玩家逼向此牆
+		if wall_normal != Vector2.ZERO and sign(wall_normal.x) == -boss_pushing_dir:
+			return true
+		return false
+	return true
 
 func _update_attack_state_boss_internal(delta: float) -> void:
 	velocity.x = 0.0

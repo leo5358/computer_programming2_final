@@ -854,6 +854,20 @@ func force_execution_thrust_attack() -> void:
 	_set_state(PlayerState.ATTACK)
 	_force_play_animation("attack_thrust")
 
+func finish_execution_thrust_attack() -> void:
+	is_attacking = false
+	action_timer = 0.0
+	attack_elapsed = 0.0
+	attack_has_hit = false
+	attack_has_cut_projectile = false
+	attack_lunge_timer = 0.0
+	attack_buffer_timer = 0.0
+	attack_buffer_queued = false
+	attack_lockout_timer = 0.0
+	_clear_attack_hold()
+	if state == PlayerState.ATTACK:
+		_set_state(PlayerState.IDLE)
+
 func _consume_attack_request(delta: float = -1.0) -> bool:
 	if ai_attack_requested:
 		_clear_attack_hold()
@@ -1246,7 +1260,7 @@ func _apply_attack_hit() -> void:
 	for body in attack_area.get_overlapping_bodies():
 		if body.has_method("can_be_executed") and body.can_be_executed() and body.has_method("execute"):
 			force_execution_thrust_attack()
-			if body.is_in_group("boss") and body.has_method("receive_player_attack"):
+			if body.has_method("complete_final_execution_death") and body.has_method("receive_player_attack"):
 				var boss_result: Variant = body.receive_player_attack(damage, posture_damage)
 				if not (boss_result is bool and boss_result == false):
 					hit_confirmed = true
