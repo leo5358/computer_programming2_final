@@ -270,7 +270,7 @@ const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 @export var posture_gain_on_guard_success_boss := 6.0
 @export var posture_break_idle_reset_delay_boss := 6.0
 @export var posture_break_hit_reset_delay_boss := 3.0
-@export var deflect_feedback_time_boss := 0.28
+@export var deflect_feedback_time_boss := 0.50
 @export var perfect_deflect_feedback_time_boss := 0.50
 @export var forced_counter_deflect_window_boss := 0.95
 @export var debug_fixed_attack_profile_boss := ""
@@ -300,6 +300,7 @@ var attack_step_timer_boss := 0.0
 var hitstop_timer_boss := 0.0
 var stored_velocity_boss := Vector2.ZERO
 var feedback_timer_boss := 0.0
+var feedback_animation_boss := ""
 var deflect_toggle_boss := false
 var has_engaged_player_boss := false
 var forced_counter_profile_boss := ""
@@ -522,6 +523,8 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if feedback_timer_boss > 0.0:
 		feedback_timer_boss = max(0.0, feedback_timer_boss - delta)
+		if feedback_timer_boss <= 0.0:
+			feedback_animation_boss = ""
 	forced_counter_timer_boss = max(0.0, forced_counter_timer_boss - delta)
 	guard_lockout_timer = max(0.0, guard_lockout_timer - delta)
 	
@@ -756,6 +759,7 @@ func receive_player_attack(damage: float, posture_damage: float) -> Variant:
 	posture = clamp(posture + _boss_posture_amount_from_percent(posture_gain_on_direct_damage_boss), 0.0, max_posture)
 	
 	_force_play_boss_animation("hurt")
+	feedback_animation_boss = "hurt"
 	feedback_timer_boss = max(feedback_timer_boss, hurt_feedback_time_boss)
 	_trigger_hit_feedback_boss_internal()
 	
@@ -791,7 +795,9 @@ func _guard_player_attack_boss_internal() -> void:
 	_interrupt_attack_boss_internal()
 	_queue_forced_counter_boss()
 	deflect_toggle_boss = not deflect_toggle_boss
-	_force_play_boss_animation("deflect1" if deflect_toggle_boss else "deflect2")
+	var deflect_animation := "deflect1" if deflect_toggle_boss else "deflect2"
+	_force_play_boss_animation(deflect_animation)
+	feedback_animation_boss = deflect_animation
 	feedback_timer_boss = deflect_feedback_time_boss
 	guard_lockout_timer = guard_lockout_duration
 	attack_cooldown = 0.0
@@ -840,7 +846,9 @@ func _receive_block_feedback_boss_internal(_perfect: bool) -> void:
 	else:
 		guard_pressure_count_boss += 1
 	deflect_toggle_boss = not deflect_toggle_boss
-	play_boss_animation("deflect1" if deflect_toggle_boss else "deflect2")
+	var deflect_animation := "deflect1" if deflect_toggle_boss else "deflect2"
+	play_boss_animation(deflect_animation)
+	feedback_animation_boss = deflect_animation
 	feedback_timer_boss = perfect_deflect_feedback_time_boss if perfect else deflect_feedback_time_boss
 	if perfect:
 		_begin_local_hitstop(parry_clash_hitstop_time_boss)
@@ -880,6 +888,7 @@ func reset_combat_state() -> void:
 	hit_flicker_timer = 0.0
 	hit_flicker_elapsed = 0.0
 	feedback_timer_boss = 0.0
+	feedback_animation_boss = ""
 	guard_lockout_timer = 0.0
 	has_engaged_player_boss = false
 	posture_recovery_pause_timer = 0.0
@@ -1551,7 +1560,7 @@ func _update_visuals_boss_internal() -> void:
 	if defeated_flag:
 		next_animation = "death"
 	elif feedback_timer_boss > 0.0:
-		next_animation = "hurt"
+		next_animation = feedback_animation_boss if not feedback_animation_boss.is_empty() else "hurt"
 	elif is_attack_winding_up_boss or is_attack_active_boss or is_attack_recovering_boss or is_chop_parried_recovery_boss:
 		next_animation = current_attack_animation
 	elif abs(velocity.x) > 1.0:
