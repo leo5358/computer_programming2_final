@@ -43,7 +43,7 @@ func _build_ui() -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
 
-	for index in 3:
+	for index in 2:
 		var icon := TextureRect.new()
 		icon.name = "Life%d" % (index + 1)
 		icon.texture = load(DEATH_ICON_PATH) as Texture2D
@@ -111,8 +111,8 @@ func _update_layout() -> void:
 	heartbeat_label.size = Vector2(96.0, 34.0)
 
 func _update_stats(delta: float = 0.0) -> void:
-	var lives := 3
-	var max_lives := 3
+	var lives := 2
+	var max_lives := 2
 	var health := 100.0
 	var max_health := 100.0
 	var heartbeat := MIN_HEARTBEAT

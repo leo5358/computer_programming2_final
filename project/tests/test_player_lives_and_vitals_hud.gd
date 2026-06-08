@@ -16,14 +16,18 @@ func _initialize() -> void:
 	root.add_child(hud)
 	await process_frame
 
-	if int(player.get("lives")) != 3:
-		push_error("Player should start with three lives")
+	if int(player.get("lives")) != 2:
+		push_error("Player should start with two lives")
+		quit(1)
+		return
+	if hud.get_node_or_null("Root/Life3") != null:
+		push_error("Vitals HUD should only build two death icons")
 		quit(1)
 		return
 
 	player.receive_enemy_attack(999.0, 0.0, null)
 	await process_frame
-	if int(player.get("lives")) != 3:
+	if int(player.get("lives")) != 2:
 		push_error("First depleted HP bar should not consume a life until revive is confirmed")
 		quit(1)
 		return
@@ -46,7 +50,7 @@ func _initialize() -> void:
 		quit(1)
 		return
 
-	var life2 := hud.get_node_or_null("Root/Life3") as TextureRect
+	var life2 := hud.get_node_or_null("Root/Life2") as TextureRect
 	if life2 == null or not life2.visible:
 		push_error("Vitals HUD should keep all life icons visible until revive is confirmed")
 		quit(1)
@@ -56,7 +60,7 @@ func _initialize() -> void:
 		push_error("Player should support in-place revive while waiting for revive")
 		quit(1)
 		return
-	if int(player.get("lives")) != 2:
+	if int(player.get("lives")) != 1:
 		push_error("Reviving in place should consume one life")
 		quit(1)
 		return
@@ -70,19 +74,9 @@ func _initialize() -> void:
 		return
 
 	player.receive_enemy_attack(999.0, 0.0, null)
-	if not player.revive_in_place():
-		push_error("Second revive-eligible defeat should still allow in-place revive")
-		quit(1)
-		return
-	if int(player.get("lives")) != 1:
-		push_error("Second in-place revive should consume the second extra life")
-		quit(1)
-		return
-
-	player.receive_enemy_attack(999.0, 0.0, null)
 	await physics_frame
 	if player._state_name() != "DEAD":
-		push_error("Player should enter final death when all three lives are consumed")
+		push_error("Player should enter final death when both lives are consumed")
 		quit(1)
 		return
 	if player.has_method("is_waiting_for_revive") and player.is_waiting_for_revive():

@@ -45,7 +45,7 @@ const MUDRA_FOCUS_DURATION_RATIO := 0.70
 const DEFAULT_ITEM_COUNTS := {
 	"kunai": 0,
 	"ash_balls": 0,
-	"gourd": 0,
+	"gourd": 3,
 	"pill": 0,
 	"capsule": 0,
 }
@@ -146,7 +146,7 @@ enum PlayerState {
 @export var max_posture := 100.0
 @export var posture_disengage_delay := 6.0
 @export_range(0.0, 1.0, 0.01) var posture_recovery_percent_per_second := 0.08
-@export var max_lives := 3
+@export var max_lives := 2
 @export var world_death_bounds_enabled := true
 @export var world_death_bounds := Rect2(-1024.0, -2048.0, 22000.0, 4096.0)
 @export var base_attack_damage := 16.0
