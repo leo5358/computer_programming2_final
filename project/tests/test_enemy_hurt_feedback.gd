@@ -44,6 +44,21 @@ func _initialize() -> void:
 			push_error("%s should immediately restart hurt animation from frame 1" % enemy.name)
 			quit(1)
 			return
+		enemy._physics_process(0.0)
+		var first_hurt_alpha: float = sprite.modulate.a
+		if first_hurt_alpha >= 0.95:
+			push_error("%s should start a visible hit flicker when directly hit" % enemy.name)
+			quit(1)
+			return
+		if sprite.modulate.r > 1.05 or sprite.modulate.g > 1.05 or sprite.modulate.b > 1.05:
+			push_error("%s hit flicker should dim like the player instead of being hidden by an overbright flash" % enemy.name)
+			quit(1)
+			return
+		enemy._physics_process(0.08)
+		if is_equal_approx(sprite.modulate.a, first_hurt_alpha):
+			push_error("%s hit flicker should alternate opacity while hurt feedback is active" % enemy.name)
+			quit(1)
+			return
 		enemy._physics_process(enemy.direct_hit_hurt_time * 0.5)
 		if enemy.state != enemy.EnemyState.HURT:
 			push_error("%s should stay in HURT briefly instead of instantly resuming AI" % enemy.name)

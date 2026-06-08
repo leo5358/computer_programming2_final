@@ -144,6 +144,28 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+	boss.guard_chance = 0.0
+	var boss_health_before_hit: float = boss.health
+	boss.receive_player_attack(1.0, 1.0)
+	if boss.health >= boss_health_before_hit:
+		push_error("Boss should take direct player attack damage")
+		quit(1)
+		return
+	var first_boss_hurt_alpha: float = sprite.modulate.a
+	if first_boss_hurt_alpha >= 0.95:
+		push_error("Boss should start a visible hit flicker when directly hit")
+		quit(1)
+		return
+	if sprite.modulate.r > 1.05 or sprite.modulate.g > 1.05 or sprite.modulate.b > 1.05:
+		push_error("Boss hit flicker should dim like the player instead of being hidden by an overbright flash")
+		quit(1)
+		return
+	boss._physics_process(0.08)
+	if is_equal_approx(sprite.modulate.a, first_boss_hurt_alpha):
+		push_error("Boss hit flicker should alternate opacity while hurt feedback is active")
+		quit(1)
+		return
+
 	boss.queue_free()
 	await process_frame
 	quit(0)

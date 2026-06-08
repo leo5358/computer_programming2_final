@@ -847,6 +847,8 @@ func reset_combat_state() -> void:
 	hit_spark_timer = 0.0
 	hit_recoil_timer = 0.0
 	hit_flash_timer = 0.0
+	hit_flicker_timer = 0.0
+	hit_flicker_elapsed = 0.0
 	feedback_timer_boss = 0.0
 	guard_lockout_timer = 0.0
 	has_engaged_player_boss = false
@@ -1442,6 +1444,7 @@ func _trigger_hit_feedback_boss_internal() -> void:
 	hit_spark_timer = hit_spark_time_boss
 	hit_recoil_timer = hit_recoil_time_boss
 	hit_flash_timer = hit_flash_time_boss
+	_start_hit_flicker(hurt_feedback_time_boss)
 	var recoil_velocity := Vector2(-facing * hit_recoil_force, velocity.y)
 	velocity = recoil_velocity
 	if hit_spark != null:
@@ -1458,10 +1461,11 @@ func _update_hit_feedback_boss_internal(delta: float) -> void:
 	hit_spark_timer = max(0.0, hit_spark_timer - delta)
 	hit_recoil_timer = max(0.0, hit_recoil_timer - delta)
 	hit_flash_timer = max(0.0, hit_flash_timer - delta)
+	_update_hit_flicker(delta)
 	if hit_spark != null:
 		hit_spark.visible = hit_spark_timer > 0.0
 	if sprite != null:
-		sprite.modulate = Color(1.75, 1.75, 1.28, 1.0) if hit_flash_timer > 0.0 else Color.WHITE
+		sprite.modulate = _hit_feedback_modulate(Color(1.75, 1.75, 1.28, 1.0))
 
 func _update_visuals_boss_internal() -> void:
 	if sprite == null or sprite.sprite_frames == null:

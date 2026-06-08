@@ -76,6 +76,9 @@ enum EnemyState {
 @export var direct_hit_hurt_time := 0.28
 @export var direct_hit_recoil_force := 210.0
 @export var direct_hit_thrust_lockout_time := 0.65
+@export var hit_flicker_interval := 0.07
+@export_range(0.0, 1.0, 0.01) var hit_flicker_low_alpha := 0.42
+@export_range(0.0, 1.0, 0.01) var hit_flicker_high_alpha := 0.9
 @export var parry_recoil_force := 155.0
 @export var dodge_posture_damage := 8.0
 @export_range(0.0, 1.0, 0.05) var guard_chance := 0.0
@@ -103,6 +106,8 @@ var attack_elapsed := 0.0
 var attack_cooldown := 0.5
 var attack_has_connected := false
 var hit_flash_timer := 0.0
+var hit_flicker_timer := 0.0
+var hit_flicker_elapsed := 0.0
 var hit_recoil_timer := 0.0
 var hit_spark_timer := 0.0
 var dodge_spark_timer := 0.0
@@ -261,6 +266,7 @@ func _start_direct_hurt_feedback() -> void:
 	state = EnemyState.HURT
 	_interrupt_attack()
 	hit_flash_timer = direct_hit_hurt_time * 0.75
+	_start_hit_flicker(direct_hit_hurt_time)
 	hit_spark_timer = 0.16
 	hit_recoil_timer = direct_hit_hurt_time
 	direct_hit_thrust_lockout_timer = direct_hit_thrust_lockout_time
@@ -335,6 +341,8 @@ func reset_combat_state() -> void:
 	current_attack_animation = "attack"
 	_apply_attack_profile("attack")
 	hit_flash_timer = 0.0
+	hit_flicker_timer = 0.0
+	hit_flicker_elapsed = 0.0
 	hit_recoil_timer = 0.0
 	hit_spark_timer = 0.0
 	dodge_spark_timer = 0.0
@@ -621,6 +629,9 @@ func _defeat() -> void:
 	corpse_timer = corpse_lifetime
 	corpse_has_landed = false
 	velocity = Vector2.ZERO
+	hit_flash_timer = 0.0
+	hit_flicker_timer = 0.0
+	hit_flicker_elapsed = 0.0
 	_set_attack_visual(false, false)
 	_set_body_collision_enabled(false)
 	defeated.emit()
@@ -637,13 +648,35 @@ func _set_body_collision_enabled(enabled: bool) -> void:
 
 func _update_feedback(delta: float) -> void:
 	hit_flash_timer = max(0.0, hit_flash_timer - delta)
+	_update_hit_flicker(delta)
 	hit_recoil_timer = max(0.0, hit_recoil_timer - delta)
 	hit_spark_timer = max(0.0, hit_spark_timer - delta)
 	dodge_spark_timer = max(0.0, dodge_spark_timer - delta)
 	if hit_spark != null:
 		hit_spark.visible = hit_spark_timer > 0.0 or dodge_spark_timer > 0.0
 	if sprite != null:
-		sprite.modulate = Color(1.65, 1.65, 1.22, 1.0) if hit_flash_timer > 0.0 else Color.WHITE
+		sprite.modulate = _hit_feedback_modulate(Color(1.65, 1.65, 1.22, 1.0))
+
+func _start_hit_flicker(duration: float) -> void:
+	hit_flicker_timer = max(hit_flicker_timer, duration)
+	hit_flicker_elapsed = 0.0
+
+func _update_hit_flicker(delta: float) -> void:
+	if hit_flicker_timer <= 0.0:
+		return
+	hit_flicker_elapsed += delta
+	hit_flicker_timer = max(0.0, hit_flicker_timer - delta)
+	if hit_flicker_timer <= 0.0:
+		hit_flicker_elapsed = 0.0
+
+func _hit_feedback_modulate(flash_color: Color) -> Color:
+	if hit_flicker_timer > 0.0:
+		var color := Color.WHITE
+		var interval: float = max(0.001, hit_flicker_interval)
+		var flash_phase: int = int(floor(hit_flicker_elapsed / interval))
+		color.a = hit_flicker_low_alpha if flash_phase % 2 == 0 else hit_flicker_high_alpha
+		return color
+	return flash_color if hit_flash_timer > 0.0 else Color.WHITE
 
 func _setup_overhead_bars() -> void:
 	if overhead_root != null:
