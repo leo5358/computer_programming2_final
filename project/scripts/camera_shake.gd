@@ -17,6 +17,7 @@ extends Camera2D
 @export var bottom_limit_end_x := 15663.0
 @export var bottom_limit_start := 655
 @export var bottom_limit_end := -50
+@export var bottom_limit_keyframes := PackedFloat32Array()
 
 var amplitude := 0.0
 var shake_time := 0.0
@@ -25,10 +26,15 @@ var sample_index := 0
 var is_suppressed := false
 var follow_target: Node2D = null
 var smoothed_lookahead_x := 0.0
+var cutscene_override_active := false
+var cutscene_focus_position := Vector2.ZERO
+var cutscene_focus_zoom := Vector2.ONE
+var pre_cutscene_zoom := Vector2.ONE
 
 func _ready() -> void:
 	add_to_group("feedback_camera")
 	base_offset = offset
+	pre_cutscene_zoom = zoom
 	if not follow_target_path.is_empty():
 		var target_node: Node = get_node_or_null(follow_target_path)
 		if target_node is Node2D:
@@ -60,7 +66,33 @@ func shake(amount: float, duration: float) -> void:
 	amplitude = max(amplitude, amount)
 	shake_time = max(shake_time, duration)
 
+func begin_cutscene_override(focus_position: Vector2, focus_zoom: Vector2) -> void:
+	cutscene_override_active = true
+	cutscene_focus_position = focus_position
+	cutscene_focus_zoom = focus_zoom
+	pre_cutscene_zoom = zoom
+	global_position = focus_position
+	zoom = focus_zoom
+
+func set_cutscene_focus(focus_position: Vector2, focus_zoom: Vector2) -> void:
+	cutscene_focus_position = focus_position
+	cutscene_focus_zoom = focus_zoom
+	if cutscene_override_active:
+		global_position = focus_position
+		zoom = focus_zoom
+
+func end_cutscene_override() -> void:
+	cutscene_override_active = false
+	zoom = pre_cutscene_zoom
+
+func is_cutscene_override_active() -> bool:
+	return cutscene_override_active
+
 func _update_follow(delta: float) -> void:
+	if cutscene_override_active:
+		global_position = cutscene_focus_position
+		zoom = cutscene_focus_zoom
+		return
 	if follow_target == null:
 		return
 
@@ -106,6 +138,10 @@ func _update_dynamic_limits() -> void:
 	if not dynamic_bottom_limit_enabled:
 		return
 
+	if bottom_limit_keyframes.size() >= 4:
+		limit_bottom = _bottom_limit_from_keyframes(follow_target.global_position.x)
+		return
+
 	if is_equal_approx(bottom_limit_start_x, bottom_limit_end_x):
 		limit_bottom = bottom_limit_end
 		return
@@ -113,3 +149,31 @@ func _update_dynamic_limits() -> void:
 	var progress: float = inverse_lerp(bottom_limit_start_x, bottom_limit_end_x, follow_target.global_position.x)
 	progress = clampf(progress, 0.0, 1.0)
 	limit_bottom = int(round(lerpf(float(bottom_limit_start), float(bottom_limit_end), progress)))
+
+func _bottom_limit_from_keyframes(target_x: float) -> int:
+	var keyframe_count: int = bottom_limit_keyframes.size() / 2
+	if keyframe_count <= 0:
+		return limit_bottom
+
+	var first_x: float = bottom_limit_keyframes[0]
+	var first_limit: float = bottom_limit_keyframes[1]
+	if target_x <= first_x:
+		return int(round(first_limit))
+
+	for keyframe_index in range(1, keyframe_count):
+		var previous_offset: int = (keyframe_index - 1) * 2
+		var current_offset: int = keyframe_index * 2
+		var previous_x: float = bottom_limit_keyframes[previous_offset]
+		var previous_limit: float = bottom_limit_keyframes[previous_offset + 1]
+		var current_x: float = bottom_limit_keyframes[current_offset]
+		var current_limit: float = bottom_limit_keyframes[current_offset + 1]
+		if target_x <= current_x:
+			if is_equal_approx(previous_x, current_x):
+				return int(round(current_limit))
+
+			var progress: float = inverse_lerp(previous_x, current_x, target_x)
+			progress = clampf(progress, 0.0, 1.0)
+			return int(round(lerpf(previous_limit, current_limit, progress)))
+
+	var last_offset: int = (keyframe_count - 1) * 2
+	return int(round(bottom_limit_keyframes[last_offset + 1]))

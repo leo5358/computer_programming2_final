@@ -2,6 +2,8 @@ extends CharacterBody2D
 
 signal stats_changed
 signal died
+signal revive_prompt_requested
+signal death_animation_finished(revive_pending: bool)
 
 const CombatMathScript = preload("res://scripts/combat_math.gd")
 const CombatServerScript = preload("res://scripts/combat_server.gd")
@@ -41,11 +43,11 @@ const MUDRA_FOCUS_FRAME_START := 3
 const MUDRA_FOCUS_FRAME_END := 5
 const MUDRA_FOCUS_DURATION_RATIO := 0.70
 const DEFAULT_ITEM_COUNTS := {
-	"kunai": 10,
-	"ash_balls": 10,
-	"gourd": 10,
-	"pill": 10,
-	"capsule": 10,
+	"kunai": 0,
+	"ash_balls": 0,
+	"gourd": 0,
+	"pill": 0,
+	"capsule": 0,
 }
 const ITEM_ORDER: Array[String] = ["kunai", "ash_balls", "gourd", "pill", "capsule"]
 const ATTACK_ITEM_IDS: Array[String] = ["kunai", "ash_balls"]
@@ -127,10 +129,6 @@ enum PlayerState {
 @export var acceleration := 2000.0
 @export var friction := 3200.0
 @export var turn_brake := 4200.0
-@export var combat_lock_range_x := 260.0
-@export var combat_lock_range_y := 90.0
-@export var combat_backpedal_speed_multiplier := 0.55
-@export var combat_backpedal_run_multiplier := 0.45
 @export var dash_impulse := 560.0
 @export var jump_velocity := -430.0
 @export var coyote_time := 0.1
@@ -187,6 +185,7 @@ enum PlayerState {
 @export var perfect_dodge_impulse := 520.0
 @export var perfect_dodge_hitstop_time := 0.09
 @export var hurt_time := 1.0
+@export var hit_invulnerability_duration := 0.55
 @export var stunned_time := 1.2
 @export var posture_break_animation_speed := 0.72
 @export var life_loss_stunned_time := 1.65
@@ -299,6 +298,13 @@ var heartbeat_direct_checkpoint_respawn := false
 var heartbeat_precise: float = CombatMathScript.MIN_HEARTBEAT
 var posture_recovery_pause_timer := 0.0
 var was_stunned_by_damage := false
+var heartbeat_modifier_item_id := ""
+var heartbeat_modifier_time_left := 0.0
+var revive_available_pending := false
+var death_animation_reported := false
+var hit_invulnerability_time_left := 0.0
+var hit_invulnerability_flash_timer := 0.0
+var hit_invulnerability_active := false
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var body_collision_shape: CollisionShape2D = $CollisionShape2D
@@ -319,6 +325,8 @@ func _ready() -> void:
 	spawn_position = global_position
 	combat_runtime = get_tree().get_first_node_in_group("combat_runtime")
 	_setup_sprite_frames()
+	if sprite != null and not sprite.animation_finished.is_connected(_on_sprite_animation_finished):
+		sprite.animation_finished.connect(_on_sprite_animation_finished)
 	_setup_hit_impact_vfx()
 	_load_optional_sfx()
 	_set_state(PlayerState.IDLE)
@@ -334,6 +342,7 @@ func _physics_process(delta: float) -> void:
 			velocity.y += gravity * delta
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 		move_and_slide()
+		_update_hit_invulnerability(delta)
 		_update_visuals()
 		stats_changed.emit()
 		return
@@ -514,48 +523,15 @@ func _update_movement(delta: float) -> void:
 			_set_state(PlayerState.IDLE)
 
 func _apply_horizontal_control(direction: float, delta: float) -> void:
-	var combat_target: Node2D = _find_combat_facing_target()
 	if direction != 0.0:
 		var movement_facing: float = sign(direction)
-		if combat_target != null:
-			var target_direction: float = sign(combat_target.global_position.x - global_position.x)
-			if target_direction != 0.0:
-				facing = target_direction
-		else:
-			facing = movement_facing
+		facing = movement_facing
 		var accel := turn_brake if velocity.x != 0.0 and sign(velocity.x) != sign(direction) else acceleration
 		var target_speed := run_speed if is_running else walk_speed
-		if combat_target != null and sign(direction) != facing:
-			target_speed = run_speed * combat_backpedal_run_multiplier if is_running else walk_speed * combat_backpedal_speed_multiplier
 		velocity.x = move_toward(velocity.x, direction * target_speed, accel * delta)
 	else:
 		is_running = false
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
-
-func _find_combat_facing_target() -> Node2D:
-	var nearest: Node2D = null
-	var nearest_distance := INF
-	for group_name in ["enemy", "boss"]:
-		for target in get_tree().get_nodes_in_group(group_name):
-			if not (target is Node2D):
-				continue
-			if _combat_target_is_defeated(target):
-				continue
-			var offset: Vector2 = (target as Node2D).global_position - global_position
-			if abs(offset.x) > combat_lock_range_x or abs(offset.y) > combat_lock_range_y:
-				continue
-			var distance: float = abs(offset.x)
-			if distance < nearest_distance:
-				nearest = target as Node2D
-				nearest_distance = distance
-	return nearest
-
-func _combat_target_is_defeated(target: Node) -> bool:
-	if target.get("defeated_flag") != null and bool(target.get("defeated_flag")):
-		return true
-	if target.get("health") != null and float(target.get("health")) <= 0.0:
-		return true
-	return false
 
 func _can_wall_interact() -> bool:
 	return is_on_wall() and not is_on_floor() and _can_jump()
@@ -724,6 +700,7 @@ func _update_action_state(delta: float) -> void:
 
 func _update_combat(delta: float) -> void:
 	_sync_heartbeat_precision_from_display()
+	_update_hit_invulnerability(delta)
 	if is_blocking:
 		block_age += delta
 		block_time_left -= delta
@@ -899,6 +876,10 @@ func get_item_count(item_id: String) -> int:
 func get_item_counts() -> Dictionary:
 	return item_counts.duplicate()
 
+func add_item(item_id: String, quantity: int = 1) -> void:
+	item_counts[item_id] = max(0, get_item_count(item_id) + quantity)
+	stats_changed.emit()
+
 func get_selected_item_id() -> String:
 	var index := clampi(selected_item_index, 0, ITEM_ORDER.size() - 1)
 	return ITEM_ORDER[index]
@@ -1036,6 +1017,7 @@ func refill_items_to_default() -> void:
 func settle_world_interaction(anchor_position: Vector2, refill_items: bool = false) -> void:
 	_cancel_current_action_flags()
 	is_invulnerable = false
+	_clear_hit_invulnerability()
 	action_timer = 0.0
 	dash_timer = 0.0
 	attack_elapsed = 0.0
@@ -1147,6 +1129,13 @@ func _apply_attack_hit() -> void:
 	var was_deflected := false
 	for body in attack_area.get_overlapping_bodies():
 		if body.has_method("can_be_executed") and body.can_be_executed() and body.has_method("execute"):
+			if body.is_in_group("boss") and body.has_method("receive_player_attack"):
+				var boss_result: Variant = body.receive_player_attack(damage, posture_damage)
+				if not (boss_result is bool and boss_result == false):
+					hit_confirmed = true
+					if boss_result is Dictionary and bool(boss_result.get("guarded", false)):
+						was_deflected = true
+				continue
 			body.execute()
 			hit_confirmed = true
 			continue
@@ -1272,7 +1261,7 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 		return
 	register_posture_contact()
 	_mark_heartbeat_combat_activity()
-	if is_invulnerable and attack_type != CombatServerScript.AttackType.SWEEP:
+	if (_has_damage_invulnerability() and attack_type != CombatServerScript.AttackType.SWEEP) or hit_invulnerability_active:
 		return
 
 	var can_guard := attack_type != CombatServerScript.AttackType.THRUST
@@ -1319,6 +1308,8 @@ func receive_enemy_attack(damage: float, posture_damage: float, attacker: Node =
 			stats_changed.emit()
 			return
 		else:
+			if took_damage_this_hit:
+				_start_hit_invulnerability()
 			_play_sfx(hurt_sfx)
 			_trigger_hurt_feedback(_knockback_direction_from_attacker(attacker))
 			hurt_animation = "hurt"
@@ -1349,10 +1340,8 @@ func _check_world_death_bounds() -> void:
 
 func _handle_health_depleted() -> void:
 	if lives > 1:
-		lives -= 1
-		health = max_health
-		posture = 0.0
-		_enter_stunned(&"life_knockdown", life_loss_stunned_time, life_loss_animation_speed, false)
+		_enter_revive_wait_state()
+		revive_prompt_requested.emit()
 		return
 	_enter_dead()
 	died.emit()
@@ -1424,6 +1413,7 @@ func _update_visuals() -> void:
 	hit_impact_vfx_timer = max(0.0, hit_impact_vfx_timer - get_physics_process_delta_time())
 	if hit_impact_vfx != null:
 		hit_impact_vfx.visible = hit_impact_vfx_timer > 0.0
+	_apply_hit_invulnerability_flicker()
 	sprite.flip_h = facing < 0.0
 	_play_state_animation()
 
@@ -1864,6 +1854,9 @@ func _shake_camera(amount: float, duration: float) -> void:
 func _enter_dead() -> void:
 	health = 0.0
 	lives = 0
+	revive_available_pending = false
+	death_animation_reported = false
+	_clear_hit_invulnerability()
 	posture = min(posture, max_posture)
 	is_blocking = false
 	is_attacking = false
@@ -1886,12 +1879,169 @@ func _enter_dead() -> void:
 	_set_state(PlayerState.DEAD)
 	_update_visuals()
 
+func _enter_revive_wait_state() -> void:
+	health = 0.0
+	revive_available_pending = true
+	death_animation_reported = false
+	_clear_hit_invulnerability()
+	posture = min(posture, max_posture)
+	is_blocking = false
+	is_attacking = false
+	is_parrying = false
+	is_dashing = false
+	is_perfect_dodging = false
+	is_invulnerable = true
+	action_timer = 0.0
+	dash_timer = 0.0
+	attack_has_hit = false
+	hitstop_timer = 0.0
+	velocity = Vector2.ZERO
+	heavy_parry_recoil_timer = 0.0
+	heavy_parry_recoil_velocity = Vector2.ZERO
+	sprite.speed_scale = 1.0
+	_fade_in_sfx(death_sfx, 1.0)
+	_set_state(PlayerState.DEAD)
+	_update_visuals()
+	stats_changed.emit()
+
 func force_death_for_debug() -> void:
 	if state == PlayerState.DEAD:
+		return
+	if lives > 1:
+		_enter_revive_wait_state()
+		revive_prompt_requested.emit()
 		return
 	_enter_dead()
 	stats_changed.emit()
 	died.emit()
+
+func is_waiting_for_revive() -> bool:
+	return revive_available_pending
+
+func has_completed_death_animation() -> bool:
+	return death_animation_reported
+
+func revive_in_place() -> bool:
+	if not revive_available_pending:
+		return false
+	lives = max(0, lives - 1)
+	revive_available_pending = false
+	death_animation_reported = false
+	health = max_health
+	posture = 0.0
+	posture_combat_timer = 0.0
+	posture_visibility_snapshot = posture
+	posture_recovery_pause_timer = 0.0
+	was_stunned_by_damage = false
+	_set_heartbeat_value(CombatMathScript.MIN_HEARTBEAT)
+	heartbeat_combat_timer = 0.0
+	heartbeat_direct_checkpoint_respawn = false
+	_clear_hit_invulnerability()
+	state = PlayerState.IDLE
+	previous_state = PlayerState.IDLE
+	is_blocking = false
+	is_attacking = false
+	is_parrying = false
+	is_dashing = false
+	is_running = false
+	is_perfect_dodging = false
+	is_invulnerable = false
+	is_block_releasing = false
+	block_age = 0.0
+	parry_elapsed = 0.0
+	block_time_left = 0.0
+	action_timer = 0.0
+	dash_timer = 0.0
+	dash_direction = 1.0
+	wall_climb_direction = 0.0
+	wall_climb_lockout_timer = 0.0
+	attack_elapsed = 0.0
+	attack_buffer_timer = 0.0
+	attack_buffer_queued = false
+	attack_lockout_timer = 0.0
+	attack_has_hit = false
+	attack_has_cut_projectile = false
+	attack_combo_step = 0
+	current_attack_animation = "attack_a"
+	hurt_animation = "hurt"
+	attack_lunge_timer = 0.0
+	current_animation = ""
+	parry_flash_timer = 0.0
+	block_flash_timer = 0.0
+	hurt_flash_timer = 0.0
+	perfect_dodge_timer = 0.0
+	hit_impact_vfx_timer = 0.0
+	hitstop_timer = 0.0
+	stored_velocity = Vector2.ZERO
+	heavy_parry_recoil_timer = 0.0
+	heavy_parry_recoil_velocity = Vector2.ZERO
+	velocity = Vector2.ZERO
+	sprite.speed_scale = 1.0
+	if hit_impact_vfx != null:
+		hit_impact_vfx.visible = false
+	_update_visuals()
+	stats_changed.emit()
+	return true
+
+func _on_sprite_animation_finished() -> void:
+	if sprite == null or state != PlayerState.DEAD or sprite.animation != &"death" or death_animation_reported:
+		return
+	death_animation_reported = true
+	death_animation_finished.emit(revive_available_pending)
+
+func _has_damage_invulnerability() -> bool:
+	return is_invulnerable
+
+func _start_hit_invulnerability() -> void:
+	hit_invulnerability_time_left = hit_invulnerability_duration
+	hit_invulnerability_flash_timer = 0.0
+	if not hit_invulnerability_active:
+		hit_invulnerability_active = true
+	else:
+		_refresh_enemy_collision_exceptions()
+	_apply_hit_invulnerability_flicker()
+	_refresh_enemy_collision_exceptions()
+
+func _update_hit_invulnerability(delta: float) -> void:
+	if not hit_invulnerability_active:
+		return
+	hit_invulnerability_time_left = max(0.0, hit_invulnerability_time_left - delta)
+	hit_invulnerability_flash_timer += delta
+	if hit_invulnerability_time_left <= 0.0:
+		_clear_hit_invulnerability()
+
+func _apply_hit_invulnerability_flicker() -> void:
+	if sprite == null:
+		return
+	if not hit_invulnerability_active:
+		sprite.modulate.a = 1.0
+		return
+	var flash_phase: int = int(floor(hit_invulnerability_flash_timer / 0.07))
+	sprite.modulate.a = 0.42 if flash_phase % 2 == 0 else 0.9
+
+func _clear_hit_invulnerability() -> void:
+	hit_invulnerability_time_left = 0.0
+	hit_invulnerability_flash_timer = 0.0
+	if not hit_invulnerability_active:
+		if sprite != null:
+			sprite.modulate.a = 1.0
+		return
+	hit_invulnerability_active = false
+	if sprite != null:
+		sprite.modulate.a = 1.0
+	_refresh_enemy_collision_exceptions()
+
+func _refresh_enemy_collision_exceptions() -> void:
+	for group_name in ["enemy", "boss"]:
+		for node in get_tree().get_nodes_in_group(group_name):
+			if node is PhysicsBody2D:
+				var body: PhysicsBody2D = node as PhysicsBody2D
+				if hit_invulnerability_active:
+					add_collision_exception_with(body)
+					body.add_collision_exception_with(self)
+				else:
+					remove_collision_exception_with(body)
+					body.remove_collision_exception_with(self)
 
 func _fade_in_sfx(player: AudioStreamPlayer2D, duration: float) -> void:
 	if player == null:
@@ -1959,9 +2109,12 @@ func reset_combat_state() -> void:
 	posture = 0.0
 	posture_combat_timer = 0.0
 	posture_visibility_snapshot = posture
+	posture_recovery_pause_timer = 0.0
+	was_stunned_by_damage = false
 	_set_heartbeat_value(CombatMathScript.MIN_HEARTBEAT)
 	heartbeat_combat_timer = 0.0
 	heartbeat_direct_checkpoint_respawn = false
+	_clear_hit_invulnerability()
 	state = PlayerState.IDLE
 	previous_state = PlayerState.IDLE
 	is_blocking = false

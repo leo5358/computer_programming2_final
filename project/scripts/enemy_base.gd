@@ -612,7 +612,7 @@ func _break_posture() -> void:
 	state = EnemyState.POSTURE_BROKEN
 	_interrupt_attack()
 	if execute_label != null:
-		execute_label.visible = true
+		execute_label.visible = false
 
 func _defeat() -> void:
 	defeated_flag = true

@@ -10,7 +10,8 @@
 [ext_resource type="Texture2D" uid="uid://cmgi6nhylti3a" path="res://assets/maps/chapter1/structures/shrine_facade.png" id="8_6lmym"]
 [ext_resource type="Texture2D" uid="uid://dmpimxksau067" path="res://assets/maps/chapter1/props/shimenawa_curtain.png" id="9_hh8eg"]
 [ext_resource type="Script" uid="uid://dauwr7kxq7rjl" path="res://scripts/camera_shake.gd" id="10_camera_shake"]
-[ext_resource type="Script" path="res://scripts/enemy_spawn_point.gd" id="enemy_spawn_point_script"]
+[ext_resource type="PackedScene" path="res://scenes/Checkpoint.tscn" id="checkpoint_scene"]
+[ext_resource type="PackedScene" uid="uid://lyh0gtdp8yqp" path="res://scenes/MapItemPickup.tscn" id="map_item_pickup_scene"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yblr1"]
 size = Vector2(3066.5, 249.5)
@@ -20,7 +21,38 @@ size = Vector2(140, 1165.75)
 
 [node name="root" type="Node2D" unique_id=506673559]
 
-[node name="EnemySpawns" type="Node2D" parent="."]
+[node name="Checkpoints" type="Node2D" parent="." unique_id=921885254]
+
+[node name="CheckpointPlaza" parent="Checkpoints" unique_id=176030127 instance=ExtResource("checkpoint_scene")]
+position = Vector2(2087, 530)
+
+[node name="ItemPickups" type="Node2D" parent="." unique_id=113975257]
+
+[node name="PlazaGourd01" parent="ItemPickups" unique_id=558179546 instance=ExtResource("map_item_pickup_scene")]
+position = Vector2(835.1, 504)
+scale = Vector2(0.07, 0.07)
+
+[node name="PlazaPill01" parent="ItemPickups" unique_id=1909569490 instance=ExtResource("map_item_pickup_scene")]
+position = Vector2(1088.2, 504)
+scale = Vector2(0.07, 0.07)
+item_id = "pill"
+
+[node name="PlazaCapsule01" parent="ItemPickups" unique_id=983008642 instance=ExtResource("map_item_pickup_scene")]
+position = Vector2(1330.2, 504)
+scale = Vector2(0.07, 0.07)
+item_id = "capsule"
+
+[node name="PlazaAshBalls01" parent="ItemPickups" unique_id=193561135 instance=ExtResource("map_item_pickup_scene")]
+position = Vector2(1593, 504)
+scale = Vector2(0.07, 0.07)
+item_id = "ash_balls"
+
+[node name="PlazaKunai01" parent="ItemPickups" unique_id=1471557212 instance=ExtResource("map_item_pickup_scene")]
+position = Vector2(523.7, 504)
+scale = Vector2(0.07, 0.07)
+item_id = "kunai"
+
+[node name="EnemySpawns" type="Node2D" parent="." unique_id=831167687]
 
 [node name="BackgroundFar" type="Node2D" parent="." unique_id=1049019642]
 

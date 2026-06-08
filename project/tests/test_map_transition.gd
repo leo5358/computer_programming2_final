@@ -93,7 +93,6 @@ func _initialize() -> void:
 		quit(1)
 		return
 	player.global_position = Vector2(2550.0, 530.5)
-	var boss_gate_position := player.global_position
 	await process_frame
 	main._update_map_interaction_prompt()
 	if not prompt.visible:
@@ -105,7 +104,6 @@ func _initialize() -> void:
 		quit(1)
 		return
 	player.global_position = Vector2(2500.0, 530.5)
-	boss_gate_position = player.global_position
 	await process_frame
 	main._update_map_interaction_prompt()
 	if prompt.visible:
@@ -124,29 +122,27 @@ func _initialize() -> void:
 		quit(1)
 		return
 	player.global_position = Vector2(2825.16, 530.5)
-	boss_gate_position = player.global_position
 
 	if not main.has_method("_transition_h_stone_plaza_to_boss_interior"):
 		push_error("Main scene should expose H stone plaza to boss interior transition")
 		quit(1)
 		return
 
-	await main._transition_h_stone_plaza_to_boss_interior()
+	if save_manager != null and save_manager.has_method("delete_save"):
+		save_manager.delete_save()
+	var boss_f_event := InputEventKey.new()
+	boss_f_event.keycode = KEY_F
+	boss_f_event.pressed = true
+	main._input(boss_f_event)
+	await process_frame
+	await create_timer(1.7).timeout
 
 	if main.get("current_map_id") != "boss_interior":
 		push_error("Interacting with H stone plaza exit should switch to boss interior")
 		quit(1)
 		return
-	if save_manager == null or not save_manager.has_save():
-		push_error("Entering boss interior should save the boss gate checkpoint")
-		quit(1)
-		return
-	if save_manager.get_saved_map() != "h_stone_plaza":
-		push_error("Boss gate checkpoint should save H stone plaza, not boss interior")
-		quit(1)
-		return
-	if save_manager.get_saved_position().distance_to(boss_gate_position) > 1.0:
-		push_error("Boss gate checkpoint should restore the player to the F interaction point before boss")
+	if save_manager != null and save_manager.has_save():
+		push_error("Entering boss interior should not create a checkpoint save")
 		quit(1)
 		return
 	if main.get_node_or_null("Chapter1Map/Camera") == null:

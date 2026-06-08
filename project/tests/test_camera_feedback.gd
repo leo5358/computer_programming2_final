@@ -39,14 +39,67 @@ func _initialize() -> void:
 		quit(1)
 		return
 	camera.dynamic_bottom_limit_enabled = true
-	camera.bottom_limit_start_x = 12800.0
-	camera.bottom_limit_end_x = 15663.0
-	camera.bottom_limit_start = 655
-	camera.bottom_limit_end = -50
-	player.global_position.x = 15663.0
+
+	player.global_position.x = 2200.0
 	await process_frame
-	if camera.limit_bottom != -50:
-		push_error("Map camera should raise bottom limit near the final stairs")
+	if camera.limit_bottom != 540:
+		push_error("AB foothill camera bottom should lower to 540 on the first foothill shelf")
+		quit(1)
+		return
+
+	player.global_position.x = 3100.0
+	await process_frame
+	if camera.limit_bottom != 655:
+		push_error("AB foothill camera bottom should use the default bottom after removing the second foothill shelf limit")
+		quit(1)
+		return
+
+	player.global_position.x = 9500.0
+	await process_frame
+	if camera.limit_bottom != 490:
+		push_error("AB foothill camera bottom should lower to 490 at the expanded rear shelf start")
+		quit(1)
+		return
+
+	player.global_position.x = 11000.0
+	await process_frame
+	if camera.limit_bottom != 490:
+		push_error("AB foothill camera bottom should lower to 490 before the rear stairs")
+		quit(1)
+		return
+
+	player.global_position.x = 12000.0
+	await process_frame
+	if camera.limit_bottom != 400:
+		push_error("AB foothill camera bottom should lower to 400 on the rear stairs approach")
+		quit(1)
+		return
+
+	player.global_position.x = 13360.0
+	await process_frame
+	if camera.limit_bottom != 300:
+		push_error("AB foothill camera bottom should linearly raise from 400 to 200 on the final climb")
+		quit(1)
+		return
+
+	player.global_position.x = 1570.0
+	await process_frame
+	if camera.limit_bottom <= 540 or camera.limit_bottom >= 655:
+		push_error("AB foothill camera bottom should use the expanded buffer before the first custom shelf")
+		quit(1)
+		return
+
+	player.global_position.x = 14000.0
+	await process_frame
+	if camera.limit_bottom != 200:
+		push_error("AB foothill camera bottom should finish at 200 at the top of the final climb")
+		quit(1)
+		return
+
+	player.global_position.x = 14700.0
+	await process_frame
+	if camera.limit_bottom != -10:
+		push_error("AB foothill camera bottom should continue raising to -10 by x=14700")
 		quit(1)
 		return
 

@@ -14,12 +14,42 @@ const H_STONE_PLAZA_EXIT_START_X := 2700.0
 const H_STONE_PLAZA_EXIT_END_X := 3200.0
 const H_STONE_PLAZA_SPAWN := Vector2(220, 530.5)
 const BOSS_INTERIOR_SPAWN := Vector2(220, 640.5)
-const BOSS_INTERIOR_BOSS_SPAWN := Vector2(1050, 640.5)
+const BOSS_INTERIOR_BOSS_SPAWN := Vector2(1050, 529.0)
 const TRANSITION_FADE_TIME := 0.45
 const INTERACTION_PROMPT_RADIUS := 300.0
+const ITEM_PICKUP_PROMPT_TEXT := "按F撿起"
 const CHECKPOINT_PROMPT_TEXT := "按下F在此處休息(存檔)"
 const DOOR_PROMPT_TEXT := "按下F進入"
 const INTERACTION_FADE_START_ALPHA := 0.2
+const PICKUP_NOTICE_FADE_TIME := 0.25
+const PICKUP_NOTICE_HOLD_TIME := 2.0
+var BOSS_INTRO_DURATION := 6.0
+var BOSS_INTRO_ZOOM_OUT_TIME := 3.0
+var BOSS_INTRO_SHAKE_TIMES := PackedFloat32Array([3.15, 4.03, 4.7, 5.08, 5.25, 5.45])
+const BOSS_INTRO_CLOSE_ZOOM := Vector2(1.7, 1.7)
+const BOSS_INTRO_FOCUS_OFFSET := Vector2(0.0, -72.0)
+const BOSS_INTRO_SHAKE_AMOUNT := 18.0
+const BOSS_INTRO_SHAKE_DURATION := 0.12
+const BOSS_INTRO_HUD_FADE_IN_TIME := 0.45
+const BOSS_INTRO_HUD_PATHS := ["BossHud", "PlayerVitalsHud", "PlayerPostureHud", "ItemUI"]
+const BOSS_FINAL_EXECUTION_ZOOM := Vector2(1.65, 1.65)
+const BOSS_FINAL_EXECUTION_FOCUS_OFFSET := Vector2(0.0, -68.0)
+const BOSS_FINAL_EXECUTION_ZOOM_IN_TIME := 0.35
+const BOSS_FINAL_EXECUTION_ZOOM_OUT_TIME := 0.65
+const BOSS_FINAL_EXECUTION_DEATH_FRAME_TIME := 0.28
+const BOSS_FINAL_EXECUTION_PLAYER_ATTACK_TIME := 1.55
+const BOSS_FINAL_EXECUTION_PLAYER_ATTACK_SPEED := 0.18
+const BOSS_FINAL_EXECUTION_ATTACK_SFX_DELAY := 1.2
+const BOSS_FINAL_EXECUTION_DUCK_BGM_DB := -28.0
+const BOSS_FINAL_EXECUTION_BGM_FADE_OUT_TIME := 1.8
+const BOSS_FINAL_EXECUTION_SFX_PATH := "res://assets/sfx/final.mp3"
+const ITEM_ICON_PATHS := {
+	"gourd": "res://assets/items/gourd/gourd.png",
+	"kunai": "res://assets/items/kunai/kunai.png",
+	"pill": "res://assets/items/pill/pill.png",
+	"capsule": "res://assets/items/capsule/capsule.png",
+	"ash_balls": "res://assets/items/ash_balls/ash_balls.png",
+}
 const INTERACTION_FADE_TO_BLACK_TIME := 2.0
 const INTERACTION_BLACK_HOLD_TIME := 1.0
 const HEARTBEAT_DEATH_FADE_START_ALPHA := 0.2
@@ -45,12 +75,23 @@ var spawn_offsets: Dictionary = {
 var current_map_id := "ab_foothill"
 var is_transitioning := false
 var is_pause_menu_open := false
+var is_boss_intro_playing := false
+var is_boss_final_execution_playing := false
 var bgm_volume_before_pause := 0.0
+var bgm_volume_before_final_execution := 0.0
+var pickup_notice_tween: Tween = null
 
 @onready var interaction_prompt: Label = $MapTransitionUI/PromptLabel
 @onready var fade_rect: ColorRect = $MapTransitionUI/FadeRect
+@onready var boss_intro_overlay: Control = get_node_or_null("MapTransitionUI/BossIntroOverlay") as Control
+@onready var boss_intro_top_bar: ColorRect = get_node_or_null("MapTransitionUI/BossIntroOverlay/TopLetterbox") as ColorRect
+@onready var boss_intro_bottom_bar: ColorRect = get_node_or_null("MapTransitionUI/BossIntroOverlay/BottomLetterbox") as ColorRect
+@onready var pickup_notice: Control = get_node_or_null("MapTransitionUI/PickupNotice")
+@onready var pickup_notice_icon: TextureRect = get_node_or_null("MapTransitionUI/PickupNotice/Icon")
+@onready var pickup_notice_label: Label = get_node_or_null("MapTransitionUI/PickupNotice/Label")
 @onready var bgm_player: Node = get_node_or_null("BgmPlayer")
 @onready var death_overlay: CanvasLayer = get_node_or_null("DeathOverlay")
+@onready var revive_overlay: CanvasLayer = get_node_or_null("ReviveOverlay")
 @onready var pause_overlay: CanvasLayer = get_node_or_null("PauseOverlay")
 
 func _ready() -> void:
@@ -64,6 +105,7 @@ func _ready() -> void:
 	_update_map_bgm()
 	_connect_player_death_signal()
 	_connect_death_overlay()
+	_connect_revive_overlay()
 	_connect_pause_overlay()
 	if _should_spawn_default_boss_for_current_run():
 		_spawn_enemy(BOSS_SCENE, spawn_offsets[KEY_0])
@@ -130,8 +172,14 @@ func _input(event: InputEvent) -> void:
 		KEY_N:
 			_debug_kill_player()
 			get_viewport().set_input_as_handled()
+		KEY_I:
+			_debug_kill_boss()
+			get_viewport().set_input_as_handled()
 		KEY_F:
-			if _can_activate_checkpoint():
+			if _can_collect_map_item():
+				_collect_nearest_map_item()
+				get_viewport().set_input_as_handled()
+			elif _can_activate_checkpoint():
 				_activate_nearest_checkpoint()
 				get_viewport().set_input_as_handled()
 			elif _can_use_ab_exit():
@@ -156,6 +204,13 @@ func _debug_kill_player() -> void:
 	if player != null and player.has_method("force_death_for_debug"):
 		player.force_death_for_debug()
 
+func _debug_kill_boss() -> void:
+	for boss in get_tree().get_nodes_in_group("boss"):
+		if boss != null and not boss.is_queued_for_deletion() and boss is Node2D:
+			boss.set("posture", boss.get("max_posture"))
+			_play_boss_final_execution_cutscene(boss as Node2D)
+			return
+
 func _spawn_debug_boss() -> void:
 	var boss := _spawn_enemy(BOSS_SCENE, spawn_offsets[KEY_0])
 	if boss != null:
@@ -166,6 +221,9 @@ func _connect_player_death_signal() -> void:
 	var callback := Callable(self, "_on_player_died")
 	if player != null and player.has_signal("died") and not player.is_connected("died", callback):
 		player.connect("died", callback)
+	var revive_callback := Callable(self, "_on_player_revive_prompt_requested")
+	if player != null and player.has_signal("revive_prompt_requested") and not player.is_connected("revive_prompt_requested", revive_callback):
+		player.connect("revive_prompt_requested", revive_callback)
 
 func _connect_death_overlay() -> void:
 	if death_overlay == null:
@@ -176,6 +234,16 @@ func _connect_death_overlay() -> void:
 		death_overlay.connect("retry_requested", retry_callback)
 	if death_overlay.has_signal("main_menu_requested") and not death_overlay.is_connected("main_menu_requested", menu_callback):
 		death_overlay.connect("main_menu_requested", menu_callback)
+
+func _connect_revive_overlay() -> void:
+	if revive_overlay == null:
+		return
+	var revive_callback := Callable(self, "_revive_player_in_place")
+	var give_up_callback := Callable(self, "_give_up_from_revive")
+	if revive_overlay.has_signal("revive_requested") and not revive_overlay.is_connected("revive_requested", revive_callback):
+		revive_overlay.connect("revive_requested", revive_callback)
+	if revive_overlay.has_signal("give_up_requested") and not revive_overlay.is_connected("give_up_requested", give_up_callback):
+		revive_overlay.connect("give_up_requested", give_up_callback)
 
 func _connect_pause_overlay() -> void:
 	if pause_overlay == null:
@@ -194,7 +262,7 @@ func _toggle_pause_menu() -> void:
 		_open_pause_menu()
 
 func _open_pause_menu() -> void:
-	if pause_overlay == null or is_transitioning or _is_death_overlay_active():
+	if pause_overlay == null or is_transitioning or _is_death_overlay_active() or _is_revive_overlay_active():
 		return
 	if bgm_player is AudioStreamPlayer:
 		var player_bgm := bgm_player as AudioStreamPlayer
@@ -248,6 +316,9 @@ func _save_current_checkpoint_progress() -> void:
 func _is_death_overlay_active() -> bool:
 	return death_overlay != null and (death_overlay.visible or bool(death_overlay.get("is_active")))
 
+func _is_revive_overlay_active() -> bool:
+	return revive_overlay != null and (revive_overlay.visible or bool(revive_overlay.get("is_active")))
+
 func _on_player_died() -> void:
 	if is_pause_menu_open:
 		_resume_from_pause()
@@ -260,6 +331,28 @@ func _on_player_died() -> void:
 	_set_player_transition_locked(true)
 	if death_overlay != null and death_overlay.has_method("show_death"):
 		death_overlay.show_death()
+
+func _on_player_revive_prompt_requested() -> void:
+	if is_pause_menu_open:
+		_resume_from_pause()
+	is_transitioning = true
+	_set_player_transition_locked(true)
+	var player := _get_player()
+	await _await_player_death_animation(player)
+	if player == null or not is_instance_valid(player):
+		return
+	if player.has_method("is_waiting_for_revive") and not player.is_waiting_for_revive():
+		return
+	if revive_overlay != null and revive_overlay.has_method("show_revive_prompt"):
+		revive_overlay.show_revive_prompt()
+
+func _await_player_death_animation(player: Node) -> void:
+	if player == null or not is_instance_valid(player):
+		return
+	if player.has_method("has_completed_death_animation") and player.has_completed_death_animation():
+		return
+	if player.has_signal("death_animation_finished"):
+		await player.death_animation_finished
 
 func _run_heartbeat_death_respawn() -> void:
 	if is_transitioning:
@@ -276,6 +369,8 @@ func _run_heartbeat_death_respawn() -> void:
 func _retry_from_checkpoint() -> void:
 	if death_overlay != null and death_overlay.has_method("hide_overlay_immediate"):
 		death_overlay.hide_overlay_immediate()
+	if revive_overlay != null and revive_overlay.has_method("hide_overlay_immediate"):
+		revive_overlay.hide_overlay_immediate()
 	var respawn := _get_respawn_snapshot()
 	clear_test_enemies()
 	_switch_map(_scene_for_map_id(String(respawn["map_id"])), String(respawn["map_id"]), respawn["position"])
@@ -289,10 +384,14 @@ func _retry_from_checkpoint() -> void:
 	is_transitioning = false
 
 func _return_to_start_page() -> void:
+	get_tree().paused = false
+	is_pause_menu_open = false
 	clear_test_enemies()
 	_set_player_transition_locked(false)
 	if death_overlay != null and death_overlay.has_method("hide_overlay_immediate"):
 		death_overlay.hide_overlay_immediate()
+	if revive_overlay != null and revive_overlay.has_method("hide_overlay_immediate"):
+		revive_overlay.hide_overlay_immediate()
 	if has_node("/root/SaveManager"):
 		var sm = get_node("/root/SaveManager")
 		if sm.has_method("delete_save"):
@@ -382,6 +481,7 @@ func _spawn_enemy(scene: PackedScene, spawn_position: Vector2) -> Node:
 		instance.global_position = spawn_position
 		if "spawn_position" in instance:
 			instance.spawn_position = spawn_position
+	_connect_boss_final_execution(instance)
 	return instance
 
 func _update_map_interaction_prompt() -> void:
@@ -401,6 +501,25 @@ func _update_map_interaction_prompt() -> void:
 func _can_activate_checkpoint() -> bool:
 	return _nearest_checkpoint() != null
 
+func _can_collect_map_item() -> bool:
+	return _nearest_map_item() != null
+
+func _collect_nearest_map_item() -> bool:
+	var pickup := _nearest_map_item()
+	if pickup == null:
+		return false
+	var player := _get_player()
+	if player == null:
+		return false
+	var item_id := String(pickup.get("item_id"))
+	var collected := false
+	if pickup.has_method("collect"):
+		collected = bool(pickup.collect(player))
+	if collected:
+		_show_pickup_notice(item_id)
+		_update_map_interaction_prompt()
+	return collected
+
 func _activate_nearest_checkpoint() -> bool:
 	var checkpoint := _nearest_checkpoint()
 	if checkpoint == null:
@@ -413,7 +532,7 @@ func _activate_nearest_checkpoint() -> bool:
 
 func _nearest_checkpoint() -> Node:
 	var player := _get_player()
-	if player == null or current_map_id != "ab_foothill":
+	if player == null:
 		return null
 	var nearest: Node = null
 	var nearest_distance := INF
@@ -433,7 +552,7 @@ func _nearest_checkpoint() -> Node:
 
 func _nearest_checkpoint_prompt() -> Node:
 	var player := _get_player()
-	if player == null or current_map_id != "ab_foothill":
+	if player == null:
 		return null
 	var nearest: Node = null
 	var nearest_distance := INF
@@ -448,6 +567,46 @@ func _nearest_checkpoint_prompt() -> Node:
 		var distance := player.global_position.distance_to(checkpoint_node.global_position)
 		if distance < nearest_distance:
 			nearest = checkpoint
+			nearest_distance = distance
+	return nearest
+
+func _nearest_map_item() -> Node:
+	var player := _get_player()
+	if player == null:
+		return null
+	var nearest: Node = null
+	var nearest_distance := INF
+	for pickup in get_tree().get_nodes_in_group("map_item_pickup"):
+		if pickup == null or pickup.is_queued_for_deletion() or not pickup.has_method("is_player_in_range"):
+			continue
+		if not pickup.is_player_in_range(player):
+			continue
+		var pickup_node := pickup as Node2D
+		if pickup_node == null:
+			continue
+		var distance := player.global_position.distance_to(pickup_node.global_position)
+		if distance < nearest_distance:
+			nearest = pickup
+			nearest_distance = distance
+	return nearest
+
+func _nearest_map_item_prompt() -> Node:
+	var player := _get_player()
+	if player == null:
+		return null
+	var nearest: Node = null
+	var nearest_distance := INF
+	for pickup in get_tree().get_nodes_in_group("map_item_pickup"):
+		if pickup == null or pickup.is_queued_for_deletion() or not pickup.has_method("is_player_in_prompt_range"):
+			continue
+		if not pickup.is_player_in_prompt_range(player):
+			continue
+		var pickup_node := pickup as Node2D
+		if pickup_node == null:
+			continue
+		var distance := player.global_position.distance_to(pickup_node.global_position)
+		if distance < nearest_distance:
+			nearest = pickup
 			nearest_distance = distance
 	return nearest
 
@@ -475,24 +634,22 @@ func _transition_ab_to_h_stone_plaza() -> void:
 	await _run_map_transition(H_STONE_PLAZA_SCENE, "h_stone_plaza", H_STONE_PLAZA_SPAWN)
 
 func _transition_h_stone_plaza_to_boss_interior() -> void:
-	_save_boss_gate_checkpoint()
-	await _run_map_transition(BOSS_INTERIOR_SCENE, "boss_interior", BOSS_INTERIOR_SPAWN)
-	_spawn_boss_for_boss_interior()
+	await _run_map_transition(BOSS_INTERIOR_SCENE, "boss_interior", BOSS_INTERIOR_SPAWN, false, false)
+	var boss := _spawn_boss_for_boss_interior()
+	await _play_boss_intro_cutscene(boss)
+	_set_player_transition_locked(false)
+	is_transitioning = false
 
 func _debug_warp_to_boss_interior() -> void:
 	clear_test_enemies()
-	await _run_map_transition(BOSS_INTERIOR_SCENE, "boss_interior", BOSS_INTERIOR_SPAWN)
-	_spawn_boss_for_boss_interior()
-
-func _save_boss_gate_checkpoint() -> void:
-	var player := _get_player()
-	if player == null or not has_node("/root/SaveManager"):
-		return
-	var sm = get_node("/root/SaveManager")
-	sm.save_game("h_stone_plaza", player.global_position, player.health)
+	await _run_map_transition(BOSS_INTERIOR_SCENE, "boss_interior", BOSS_INTERIOR_SPAWN, false, false)
+	var boss := _spawn_boss_for_boss_interior()
+	await _play_boss_intro_cutscene(boss)
+	_set_player_transition_locked(false)
+	is_transitioning = false
 
 func _sync_checkpoints_to_saved_position(map_id: String, saved_position: Vector2) -> void:
-	if map_id != "ab_foothill":
+	if map_id != current_map_id:
 		return
 	var player := _get_player()
 	for checkpoint in get_tree().get_nodes_in_group("checkpoint"):
@@ -515,27 +672,281 @@ func _checkpoint_matches_position(checkpoint: Node, saved_position: Vector2) -> 
 		return (respawn_position as Vector2).distance_to(saved_position) <= 2.0
 	return false
 
-func _spawn_boss_for_boss_interior() -> void:
+func _spawn_boss_for_boss_interior() -> Node2D:
 	for boss in get_tree().get_nodes_in_group("boss"):
 		if boss != null and not boss.is_queued_for_deletion():
-			return
-	_spawn_enemy(BOSS_SCENE, BOSS_INTERIOR_BOSS_SPAWN)
+			_connect_boss_final_execution(boss)
+			return boss as Node2D
+	return _spawn_enemy(BOSS_SCENE, BOSS_INTERIOR_BOSS_SPAWN) as Node2D
 
-func _run_map_transition(next_scene: PackedScene, next_map_id: String, player_spawn: Vector2) -> void:
+func _connect_boss_final_execution(boss: Node) -> void:
+	if boss == null or not boss.has_signal("final_execution_requested"):
+		return
+	var callback := Callable(self, "_on_boss_final_execution_requested")
+	if not boss.is_connected("final_execution_requested", callback):
+		boss.connect("final_execution_requested", callback)
+
+func _on_boss_final_execution_requested(boss: Node2D) -> void:
+	await _play_boss_final_execution_cutscene(boss)
+
+func _run_map_transition(next_scene: PackedScene, next_map_id: String, player_spawn: Vector2, release_player_at_end := true, update_bgm_at_switch := true) -> void:
 	is_transitioning = true
 	interaction_prompt.visible = false
 	_set_player_transition_locked(true)
 	_begin_interaction_fade()
 	await _fade_to(1.0, INTERACTION_FADE_TO_BLACK_TIME)
-	_switch_map(next_scene, next_map_id, player_spawn)
+	_switch_map(next_scene, next_map_id, player_spawn, update_bgm_at_switch)
 	var player := _get_player()
 	if player != null and player.has_method("settle_world_interaction"):
 		player.settle_world_interaction(player_spawn)
 	await get_tree().process_frame
 	await get_tree().create_timer(INTERACTION_BLACK_HOLD_TIME).timeout
 	_clear_fade()
+	if release_player_at_end:
+		_set_player_transition_locked(false)
+		is_transitioning = false
+
+func _play_boss_intro_cutscene(boss: Node2D) -> void:
+	if boss == null or not is_instance_valid(boss):
+		return
+	var camera := _get_active_map_camera()
+	if camera == null:
+		return
+	is_boss_intro_playing = true
+	_update_map_bgm()
+	_set_player_transition_locked(true)
+	boss.set_physics_process(false)
+	_pose_boss_for_intro(boss)
+	_set_boss_intro_letterbox_visible(true)
+	_set_boss_intro_hud_visible(false)
+	var focus_position: Vector2 = boss.global_position + BOSS_INTRO_FOCUS_OFFSET
+	var end_zoom: Vector2 = camera.zoom if "zoom" in camera else Vector2.ONE
+	if camera.has_method("begin_cutscene_override"):
+		camera.begin_cutscene_override(focus_position, BOSS_INTRO_CLOSE_ZOOM)
+	var elapsed := 0.0
+	var next_shake_index := 0
+	while elapsed < BOSS_INTRO_DURATION:
+		await get_tree().process_frame
+		var delta := get_process_delta_time()
+		elapsed = min(BOSS_INTRO_DURATION, elapsed + delta)
+		if camera.has_method("set_cutscene_focus"):
+			var zoom_progress: float = clampf(elapsed / BOSS_INTRO_ZOOM_OUT_TIME, 0.0, 1.0)
+			camera.set_cutscene_focus(focus_position, BOSS_INTRO_CLOSE_ZOOM.lerp(end_zoom, zoom_progress))
+		while next_shake_index < BOSS_INTRO_SHAKE_TIMES.size() and elapsed >= BOSS_INTRO_SHAKE_TIMES[next_shake_index]:
+			if camera.has_method("shake"):
+				camera.shake(BOSS_INTRO_SHAKE_AMOUNT, BOSS_INTRO_SHAKE_DURATION)
+			next_shake_index += 1
+	_set_boss_intro_letterbox_visible(false)
+	if camera.has_method("end_cutscene_override"):
+		camera.end_cutscene_override()
+	_restore_boss_after_intro(boss)
+	boss.set_physics_process(true)
+	_set_boss_intro_hud_visible(true, BOSS_INTRO_HUD_FADE_IN_TIME)
+	is_boss_intro_playing = false
+
+func _get_active_map_camera() -> Camera2D:
+	return get_node_or_null("Chapter1Map/Camera") as Camera2D
+
+func _set_boss_intro_letterbox_visible(is_visible: bool) -> void:
+	if boss_intro_overlay != null:
+		boss_intro_overlay.visible = is_visible
+	if boss_intro_top_bar != null:
+		boss_intro_top_bar.visible = is_visible
+	if boss_intro_bottom_bar != null:
+		boss_intro_bottom_bar.visible = is_visible
+
+func _set_boss_intro_hud_visible(is_visible: bool, fade_time := 0.0) -> void:
+	for hud_path in BOSS_INTRO_HUD_PATHS:
+		var hud := get_node_or_null(String(hud_path)) as CanvasLayer
+		if hud == null:
+			continue
+		hud.visible = is_visible
+		var root := _get_hud_root_control(hud)
+		if root == null:
+			continue
+		if is_visible and fade_time > 0.0:
+			root.modulate.a = 0.0
+			var tween := create_tween()
+			tween.tween_property(root, "modulate:a", 1.0, fade_time)
+		else:
+			root.modulate.a = 1.0 if is_visible else 0.0
+
+func _get_hud_root_control(hud: Node) -> Control:
+	var root := hud.get_node_or_null("Root") as Control
+	if root != null:
+		return root
+	for child in hud.get_children():
+		if child is Control:
+			return child as Control
+	return null
+
+func _pose_boss_for_intro(boss: Node2D) -> void:
+	var player := _get_player()
+	if player != null and absf(player.global_position.x - boss.global_position.x) > 0.01:
+		boss.set("facing", signf(player.global_position.x - boss.global_position.x))
+	if boss.has_method("play_boss_animation"):
+		boss.play_boss_animation("walk")
+	var sprite := boss.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if sprite != null:
+		var facing_value: Variant = boss.get("facing")
+		if facing_value is float or facing_value is int:
+			sprite.flip_h = float(facing_value) < 0.0
+		sprite.frame = 0
+		sprite.frame_progress = 0.0
+		sprite.speed_scale = 0.0
+	if boss.has_method("align_sprite_to_ground"):
+		boss.align_sprite_to_ground()
+
+func _restore_boss_after_intro(boss: Node2D) -> void:
+	var sprite := boss.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if sprite != null:
+		sprite.speed_scale = 1.0
+
+func _play_boss_final_execution_cutscene(boss: Node2D) -> void:
+	if is_boss_final_execution_playing:
+		return
+	if boss == null or not is_instance_valid(boss):
+		return
+	var camera := _get_active_map_camera()
+	if camera == null:
+		if boss.has_method("complete_final_execution_death"):
+			boss.complete_final_execution_death()
+		return
+	var player := _get_player()
+	is_boss_final_execution_playing = true
+	var was_transitioning := is_transitioning
+	is_transitioning = true
+	_set_player_transition_locked(true)
+	boss.set_physics_process(false)
+	_face_boss_and_player_for_execution(boss, player)
+	_duck_bgm_for_final_execution()
+	_set_boss_intro_letterbox_visible(true)
+
+	var focus_position := _get_final_execution_focus_position(boss, player)
+	var end_zoom: Vector2 = camera.zoom if "zoom" in camera else Vector2.ONE
+	if camera.has_method("begin_cutscene_override"):
+		camera.begin_cutscene_override(focus_position, end_zoom)
+	await _interpolate_cutscene_zoom(camera, focus_position, end_zoom, BOSS_FINAL_EXECUTION_ZOOM, BOSS_FINAL_EXECUTION_ZOOM_IN_TIME)
+
+	await _play_boss_death_frame_range(boss, 0, 3)
+	await _play_player_final_execution_attack(player)
+	await _play_boss_death_frame_range(boss, 4, 7)
+	if boss.has_method("complete_final_execution_death"):
+		boss.complete_final_execution_death()
+	_set_boss_final_death_frame(boss, 7)
+
+	await _interpolate_cutscene_zoom(camera, focus_position, BOSS_FINAL_EXECUTION_ZOOM, end_zoom, BOSS_FINAL_EXECUTION_ZOOM_OUT_TIME)
+	if camera.has_method("end_cutscene_override"):
+		camera.end_cutscene_override()
+	_set_boss_intro_letterbox_visible(false)
+	_restore_bgm_after_final_execution()
+	_fade_out_bgm_after_final_execution()
+	var boss_sprite := boss.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if boss_sprite != null:
+		boss_sprite.speed_scale = 1.0
+	boss.set_physics_process(true)
 	_set_player_transition_locked(false)
-	is_transitioning = false
+	is_transitioning = was_transitioning
+	is_boss_final_execution_playing = false
+
+func _get_final_execution_focus_position(boss: Node2D, player: Node2D) -> Vector2:
+	if player == null:
+		return boss.global_position + BOSS_FINAL_EXECUTION_FOCUS_OFFSET
+	return ((boss.global_position + player.global_position) * 0.5) + BOSS_FINAL_EXECUTION_FOCUS_OFFSET
+
+func _face_boss_and_player_for_execution(boss: Node2D, player: Node2D) -> void:
+	if player == null:
+		return
+	if absf(player.global_position.x - boss.global_position.x) > 0.01:
+		boss.set("facing", signf(player.global_position.x - boss.global_position.x))
+		player.set("facing", signf(boss.global_position.x - player.global_position.x))
+	_sync_character_flip(boss)
+	_sync_character_flip(player)
+
+func _sync_character_flip(character: Node2D) -> void:
+	var sprite := character.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if sprite == null:
+		return
+	var facing_value: Variant = character.get("facing")
+	if facing_value is float or facing_value is int:
+		sprite.flip_h = float(facing_value) < 0.0
+
+func _duck_bgm_for_final_execution() -> void:
+	if not (bgm_player is AudioStreamPlayer):
+		return
+	var player_bgm := bgm_player as AudioStreamPlayer
+	bgm_volume_before_final_execution = player_bgm.volume_db
+	player_bgm.volume_db = bgm_volume_before_final_execution + BOSS_FINAL_EXECUTION_DUCK_BGM_DB
+
+func _restore_bgm_after_final_execution() -> void:
+	if bgm_player is AudioStreamPlayer:
+		(bgm_player as AudioStreamPlayer).volume_db = bgm_volume_before_final_execution
+
+func _fade_out_bgm_after_final_execution() -> void:
+	if bgm_player != null and bgm_player.has_method("fade_out_bgm"):
+		bgm_player.fade_out_bgm(BOSS_FINAL_EXECUTION_BGM_FADE_OUT_TIME)
+
+func _interpolate_cutscene_zoom(camera: Camera2D, focus_position: Vector2, from_zoom: Vector2, to_zoom: Vector2, duration: float) -> void:
+	var elapsed := 0.0
+	while elapsed < duration:
+		await get_tree().process_frame
+		var delta := get_process_delta_time()
+		elapsed = min(duration, elapsed + delta)
+		var progress := 1.0 if duration <= 0.0 else clampf(elapsed / duration, 0.0, 1.0)
+		if camera.has_method("set_cutscene_focus"):
+			camera.set_cutscene_focus(focus_position, from_zoom.lerp(to_zoom, progress))
+
+func _play_boss_death_frame_range(boss: Node2D, first_frame: int, last_frame: int) -> void:
+	for frame_index in range(first_frame, last_frame + 1):
+		_set_boss_final_death_frame(boss, frame_index)
+		await get_tree().create_timer(BOSS_FINAL_EXECUTION_DEATH_FRAME_TIME).timeout
+
+func _set_boss_final_death_frame(boss: Node2D, frame_index: int) -> void:
+	var sprite := boss.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if sprite == null or sprite.sprite_frames == null:
+		return
+	if sprite.sprite_frames.has_animation("death"):
+		if sprite.animation != "death":
+			sprite.play("death")
+		var frame_count := sprite.sprite_frames.get_frame_count("death")
+		sprite.frame = clampi(frame_index, 0, max(0, frame_count - 1))
+		sprite.frame_progress = 0.0
+		sprite.speed_scale = 0.0
+	if boss.has_method("align_sprite_to_ground"):
+		boss.align_sprite_to_ground()
+
+func _play_player_final_execution_attack(player: Node2D) -> void:
+	if player == null:
+		await get_tree().create_timer(BOSS_FINAL_EXECUTION_PLAYER_ATTACK_TIME).timeout
+		return
+	if player.has_method("_force_play_animation"):
+		player._force_play_animation("attack_a")
+	var sprite := player.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if sprite != null:
+		sprite.speed_scale = BOSS_FINAL_EXECUTION_PLAYER_ATTACK_SPEED
+	var sfx_delay: float = minf(BOSS_FINAL_EXECUTION_ATTACK_SFX_DELAY, BOSS_FINAL_EXECUTION_PLAYER_ATTACK_TIME)
+	if sfx_delay > 0.0:
+		await get_tree().create_timer(sfx_delay).timeout
+	if player.has_method("_play_random_attack_hit_sfx"):
+		player._play_random_attack_hit_sfx()
+	_play_final_execution_sfx(player)
+	var remaining_time: float = maxf(0.0, BOSS_FINAL_EXECUTION_PLAYER_ATTACK_TIME - sfx_delay)
+	if remaining_time > 0.0:
+		await get_tree().create_timer(remaining_time).timeout
+	if sprite != null:
+		sprite.speed_scale = 1.0
+
+func _play_final_execution_sfx(player: Node2D) -> void:
+	var sfx := player.get_node_or_null("FinalExecutionSfx") as AudioStreamPlayer2D
+	if sfx == null:
+		sfx = AudioStreamPlayer2D.new()
+		sfx.name = "FinalExecutionSfx"
+		player.add_child(sfx)
+	if sfx.stream == null or sfx.stream.resource_path != BOSS_FINAL_EXECUTION_SFX_PATH:
+		if ResourceLoader.exists(BOSS_FINAL_EXECUTION_SFX_PATH):
+			sfx.stream = load(BOSS_FINAL_EXECUTION_SFX_PATH)
+	if sfx.stream != null:
+		sfx.play()
 
 func _fade_to(alpha: float, duration: float = TRANSITION_FADE_TIME) -> void:
 	fade_rect.visible = true
@@ -554,7 +965,7 @@ func _play_start_page_fade_in_if_needed() -> void:
 	fade_rect.color = Color(0, 0, 0, 1)
 	_fade_to(0.0, TRANSITION_FADE_TIME)
 
-func _switch_map(next_scene: PackedScene, next_map_id: String, player_spawn: Vector2) -> void:
+func _switch_map(next_scene: PackedScene, next_map_id: String, player_spawn: Vector2, update_bgm := true) -> void:
 	var old_map: Node = get_node_or_null("Chapter1Map")
 	if old_map != null:
 		remove_child(old_map)
@@ -571,7 +982,8 @@ func _switch_map(next_scene: PackedScene, next_map_id: String, player_spawn: Vec
 		_apply_current_map_climb_bounds()
 		if "spawn_position" in player:
 			player.spawn_position = player_spawn
-	_update_map_bgm()
+	if update_bgm:
+		_update_map_bgm()
 
 func _update_map_bgm() -> void:
 	if bgm_player != null and bgm_player.has_method("set_map_bgm"):
@@ -652,6 +1064,20 @@ func _clear_fade() -> void:
 	fade_rect.color = Color(0, 0, 0, 0)
 	fade_rect.visible = false
 
+func _revive_player_in_place() -> void:
+	var player := _get_player()
+	if player == null:
+		return
+	if revive_overlay != null and revive_overlay.has_method("hide_overlay_immediate"):
+		revive_overlay.hide_overlay_immediate()
+	if player.has_method("revive_in_place"):
+		player.revive_in_place()
+	is_transitioning = false
+	_set_player_transition_locked(false)
+
+func _give_up_from_revive() -> void:
+	_retry_from_checkpoint()
+
 func _position_prompt_on_screen(anchor_value: Variant) -> void:
 	if interaction_prompt == null or get_viewport() == null:
 		return
@@ -663,21 +1089,53 @@ func _position_prompt_on_screen(anchor_value: Variant) -> void:
 func _current_prompt_target() -> Dictionary:
 	var best_target := {}
 	var best_distance := INF
+	var pickup := _nearest_map_item_prompt()
+	if pickup != null:
+		var pickup_anchor: Vector2 = (pickup as Node2D).global_position
+		if pickup.has_method("get_prompt_anchor_position"):
+			pickup_anchor = pickup.get_prompt_anchor_position()
+		var pickup_distance: float = _get_player().global_position.distance_to((pickup as Node2D).global_position)
+		best_target = {
+			"text": ITEM_PICKUP_PROMPT_TEXT,
+			"anchor": pickup_anchor,
+		}
+		best_distance = pickup_distance
 	var checkpoint := _nearest_checkpoint_prompt()
 	if checkpoint != null:
 		var checkpoint_anchor: Vector2 = (checkpoint as Node2D).global_position
 		if checkpoint.has_method("get_prompt_anchor_position"):
 			checkpoint_anchor = checkpoint.get_prompt_anchor_position()
 		var checkpoint_distance: float = _get_player().global_position.distance_to((checkpoint as Node2D).global_position)
-		best_target = {
-			"text": CHECKPOINT_PROMPT_TEXT,
-			"anchor": checkpoint_anchor,
-		}
-		best_distance = checkpoint_distance
+		if checkpoint_distance < best_distance:
+			best_target = {
+				"text": CHECKPOINT_PROMPT_TEXT,
+				"anchor": checkpoint_anchor,
+			}
+			best_distance = checkpoint_distance
 	var door_target := _current_door_prompt_target()
 	if not door_target.is_empty() and float(door_target.get("distance", INF)) < best_distance:
 		best_target = door_target
 	return best_target
+
+func _show_pickup_notice(item_id: String) -> void:
+	if pickup_notice == null:
+		return
+	if pickup_notice_tween != null and pickup_notice_tween.is_valid():
+		pickup_notice_tween.kill()
+	if pickup_notice_icon != null:
+		pickup_notice_icon.texture = load(String(ITEM_ICON_PATHS.get(item_id, ""))) as Texture2D
+	if pickup_notice_label != null:
+		pickup_notice_label.text = "獲得 x1"
+	pickup_notice.visible = true
+	pickup_notice.modulate.a = 0.0
+	pickup_notice_tween = create_tween()
+	pickup_notice_tween.tween_property(pickup_notice, "modulate:a", 1.0, PICKUP_NOTICE_FADE_TIME)
+	pickup_notice_tween.tween_interval(PICKUP_NOTICE_HOLD_TIME)
+	pickup_notice_tween.tween_property(pickup_notice, "modulate:a", 0.0, PICKUP_NOTICE_FADE_TIME)
+	pickup_notice_tween.tween_callback(func() -> void:
+		if pickup_notice != null:
+			pickup_notice.visible = false
+	)
 
 func _current_door_prompt_target() -> Dictionary:
 	var player := _get_player()

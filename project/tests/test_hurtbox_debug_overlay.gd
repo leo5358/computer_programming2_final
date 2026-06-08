@@ -52,6 +52,24 @@ func _initialize() -> void:
 		push_error("Player hurtbox should cover the head and torso, not only the lower body")
 		quit(1)
 		return
+	var coordinate_label := overlay.get_node_or_null("CoordinateHudLayer/PlayerCoordinateLabel") as Label
+	if coordinate_label == null:
+		push_error("Toggling hurtbox debug should create a player coordinate label")
+		quit(1)
+		return
+	if not coordinate_label.visible:
+		push_error("Player coordinate label should be visible while hurtbox debug is on")
+		quit(1)
+		return
+	player.global_position = Vector2(321.0, 654.0)
+	overlay._process(0.0)
+	var player_collision := player.get_node("CollisionShape2D") as CollisionShape2D
+	var hitbox_bottom_center: Vector2 = player_collision.global_transform * Vector2(0.0, player_shape.size.y * 0.5)
+	var expected_coordinate_text := "Player Hitbox: x=%.1f y=%.1f" % [hitbox_bottom_center.x, hitbox_bottom_center.y]
+	if coordinate_label.text != expected_coordinate_text:
+		push_error("Player coordinate label should use hitbox center x and bottom y, expected '%s' but got '%s'" % [expected_coordinate_text, coordinate_label.text])
+		quit(1)
+		return
 	var boss_attack_line := boss.get_node_or_null("AttackArea/AttackHitboxDebugLine") as Line2D
 	if boss_attack_line == null:
 		push_error("Toggling hurtbox debug should create a Boss attack hitbox line")
@@ -73,6 +91,10 @@ func _initialize() -> void:
 	overlay.toggle_hurtbox_debug()
 	if player_line.visible or boss_line.visible or boss_attack_line.visible:
 		push_error("Toggling hurtbox debug off should hide line overlays")
+		quit(1)
+		return
+	if coordinate_label.visible:
+		push_error("Toggling hurtbox debug off should hide the player coordinate label")
 		quit(1)
 		return
 

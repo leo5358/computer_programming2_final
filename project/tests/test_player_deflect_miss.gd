@@ -105,6 +105,47 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+	player.reset_combat_state()
+	player.health = player.max_health
+	player.receive_enemy_attack(12.0, 10.0, null)
+	var post_hit_health: float = float(player.health)
+	player.receive_enemy_attack(12.0, 10.0, null)
+	if not is_equal_approx(float(player.health), post_hit_health):
+		push_error("Direct unguarded hits should grant iframe protection against immediate follow-up damage")
+		quit(1)
+		return
+	if not player.get("hit_invulnerability_active"):
+		push_error("Direct unguarded hits should activate hit invulnerability")
+		quit(1)
+		return
+	if absf(float(player.get("hit_invulnerability_time_left")) - 0.55) > 0.05:
+		push_error("Direct unguarded hits should start a 0.55 second hit invulnerability window")
+		quit(1)
+		return
+	if sprite.modulate.a >= 0.95:
+		push_error("Direct unguarded hit invulnerability should start a visible flicker")
+		quit(1)
+		return
+	player._physics_process(0.56)
+	if player.get("hit_invulnerability_active"):
+		push_error("Hit invulnerability should end after 0.55 seconds")
+		quit(1)
+		return
+	if absf(sprite.modulate.a - 1.0) > 0.01:
+		push_error("Player sprite opacity should recover after hit invulnerability ends")
+		quit(1)
+		return
+
+	player.reset_combat_state()
+	player.health = player.max_health
+	player._start_block()
+	player.is_blocking = true
+	player.receive_enemy_attack(12.0, 10.0, null)
+	if player.get("hit_invulnerability_active"):
+		push_error("Partial guard chip damage should not activate hit invulnerability")
+		quit(1)
+		return
+
 	Input.action_release("block")
 	player.queue_free()
 	await process_frame
