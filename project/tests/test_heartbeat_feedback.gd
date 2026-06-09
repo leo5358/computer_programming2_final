@@ -1,5 +1,7 @@
 extends SceneTree
 
+const BLOOD_OVERLAY_PATH := "res://assets/sprites/vfx/blood.png"
+
 class FakePlayer:
 	extends Node2D
 	signal stats_changed
@@ -41,8 +43,12 @@ func _initialize() -> void:
 		push_error("Heartbeat feedback should build a full-screen blood texture overlay")
 		quit(1)
 		return
-	if blood_overlay.texture == null or blood_overlay.texture.resource_path != "res://assets/sprites/vfx/blood.png":
-		push_error("Heartbeat feedback should use the shared blood.png VFX texture")
+	if blood_overlay.texture == null:
+		push_error("Heartbeat feedback should always provide a blood overlay texture")
+		quit(1)
+		return
+	if blood_overlay.texture.resource_path != "" and blood_overlay.texture.resource_path != BLOOD_OVERLAY_PATH:
+		push_error("Heartbeat feedback should use the shared blood.png VFX asset or a runtime fallback from it")
 		quit(1)
 		return
 	if heartbeat_sfx == null or heartbeat_sfx.stream == null:

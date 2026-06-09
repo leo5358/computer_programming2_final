@@ -53,12 +53,35 @@ func _build_overlay() -> void:
 	blood_overlay = TextureRect.new()
 	blood_overlay.name = "BloodOverlay"
 	blood_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	blood_overlay.texture = load(BLOOD_OVERLAY_PATH) as Texture2D
+	blood_overlay.texture = _load_blood_overlay_texture()
 	blood_overlay.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	blood_overlay.stretch_mode = TextureRect.STRETCH_SCALE
 	blood_overlay.modulate = Color(1.0, 1.0, 1.0, 0.0)
 	blood_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.add_child(blood_overlay)
+
+func _load_blood_overlay_texture() -> Texture2D:
+	var imported_path := _get_import_remap_path("%s.import" % BLOOD_OVERLAY_PATH)
+	if imported_path != "" and ResourceLoader.exists(imported_path):
+		var imported_texture := load(BLOOD_OVERLAY_PATH) as Texture2D
+		if imported_texture != null:
+			return imported_texture
+
+	var raw_bytes := FileAccess.get_file_as_bytes(BLOOD_OVERLAY_PATH)
+	if raw_bytes.is_empty():
+		return null
+
+	var image := Image.new()
+	if image.load_png_from_buffer(raw_bytes) != OK or image.is_empty():
+		return null
+
+	return ImageTexture.create_from_image(image)
+
+func _get_import_remap_path(import_metadata_path: String) -> String:
+	var import_metadata := ConfigFile.new()
+	if import_metadata.load(import_metadata_path) != OK:
+		return ""
+	return String(import_metadata.get_value("remap", "path", ""))
 
 func _build_audio() -> void:
 	heartbeat_sfx = AudioStreamPlayer.new()
