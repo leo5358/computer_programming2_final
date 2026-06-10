@@ -1,0 +1,271 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+
+\setmainfont{Times New Roman}
+\setsansfont{Arial}
+\setmonofont{Menlo}
+\setCJKmainfont[
+  Path=/System/Library/Fonts/Supplemental/,
+  FontIndex=7,
+  BoldFont=Songti.ttc,
+  BoldFeatures={FontIndex=2}
+]{Songti.ttc}
+\setCJKsansfont[
+  Path=/System/Library/Fonts/Supplemental/,
+  FontIndex=7,
+  BoldFont=Songti.ttc,
+  BoldFeatures={FontIndex=2}
+]{Songti.ttc}
+\setCJKmonofont[
+  Path=/System/Library/Fonts/Supplemental/,
+  FontIndex=7
+]{Songti.ttc}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue,
+  citecolor=blue
+}
+
+\lstdefinestyle{code}{
+  basicstyle=\small\ttfamily,
+  breaklines=true,
+  frame=single,
+  columns=fullflexible,
+  tabsize=2
+}
+\lstset{style=code}
+
+\newcommand{\projecttitle}{心音之忍 Heartbeat of Shinobi}
+\newcommand{\coursename}{Computer Programming II}
+\newcommand{\semester}{Spring 2026}
+
+\title{
+  \vspace{-1.5cm}
+  \textbf{\projecttitle}\\
+  \large Final Project Written Report
+}
+\author{
+  組員一：姓名／學號 \\
+  組員二：姓名／學號 \\
+  組員三：姓名／學號
+}
+\date{2026 年 6 月 12 日}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+本文說明本組 final project 的主題、設計動機、系統架構、核心技術、實作成果、測試方式與組內分工。本專案是一款以 Godot 與 GDExtension 實作的 2D 橫向動作遊戲 prototype，核心特色包含精準格擋、架勢值、心跳 BPM 回饋、敵人 AI、Boss 戰、道具與地圖流程。
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{專案概述}
+
+\subsection{專案名稱與一句話介紹}
+\begin{itemize}[leftmargin=2em]
+  \item 專案名稱：\projecttitle
+  \item 類型：2D 橫向動作遊戲 prototype
+  \item 一句話介紹：玩家透過攻擊、格擋、閃避與道具，在心跳壓力逐漸升高的戰鬥中擊敗敵人與 Boss。
+\end{itemize}
+
+\subsection{設計動機}
+請說明為什麼選擇這個題目、想解決或探索什麼玩法問題，以及本專案和一般 2D 動作遊戲相比的差異。
+
+\subsection{最終成果摘要}
+請用條列方式整理完成的功能，例如：
+\begin{itemize}[leftmargin=2em]
+  \item 玩家移動、跳躍、爬牆、攻擊、格擋、閃避與道具使用。
+  \item 敵人巡邏、追擊、攻擊、受擊、格擋、架勢崩潰與死亡。
+  \item Boss 戰、Boss 連段、階段轉換、處決流程與 HUD。
+  \item 心跳 BPM 系統、畫面與音效回饋。
+  \item C/C++ GDExtension 戰鬥計算與 GDScript fallback。
+  \item 測試腳本、debug overlay 與 autopilot 驗證工具。
+\end{itemize}
+
+\section{遊戲內容與使用方式}
+
+\subsection{遊戲流程}
+請描述玩家從開始畫面、進入關卡、遭遇敵人、收集或使用道具、進入 Boss 戰到完成 prototype 的流程。
+
+\subsection{操作方式}
+\begin{table}[H]
+\centering
+\caption{主要操作}
+\begin{tabular}{lll}
+\toprule
+功能 & 按鍵 & 說明 \\
+\midrule
+左右移動 & A / D 或方向鍵 & 控制角色水平移動 \\
+跑步 & Shift 長按 & 提高移動速度 \\
+跳躍／攀爬 & Space & 跳躍，靠牆時可攀爬 \\
+攻擊 & J 或滑鼠左鍵 & 執行基本攻擊 \\
+格擋／彈刀 & K 或滑鼠右鍵 & 短按嘗試 parry，長按 block \\
+閃避 & L & 短距離閃避 \\
+選擇道具 & 1--5 & 切換道具 \\
+使用攻擊道具 & E & 使用苦無、煙霧彈等 \\
+使用補血道具 & R & 使用葫蘆或補血道具 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{執行環境與執行方式}
+本課程規格要求 final project 必須能在 Ubuntu 24.04 環境下運作。請在此處寫明安裝需求與實際執行步驟。
+
+\begin{lstlisting}[language=bash,caption={範例建置與執行指令，請依實際情況修正}]
+sudo apt update
+sudo apt install -y build-essential scons pkg-config \
+  libx11-dev libxcursor-dev libxinerama-dev libxrandr-dev \
+  libxi-dev libgl-dev libasound2-dev libpulse-dev
+
+scons platform=linux target=template_debug arch=x86_64 api_version=4.6
+godot --editor project/
+\end{lstlisting}
+
+\section{系統架構與技術實作}
+
+\subsection{整體架構}
+請放入架構圖或以文字說明各層關係。建議包含：
+\begin{itemize}[leftmargin=2em]
+  \item Godot scene layer：場景、角色、地圖、UI 與音效。
+  \item GDScript gameplay layer：玩家、敵人、Boss、道具與流程控制。
+  \item Combat facade layer：\texttt{combat\_math.gd}、\texttt{combat\_server.gd}、\texttt{combat\_runtime.gd}。
+  \item Native C/C++ layer：\texttt{combat\_math.c}、\texttt{combat\_mgr.c} 與 GDExtension wrapper。
+\end{itemize}
+
+\subsection{核心玩法一：精準格擋與架勢值}
+請說明 parry / block 的判定方式、輸入緩衝、攻擊 active frame、架勢值累積與處決條件。
+
+\subsection{核心玩法二：心跳 BPM 系統}
+請說明心跳如何隨戰鬥狀態改變，如何影響格擋容錯、架勢恢復、傷害或視覺音效回饋。
+
+\subsection{核心玩法三：敵人與 Boss AI}
+請說明一般敵人與 Boss 的狀態機、攻擊選擇、追擊與保持距離、連段、階段轉換或反制邏輯。
+
+\subsection{C/C++ 與 GDExtension 使用}
+本課程規格要求整個 project 至少有一部分使用 C 語言。請在此處說明：
+\begin{itemize}[leftmargin=2em]
+  \item 哪些模組使用 C 或 C++ 實作。
+  \item 為什麼這些邏輯適合放在 native layer。
+  \item Godot 如何透過 GDExtension 呼叫 native 函式。
+  \item 若 native library 未成功載入，GDScript fallback 如何維持可執行性。
+\end{itemize}
+
+\section{創意、藝術與設計}
+
+\subsection{創意與原創性}
+請說明本 project 的創新點。可從玩法、技術、敘事、視覺、回饋設計或開發工具等角度描述。
+
+\subsection{美術、音效與 UI}
+請描述使用的 sprite、地圖素材、音效、BGM、HUD、debug overlay、畫面震動、心跳回饋等設計。
+
+\subsection{關卡與體驗設計}
+請說明關卡如何安排敵人、道具、checkpoint、Boss 戰與難度曲線。
+
+\section{測試與可執行性}
+
+\subsection{測試方法}
+請說明使用哪些方式確認功能正確，例如人工測試、Godot 測試腳本、C 單元測試、debug overlay、autopilot。
+
+\begin{table}[H]
+\centering
+\caption{測試項目摘要}
+\begin{tabular}{p{0.28\linewidth}p{0.42\linewidth}p{0.2\linewidth}}
+\toprule
+測試項目 & 測試內容 & 結果 \\
+\midrule
+玩家移動與攻擊 & 測試走路、跑步、跳躍、攻擊連段 & 待填 \\
+格擋與 parry & 測試 parry window、block、架勢值變化 & 待填 \\
+Boss 戰 & 測試 Boss 攻擊、階段轉換、處決流程 & 待填 \\
+GDExtension & 測試 native library 載入與 fallback & 待填 \\
+Ubuntu 24.04 執行 & 測試建置、啟動與操作流程 & 待填 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{已知限制}
+請列出目前仍未完成或受時間限制的部分，例如素材完整度、平衡性、關卡長度、平台相容性、效能或測試覆蓋率。
+
+\section{組內分工}
+
+請依實際貢獻填寫。課程規格要求書面報告必須包含組內分工；若分工差異過大，分數可能依個人狀況調整。
+
+\begin{longtable}{p{0.17\linewidth}p{0.18\linewidth}p{0.42\linewidth}p{0.13\linewidth}}
+\caption{組員分工表}\\
+\toprule
+組員 & 學號 & 主要負責內容 & 貢獻比例 \\
+\midrule
+\endfirsthead
+\toprule
+組員 & 學號 & 主要負責內容 & 貢獻比例 \\
+\midrule
+\endhead
+姓名一 & 學號一 & 待填：例如玩家控制、戰鬥系統、C/GDExtension、測試等。 & 待填 \\
+姓名二 & 學號二 & 待填：例如敵人 AI、Boss 戰、關卡、UI、音效等。 & 待填 \\
+姓名三 & 學號三 & 待填：例如美術素材整合、道具、報告、README、測試等。 & 待填 \\
+\bottomrule
+\end{longtable}
+
+\section{LLM 使用揭露}
+
+課程規格要求若使用 LLM，必須在報告中明確告知使用範圍。請依實際情況保留或刪改以下內容。
+
+\begin{table}[H]
+\centering
+\caption{LLM 使用紀錄}
+\begin{tabular}{p{0.24\linewidth}p{0.34\linewidth}p{0.32\linewidth}}
+\toprule
+使用範圍 & 具體用途 & 人工檢查與修改 \\
+\midrule
+程式碼 & 待填：例如輔助撰寫測試、整理 fallback 邏輯、debug 建議。 & 待填：人工閱讀、測試、修改後才納入。 \\
+報告文字 & 待填：例如協助整理章節架構或潤稿。 & 待填：由組員確認內容符合實際實作。 \\
+README / 文件 & 待填：例如協助整理執行步驟。 & 待填：以實際可執行結果校正。 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{結論}
+
+請總結本 project 完成了什麼、最重要的技術或設計挑戰、學到的內容，以及如果有更多時間會如何延伸。
+
+\appendix
+\section{附錄：專案檔案結構}
+
+\begin{lstlisting}[caption={可依實際目錄修正}]
+src/                         C/C++ GDExtension source
+project/                     Godot project
+project/scenes/              Scenes and prefabs
+project/scripts/             GDScript gameplay logic
+project/assets/              Sprites, audio, maps, UI assets
+project/tests/               Godot test scripts
+tests/                       C unit tests
+README.md                    Build and usage guide
+\end{lstlisting}
+
+\section{附錄：畫面截圖}
+請放入遊戲主畫面、戰鬥畫面、Boss 戰、debug overlay 或其他重要畫面。
+
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=0.85\linewidth]{path/to/screenshot.png}
+% \caption{遊戲畫面截圖}
+% \end{figure}
+
+\end{document}
