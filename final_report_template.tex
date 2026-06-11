@@ -87,23 +87,30 @@
 \end{itemize}
 
 \subsection{設計動機}
-請說明為什麼選擇這個題目、想解決或探索什麼玩法問題，以及本專案和一般 2D 動作遊戲相比的差異。
+本專案選擇製作 2D 橫向動作遊戲，是因為這類型遊戲能在有限的開發時間內清楚呈現角色控制、戰鬥判定、敵人 AI、關卡流程、UI 與音效回饋等程式設計能力。設計上參考了強調攻防節奏的動作遊戲，特別是精準格擋、架勢值與處決機制；但本專案另外加入心跳 BPM 系統，讓玩家的戰鬥壓力不只表現在血量，也會影響視覺、音效與部分戰鬥容錯。
+
+和一般 2D 動作遊戲相比，本專案的核心不是單純扣血，而是同時管理生命值、架勢值與心跳值。玩家如果一味攻擊，雖然可以提高輸出與戰鬥節奏，但也會讓心跳升高、架勢恢復變慢，進而增加失誤成本。這種設計讓玩家必須在攻擊、格擋、閃避、道具與 checkpoint 之間做出取捨。
 
 \subsection{最終成果摘要}
-請用條列方式整理完成的功能，例如：
 \begin{itemize}[leftmargin=2em]
   \item 玩家移動、跳躍、爬牆、攻擊、格擋、閃避與道具使用。
   \item 敵人巡邏、追擊、攻擊、受擊、格擋、架勢崩潰與死亡。
-  \item Boss 戰、Boss 連段、階段轉換、處決流程與 HUD。
+  \item Boss 戰、Boss 連段、突刺與劈砍攻擊、架勢崩潰、處決流程與 HUD。
   \item 心跳 BPM 系統、畫面與音效回饋。
   \item C/C++ GDExtension 戰鬥計算與 GDScript fallback。
-  \item 測試腳本、debug overlay 與 autopilot 驗證工具。
+  \item 道具系統，包含葫蘆補血、藥物、煙霧彈、苦無與灰球等。
+  \item 地圖、敵人生成、checkpoint、死亡重生、暫停選單與存檔流程。
+  \item Godot 測試腳本、C 單元測試、debug overlay、hurtbox debug 與 autopilot 驗證工具。
 \end{itemize}
 
 \section{遊戲內容與使用方式}
 
 \subsection{遊戲流程}
-請描述玩家從開始畫面、進入關卡、遭遇敵人、收集或使用道具、進入 Boss 戰到完成 prototype 的流程。
+遊戲從 \texttt{start\_page.tscn} 主選單開始，玩家可開始新遊戲或繼續進度。進入主場景後，玩家會出現在章節地圖中，透過左右移動、跳躍與攀爬穿越平台地形，並在路途中遭遇不同敵人。一般敵人包含近戰武士、火把敵人與弓箭手，會依照距離進行巡邏、警戒、追擊、保持距離與攻擊。
+
+玩家在探索過程中可取得或使用道具，例如葫蘆補血、藥物調整心跳、煙霧彈暫停敵人或 Boss 動作、苦無作為投擲與位移工具。checkpoint 類似魂系遊戲中的休息點，用來保存玩家狀態並作為死亡後的重生點；玩家掉出地圖或血量歸零時會進入死亡流程，再依照存檔狀態回到 checkpoint。
+
+Prototype 的高潮是 Boss 戰。Boss 會追蹤玩家、維持攻擊距離、使用普通攻擊、突刺、劈砍與連段，並根據玩家持續施壓進行反制。玩家需要利用 parry、block、dash、道具與攻擊累積 Boss 架勢值。當 Boss 架勢崩潰後，玩家可以進入處決流程完成戰鬥。
 
 \subsection{操作方式}
 \begin{table}[H]
@@ -127,14 +134,20 @@
 \end{table}
 
 \subsection{執行環境與執行方式}
-本課程規格要求 final project 必須能在 Ubuntu 24.04 環境下運作。請在此處寫明安裝需求與實際執行步驟。
+本專案目標執行環境為 Ubuntu 24.04，開發使用 Godot 4.6.2 與 SCons 建置 GDExtension。若 native library 未成功建置，主要玩法仍可透過 GDScript fallback 執行，但課程要求的 C/C++ 部分需完成 SCons 編譯後才算完整啟用。
 
-\begin{lstlisting}[language=bash,caption={範例建置與執行指令，請依實際情況修正}]
+\begin{lstlisting}[language=bash,caption={Ubuntu 24.04 建置與執行指令}]
 sudo apt update
 sudo apt install -y build-essential scons pkg-config \
   libx11-dev libxcursor-dev libxinerama-dev libxrandr-dev \
   libxi-dev libgl-dev libasound2-dev libpulse-dev
 
+git clone https://github.com/godotengine/godot-cpp.git
+cd godot-cpp
+git submodule update --init
+cd ..
+
+mkdir -p project/bin
 scons platform=linux target=template_debug arch=x86_64 api_version=4.6
 godot --editor project/
 \end{lstlisting}
@@ -142,47 +155,63 @@ godot --editor project/
 \section{系統架構與技術實作}
 
 \subsection{整體架構}
-請放入架構圖或以文字說明各層關係。建議包含：
+本專案採用分層架構，將 Godot 場景、GDScript gameplay、戰鬥 facade 與 native C/C++ 計算分開，避免所有邏輯集中在單一角色腳本中。
 \begin{itemize}[leftmargin=2em]
-  \item Godot scene layer：場景、角色、地圖、UI 與音效。
-  \item GDScript gameplay layer：玩家、敵人、Boss、道具與流程控制。
-  \item Combat facade layer：\texttt{combat\_math.gd}、\texttt{combat\_server.gd}、\texttt{combat\_runtime.gd}。
-  \item Native C/C++ layer：\texttt{combat\_math.c}、\texttt{combat\_mgr.c} 與 GDExtension wrapper。
+  \item Godot scene layer：\texttt{start\_page.tscn}、\texttt{Main.tscn}、\texttt{Player.tscn}、敵人 prefab、Boss 場景、地圖、UI 與音效節點。
+  \item GDScript gameplay layer：\texttt{player.gd}、\texttt{enemy\_base.gd}、\texttt{boss.gd}、道具、checkpoint、save manager、pause/death overlay 與 BGM 控制。
+  \item Combat facade layer：\texttt{combat\_math.gd}、\texttt{combat\_server.gd}、\texttt{combat\_runtime.gd} 負責連接 Godot entity 與 native combat state。
+  \item Native C/C++ layer：\texttt{combat\_math.c}、\texttt{combat\_mgr.c} 提供純 C 戰鬥計算與狀態管理，再由 \texttt{native\_combat\_math.cpp}、\texttt{native\_combat\_server.cpp} 透過 GDExtension 暴露給 Godot。
 \end{itemize}
 
+主要資料流為：玩家或敵人腳本接收輸入與攻擊事件後，將 input type、attack type 與 timestamp 傳給 \texttt{CombatRuntime}；\texttt{CombatRuntime} 再交給 \texttt{CombatServer} 或 native \texttt{combat\_mgr} 判斷 parry、block、受擊、架勢與 BPM 變化；最後把 combat snapshot 同步回玩家、Boss、HUD、debug overlay 與音效回饋。
+
 \subsection{核心玩法一：精準格擋與架勢值}
-請說明 parry / block 的判定方式、輸入緩衝、攻擊 active frame、架勢值累積與處決條件。
+敵人攻擊不是在動畫開始時立即造成傷害，而是由 attack profile 定義 cue、active frame 與 recovery。玩家按下格擋鍵時，輸入會被放入 input buffer；當敵人攻擊進入 active frame，系統會比較玩家輸入時間與攻擊 active timestamp 的差值。native combat 設定的 parry 容錯約為早按 100ms 到晚按 50ms，若落在此範圍內即判定為成功 parry。
+
+成功 parry 時，玩家不受血量傷害，Boss 或敵人會增加較多架勢值；普通 block 則會降低或避免部分傷害，但玩家自身架勢與心跳會上升。若玩家未防禦或防禦失敗，則進入受擊流程。雙方架勢值通常被限制在 0 到 100；當敵人或 Boss 架勢值滿時會進入 posture broken 狀態，可被玩家處決。玩家架勢值滿時則會進入短暫失衡或暈眩，提高被追擊的風險。
 
 \subsection{核心玩法二：心跳 BPM 系統}
-請說明心跳如何隨戰鬥狀態改變，如何影響格擋容錯、架勢恢復、傷害或視覺音效回饋。
+心跳 BPM 是本專案用來表現壓力與節奏的第二資源。玩家跑步、受擊、普通格擋、使用特定道具或進入高壓戰鬥時，BPM 會上升；脫離戰鬥或經過時間後會逐漸下降。C 層的 \texttt{combat\_add\_heartbeat} 會將 BPM 限制在合理範圍內，避免數值無限制增加。
+
+BPM 會影響戰鬥容錯與風險。心跳越高，block 可維持的安全時間越短，玩家架勢恢復速度也越慢，因此高壓狀態下連續失誤會更容易被擊破。同時，BPM 也會帶來更強的畫面與音效回饋，例如心跳音效、畫面脈衝、紅色邊緣提示與 BGM 緊張感。這讓玩家可以不用只看數字，也能透過感官回饋理解目前風險。
 
 \subsection{核心玩法三：敵人與 Boss AI}
-請說明一般敵人與 Boss 的狀態機、攻擊選擇、追擊與保持距離、連段、階段轉換或反制邏輯。
+一般敵人共用 \texttt{enemy\_base.gd} 的狀態機，包含 \texttt{PATROL}、\texttt{ALERTED}、\texttt{CHASE}、\texttt{HOLD}、\texttt{FLEE}、\texttt{ATTACK}、\texttt{DEFLECT}、\texttt{HURT}、\texttt{POSTURE\_BROKEN} 與 \texttt{DEAD}。敵人會依照玩家距離、視野範圍、攻擊冷卻與理想距離決定是否巡邏、追擊、後退、保持距離或攻擊。不同敵人透過 export 參數與少量 override 調整血量、速度、攻擊距離、格擋機率與動畫素材。
+
+Boss 繼承一般敵人架構，但有專屬攻擊 profile 與連段邏輯。Boss 會根據距離選擇普通攻擊、突刺、劈砍或 gap close 行為，並透過 combo 狀態安排連續攻擊。當玩家連續進攻時，Boss 會提高格擋與反制行為，避免玩家用單一節奏壓制。Boss 也有煙霧彈暫停、重攻擊被 parry 後的 recoil、受擊停頓、HUD 顯示與最終處決流程。
 
 \subsection{C/C++ 與 GDExtension 使用}
-本課程規格要求整個 project 至少有一部分使用 C 語言。請在此處說明：
+本課程規格要求整個 project 至少有一部分使用 C 語言。本專案的 C/C++ 使用如下：
 \begin{itemize}[leftmargin=2em]
-  \item 哪些模組使用 C 或 C++ 實作。
-  \item 為什麼這些邏輯適合放在 native layer。
-  \item Godot 如何透過 GDExtension 呼叫 native 函式。
-  \item 若 native library 未成功載入，GDScript fallback 如何維持可執行性。
+  \item \texttt{src/combat\_math.c} 與 \texttt{src/combat\_math.h} 使用 C 實作扣血、架勢值、心跳 clamp、BPM 對 block duration 與傷害倍率的影響。
+  \item \texttt{src/combat\_mgr.c} 與 \texttt{src/combat\_mgr.h} 使用 C 管理戰鬥 snapshot、input buffer、attack packet、parry 判定與每幀 combat update。
+  \item \texttt{native\_combat\_math.cpp} 與 \texttt{native\_combat\_server.cpp} 使用 C++ GDExtension wrapper，將 C API 包成 Godot 可建立的 \texttt{NativeCombatMath} 與 \texttt{NativeCombatServer}。
+  \item 這些邏輯適合放在 native layer，因為它們是高頻、可測、和畫面節點無關的純戰鬥計算。拆成 C 層後，也能用根目錄 \texttt{tests/} 的 C 單元測試驗證。
+  \item Godot 透過 \texttt{project/example.gdextension} 載入 \texttt{project/bin} 中的 native library，再由 GDScript facade 呼叫 native class。
+  \item 若 native library 未成功載入，\texttt{combat\_math.gd} 與 \texttt{combat\_server.gd} 會使用 GDScript fallback，讓遊戲仍可啟動與測試主要玩法。
 \end{itemize}
 
 \section{創意、藝術與設計}
 
 \subsection{創意與原創性}
-請說明本 project 的創新點。可從玩法、技術、敘事、視覺、回饋設計或開發工具等角度描述。
+本專案的主要創意在於把「心跳」設計成可被系統讀取與回饋的戰鬥資源。多數 2D 動作遊戲只用血量或耐力管理風險，本專案則加入 BPM，讓玩家在高壓戰鬥中感受到視覺、音效與數值容錯的同步變化。心跳越高，玩家越能感受到緊張感，但也更容易因架勢恢復變慢而被擊破。
+
+技術上，本專案也將 Godot 腳本與 C/C++ GDExtension 結合。GDScript 負責場景、動畫、UI 與輸入回饋，C/C++ 負責可獨立測試的戰鬥數學與狀態判定。這種分層設計讓 prototype 不只是單純 Godot 腳本遊戲，也符合課程對 C 語言整合的要求。
 
 \subsection{美術、音效與 UI}
-請描述使用的 sprite、地圖素材、音效、BGM、HUD、debug overlay、畫面震動、心跳回饋等設計。
+美術素材包含玩家、Boss、武士、弓箭手、火把敵人、道具、地圖地形、鳥居、神社、竹林、山景、Boss 房室內背景與儀式道具等 2D sprite。角色動畫包含 idle、walk、run、jump、attack、hurt、death、deflect、dash、throw 等，並依不同敵人調整圖片切格與播放速度。
+
+音效包含玩家受傷、死亡、攻擊、格擋、parry、dash、苦無、按鈕點擊與心跳音效；BGM 包含開始畫面、一般關卡與 Boss 戰音樂。UI 包含玩家血量、架勢、心跳、道具數量、Boss HUD、敵人 overhead bars、死亡畫面、暫停選單與 revive overlay。開發輔助方面，專案提供 debug overlay 顯示 parry delta、attack id、BPM、玩家/Boss 狀態、input buffer 等資訊，也能切換 hurtbox/hitbox debug 與 camera shake 觀察戰鬥回饋。
 
 \subsection{關卡與體驗設計}
-請說明關卡如何安排敵人、道具、checkpoint、Boss 戰與難度曲線。
+關卡以橫向推進為主，透過平台地形、牆面攀爬、敵人配置與道具拾取引導玩家逐步熟悉操作。前段主要讓玩家練習移動、跳躍、攻擊與基本格擋；中段加入不同敵人類型與 checkpoint，使玩家學會在受傷後管理補血與重生資源；後段則進入 Boss 戰，要求玩家綜合使用 parry、dash、攻擊硬直管理、道具與心跳控制。
+
+難度曲線設計上，普通敵人用於教學與節奏練習，Boss 則測試玩家是否理解架勢值與攻防時機。checkpoint 的存在降低反覆測試成本，但敵人重生與玩家狀態保存仍保留壓力，讓 prototype 有接近完整關卡流程的體驗。
 
 \section{測試與可執行性}
 
 \subsection{測試方法}
-請說明使用哪些方式確認功能正確，例如人工測試、Godot 測試腳本、C 單元測試、debug overlay、autopilot。
+本專案使用四種方式確認功能正確。第一是人工測試，直接在 Godot 中操作玩家、敵人、Boss、道具、checkpoint 與 UI 流程。第二是 Godot 測試腳本，\texttt{project/tests/} 中包含玩家移動、攻擊、格擋、Boss AI、Boss HUD、道具、checkpoint、地圖轉換、音效與 debug 功能等測試。第三是 C 單元測試，根目錄 \texttt{tests/} 用來驗證 \texttt{combat\_math.c} 與 \texttt{combat\_mgr.c} 的純邏輯。第四是 debug overlay 與 autopilot，用於長時間觀察戰鬥狀態、parry timing、BPM 變化、input buffer 與 AI 行為是否合理。
 
 \begin{table}[H]
 \centering
@@ -191,17 +220,23 @@ godot --editor project/
 \toprule
 測試項目 & 測試內容 & 結果 \\
 \midrule
-玩家移動與攻擊 & 測試走路、跑步、跳躍、攻擊連段 & 待填 \\
-格擋與 parry & 測試 parry window、block、架勢值變化 & 待填 \\
-Boss 戰 & 測試 Boss 攻擊、階段轉換、處決流程 & 待填 \\
-GDExtension & 測試 native library 載入與 fallback & 待填 \\
-Ubuntu 24.04 執行 & 測試建置、啟動與操作流程 & 待填 \\
+玩家移動與攻擊 & 測試走路、跑步、跳躍、攀爬、攻擊連段 & 通過，仍需手感微調 \\
+格擋與 parry & 測試 parry window、block、架勢值變化 & 通過，仍需平衡數值 \\
+Boss 戰 & 測試 Boss 攻擊、連段、架勢崩潰、處決流程 & 通過，仍需調整難度 \\
+GDExtension & 測試 native library 載入與 fallback & 通過 fallback；native 需依平台建置確認 \\
+Ubuntu 24.04 執行 & 測試建置、啟動與操作流程 & 依 README 指令暫定可執行 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \subsection{已知限制}
-請列出目前仍未完成或受時間限制的部分，例如素材完整度、平衡性、關卡長度、平台相容性、效能或測試覆蓋率。
+\begin{itemize}[leftmargin=2em]
+  \item 本專案仍屬 vertical slice prototype，關卡長度與劇情內容有限。
+  \item 戰鬥數值仍需更多玩家測試調整，例如 Boss 攻擊頻率、parry 容錯、BPM 懲罰與道具數量。
+  \item 部分美術與音效素材仍以 prototype 整合為主，整體風格可再統一。
+  \item GDExtension 在不同作業系統上需要分別建置 native library；若沒有建置成功，會改用 GDScript fallback。
+  \item 自動化測試已涵蓋多個系統，但仍無法完全取代人工操作測試，尤其是手感、動畫銜接與 Boss 難度。
+\end{itemize}
 
 \section{組內分工}
 
@@ -217,9 +252,9 @@ Ubuntu 24.04 執行 & 測試建置、啟動與操作流程 & 待填 \\
 組員 & 學號 & 主要負責內容 & 貢獻比例 \\
 \midrule
 \endhead
-姓名一 & 學號一 & 待填：例如玩家控制、戰鬥系統、C/GDExtension、測試等。 & 待填 \\
-姓名二 & 學號二 & 待填：例如敵人 AI、Boss 戰、關卡、UI、音效等。 & 待填 \\
-姓名三 & 學號三 & 待填：例如美術素材整合、道具、報告、README、測試等。 & 待填 \\
+楊立宇 & 學號待填 & 擔任 PM，負責需求整理、功能規劃、開發進度控管、code review、整合檢查與問題追蹤；同時也參與部分 gameplay 功能、戰鬥邏輯、測試與報告整理。 & 待填 \\
+姓名二 & 學號二 & 待填：請依實際貢獻填入敵人 AI、Boss 戰、關卡、UI、音效、美術或測試等。 & 待填 \\
+姓名三 & 學號三 & 待填：請依實際貢獻填入美術素材整合、道具、文件、README、測試或展示等。 & 待填 \\
 \bottomrule
 \end{longtable}
 
@@ -234,9 +269,9 @@ Ubuntu 24.04 執行 & 測試建置、啟動與操作流程 & 待填 \\
 \toprule
 使用範圍 & 具體用途 & 人工檢查與修改 \\
 \midrule
-程式碼 & 待填：例如輔助撰寫測試、整理 fallback 邏輯、debug 建議。 & 待填：人工閱讀、測試、修改後才納入。 \\
-報告文字 & 待填：例如協助整理章節架構或潤稿。 & 待填：由組員確認內容符合實際實作。 \\
-README / 文件 & 待填：例如協助整理執行步驟。 & 待填：以實際可執行結果校正。 \\
+程式碼 & 輔助理解 Godot/GDExtension 程式碼、規劃功能、撰寫測試、整理 fallback 邏輯與 debug 建議。 & 由組員人工閱讀、測試、修改後才納入版本控制。 \\
+報告文字 & 協助整理章節架構、LLM 使用揭露、系統說明與文字潤稿。 & 由組員依實際專案內容確認與修正。 \\
+README / 文件 & 協助整理建置方式、操作方式、專案架構與功能摘要。 & 以實際可執行結果與專案檔案校正。 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -364,12 +399,16 @@ README / 文件 & 待填：例如協助整理執行步驟。 & 待填：以實�
 
 \section{結論}
 
-請總結本 project 完成了什麼、最重要的技術或設計挑戰、學到的內容，以及如果有更多時間會如何延伸。
+本專案完成了一個以 Godot 4 與 GDExtension 實作的 2D 橫向動作遊戲 prototype。實作內容包含玩家移動與戰鬥、精準格擋、架勢值、心跳 BPM、敵人 AI、Boss 戰、道具、checkpoint、死亡重生、UI、音效、debug overlay、autopilot、Godot 測試與 C 單元測試。整體上，本專案不只呈現遊戲畫面，也將戰鬥判定、數值計算與系統架構拆分成可維護的模組。
+
+最重要的技術挑戰是把即時動作遊戲的時間判定做得穩定，例如 parry input buffer、攻擊 active frame、架勢值同步、Boss AI 狀態切換與 GDScript/native fallback 的一致性。設計挑戰則是讓 BPM 系統不只是裝飾，而是能影響風險、回饋與玩家決策。
+
+透過本專案，我們學到如何在 Godot 中組織大型腳本、如何使用 C/C++ GDExtension 提供 native 模組、如何設計測試與 debug 工具，以及如何在有限時間內完成 playable vertical slice。若有更多時間，後續可擴充更多關卡、敵人、Boss 階段、劇情演出、素材統一性、跨平台 build 流程與更完整的自動化測試。
 
 \appendix
 \section{附錄：專案檔案結構}
 
-\begin{lstlisting}[caption={可依實際目錄修正}]
+\begin{lstlisting}[caption={專案檔案結構}]
 src/                         C/C++ GDExtension source
 project/                     Godot project
 project/scenes/              Scenes and prefabs
@@ -378,10 +417,13 @@ project/assets/              Sprites, audio, maps, UI assets
 project/tests/               Godot test scripts
 tests/                       C unit tests
 README.md                    Build and usage guide
+document.md                  Codebase architecture notes
+prompt_log.md                Codex CLI prompt disclosure
+prompt_log_gemini.md         gemini-cli prompt disclosure
 \end{lstlisting}
 
 \section{附錄：畫面截圖}
-請放入遊戲主畫面、戰鬥畫面、Boss 戰、debug overlay 或其他重要畫面。
+此處建議放入遊戲主畫面、一般戰鬥、Boss 戰、debug overlay 與道具 UI 截圖。截圖檔案尚待組員補上。
 
 % \begin{figure}[H]
 % \centering
