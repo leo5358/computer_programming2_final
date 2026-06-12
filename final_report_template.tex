@@ -17,10 +17,42 @@
 
 \setmainfont{Times New Roman}
 \setsansfont{Arial}
-\setmonofont{Consolas}
-\setCJKmainfont{Microsoft JhengHei}
-\setCJKsansfont{Microsoft JhengHei}
-\setCJKmonofont{Microsoft JhengHei}
+\IfFontExistsTF{Menlo}
+  {\setmonofont{Menlo}}
+  {\setmonofont{Consolas}}
+
+\IfFileExists{/System/Library/Fonts/Supplemental/Songti.ttc}
+  {
+    \setCJKmainfont[
+      Path=/System/Library/Fonts/Supplemental/,
+      FontIndex=7,
+      BoldFont=Songti.ttc,
+      BoldFeatures={FontIndex=2}
+    ]{Songti.ttc}
+    \setCJKsansfont[
+      Path=/System/Library/Fonts/Supplemental/,
+      FontIndex=7,
+      BoldFont=Songti.ttc,
+      BoldFeatures={FontIndex=2}
+    ]{Songti.ttc}
+    \setCJKmonofont[
+      Path=/System/Library/Fonts/Supplemental/,
+      FontIndex=7
+    ]{Songti.ttc}
+  }
+  {
+    \IfFontExistsTF{Microsoft JhengHei}
+      {
+        \setCJKmainfont{Microsoft JhengHei}
+        \setCJKsansfont{Microsoft JhengHei}
+        \setCJKmonofont{Microsoft JhengHei}
+      }
+      {
+        \setCJKmainfont{Noto Sans CJK TC}
+        \setCJKsansfont{Noto Sans CJK TC}
+        \setCJKmonofont{Noto Sans Mono CJK TC}
+      }
+  }
 
 \hypersetup{
   colorlinks=true,
