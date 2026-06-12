@@ -175,8 +175,16 @@ godot --editor project/
 
 BPM 會影響戰鬥容錯與風險。心跳越高，block 可維持的安全時間越短，玩家架勢恢復速度也越慢，因此高壓狀態下連續失誤會更容易被擊破。同時，BPM 也會帶來更強的畫面與音效回饋，例如心跳音效、畫面脈衝、紅色邊緣提示與 BGM 緊張感。這讓玩家可以不用只看數字，也能透過感官回饋理解目前風險。
 
-\subsection{核心玩法三：敵人與 Boss AI}
+\subsection{核心玩法三：敵人 AI 與戰鬥底層邏輯}
 一般敵人共用 \texttt{enemy\_base.gd} 的狀態機，包含 \texttt{PATROL}、\texttt{ALERTED}、\texttt{CHASE}、\texttt{HOLD}、\texttt{FLEE}、\texttt{ATTACK}、\texttt{DEFLECT}、\texttt{HURT}、\texttt{POSTURE\_BROKEN} 與 \texttt{DEAD}。敵人會依照玩家距離、視野範圍、攻擊冷卻與理想距離決定是否巡邏、追擊、後退、保持距離或攻擊。不同敵人透過 export 參數與少量 override 調整血量、速度、攻擊距離、格擋機率與動畫素材。
+
+在底層實作上，\texttt{enemy\_base.gd} 展現了動作遊戲核心的數值與時間軸管理，包含以下四項關鍵技術：
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{基於時間軸的攻擊判定（Attack Profiles）：} 有別於依賴動畫影格回呼，本專案為每種攻擊定義了嚴格的時間軸（\texttt{cue\_start}、\texttt{hit\_start}、\texttt{hit\_end}、\texttt{total\_time}）。系統依據 \texttt{attack\_elapsed} 主動比對區間來開關 hitbox 與視覺提示。這種做法切斷了邏輯與動畫的強耦合，確保在任何幀率下判定皆精準公平。
+  \item \textbf{聯動生命值的架勢與壓力機制：} 當敵人受擊或被彈刀時會獲得 \texttt{posture\_recovery\_pause}，只要玩家持續施加壓力，敵人的架勢值就不會下降。此外，架勢值的自然恢復速率會乘上當前血量比例（\texttt{health\_ratio}），完美還原了「滿血恢復快，殘血恢復慢」的戰術深度。
+  \item \textbf{主動防禦與攻守轉換：} 當玩家發動攻擊時，系統會依據敵人的 \texttt{guard\_chance} 與防禦冷卻判定是否主動防禦。若防禦成功，敵人會強制進入 \texttt{DEFLECT} 狀態，並在短暫硬直後自動執行 \texttt{counter} 進行快速反擊，迫使玩家轉攻為守。
+  \item \textbf{雙向驗證的精準格擋（Parry）：} 透過 \texttt{can\_be\_perfect\_parried\_by} 函數，系統同時驗證「敵人攻擊是否處於前搖或打擊區間」以及「玩家按下防禦鍵的時間是否落在寬容度內」。雙向條件均成立才會觸發完美格擋，對敵人造成巨量架勢傷害並中斷攻擊。
+\end{itemize}
 
 Boss 繼承一般敵人架構，但有專屬攻擊 profile 與連段邏輯。Boss 會根據距離選擇普通攻擊、突刺、劈砍或 gap close 行為，並透過 combo 狀態安排連續攻擊。當玩家連續進攻時，Boss 會提高格擋與反制行為，避免玩家用單一節奏壓制。Boss 也有煙霧彈暫停、重攻擊被 parry 後的 recoil、受擊停頓、HUD 顯示與最終處決流程。
 
