@@ -17,23 +17,10 @@
 
 \setmainfont{Times New Roman}
 \setsansfont{Arial}
-\setmonofont{Menlo}
-\setCJKmainfont[
-  Path=/System/Library/Fonts/Supplemental/,
-  FontIndex=7,
-  BoldFont=Songti.ttc,
-  BoldFeatures={FontIndex=2}
-]{Songti.ttc}
-\setCJKsansfont[
-  Path=/System/Library/Fonts/Supplemental/,
-  FontIndex=7,
-  BoldFont=Songti.ttc,
-  BoldFeatures={FontIndex=2}
-]{Songti.ttc}
-\setCJKmonofont[
-  Path=/System/Library/Fonts/Supplemental/,
-  FontIndex=7
-]{Songti.ttc}
+\setmonofont{Consolas}
+\setCJKmainfont{Microsoft JhengHei}
+\setCJKsansfont{Microsoft JhengHei}
+\setCJKmonofont{Microsoft JhengHei}
 
 \hypersetup{
   colorlinks=true,
@@ -285,7 +272,8 @@ Ubuntu 24.04 執行 & 測試建置、啟動與操作流程 & 依 README 指令�
 \endhead
 楊立宇 & 41371216H & 計畫發想；擔任 PM，負責需求整理、功能規劃、開發進度控管、code review、整合檢查與問題追蹤； 開發道具系統、存檔功能等；同時也參與部分 gameplay 功能、戰鬥邏輯、測試與報告整理。 \\
 顏端廷 & 41371228H & 擔任人物素材製作、背景音樂製作、地圖與畫面設計、遊戲背景設定構想; 同時還有心跳系統、軀幹值系統、道具系統、起始頁面設計與實作、code review、ubuntu系統編譯測試，以及維護git內容乾淨。 \\
-范子昊 & 41371229H & 程式編寫（TODO 請完整敘述） \\
+范子昊 & 41371229H & 使用Codex生成大部分遊戲基礎架構程式碼，包含:玩家操作(移動、攻擊、格擋、閃避、跳躍)、三隻小怪與BOSS的機制(原地巡邏、追擊、攻擊、格擋)、主角攻擊、受擊、隔擋回饋(畫面震動)、整合組員做好的美術素材(遊戲主頁、地圖、玩家、小怪、BOSS等......)進遊戲、三張地圖中間做切換轉場、玩家資訊欄(血量、軀幹條、心跳、道具欄)、將小怪與道具放置到地圖中、暫停介面與死亡介面、心跳系統視覺與聽覺回饋、Boss關卡進場運鏡動畫+處決特寫動畫。
+使用paint.net手動修正部分美術素材(修正去背沒去乾淨、中心偏移、動畫切割問題)、在Godot中手動鋪設三張地圖的地板與邊界碰撞體、尋找並整合所有非BGM的音效類素材、戰鬥手感做手動調整(如把敵人攻擊動作的素材做不等速播放，尤其是BOSS的CHOP招式)、根據玩家位置設定鏡頭下限。\\
 \bottomrule
 \end{longtable}
 
@@ -431,6 +419,9 @@ README / 文件 & 協助整理建置方式、操作方式、專案架構與功�
 \subsection{顏端廷使用 Codex 與 ChatGPT 的 Prompt 紀錄}
 因篇幅過大，故採用螢幕錄製的形式用以展示，請參考影片連結：\href{https://youtu.be/Xp396Fx395E}{YouTube 影片連結}。
 
+\subsection{范子昊使用 Codex 與 Antigravity 的 Prompt 紀錄}
+因篇幅過大，故採用螢幕錄製的形式用以展示，請參考影片連結：\href{https://youtu.be/NPqH6vN8TdQ?si=lx7U6TC8le3jgPIL}{YouTube 影片連結}。
+
 \section{結論}
 
 本專案完成了一個以 Godot 4 與 GDExtension 實作的 2D 橫向動作遊戲 prototype。實作內容包含玩家移動與戰鬥、精準格擋、架勢值、心跳 BPM、敵人 AI、Boss 戰、道具、checkpoint、死亡重生、UI、音效、debug overlay、autopilot、Godot 測試與 C 單元測試。整體上，本專案不只呈現遊戲畫面，也將戰鬥判定、數值計算與系統架構拆分成可維護的模組。
@@ -457,12 +448,23 @@ prompt_log_gemini.md         gemini-cli prompt disclosure
 \end{lstlisting}
 
 \section{附錄：畫面截圖}
-此處建議放入遊戲主畫面、一般戰鬥、Boss 戰、debug overlay 與道具 UI 截圖。截圖檔案尚待組員補上。
 
-% \begin{figure}[H]
-% \centering
-% \includegraphics[width=0.85\linewidth]{path/to/screenshot.png}
-% \caption{遊戲畫面截圖}
-% \end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{images/StartPage.png}
+\caption{初始頁面}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{images/Gameplay.png}
+\caption{遊戲畫面}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{images/BOSS.png}
+\caption{BOSS戰}
+\end{figure}
 
 \end{document}
