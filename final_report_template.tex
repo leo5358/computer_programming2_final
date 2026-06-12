@@ -199,6 +199,31 @@ Boss 繼承一般敵人架構，但有專屬攻擊 profile 與連段邏輯。Bos
   \item 若 native library 未成功載入，\texttt{combat\_math.gd} 與 \texttt{combat\_server.gd} 會使用 GDScript fallback，讓遊戲仍可啟動與測試主要玩法。
 \end{itemize}
 
+\subsection{遊戲平衡與數值詳細規格}
+針對戰鬥節奏與 Demo 體驗，本專案實作了精確的數值平衡調整，具體規格如下：
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{玩家 (Player) 屬性：}
+    \begin{itemize}
+      \item 基礎能力：生命值上限 120.0、基礎攻擊力 13.0、跳躍力度 (jump\_velocity) -559.0。
+      \item 心跳系統：戰鬥心跳上升量調整為 2.0/sec。
+      \item 道具機制：藥丸 (Pill) 與膠囊 (Capsule) 改為持續性效果（藥丸：0.6x 倍率，20 秒；膠囊：1.2x 倍率，15 秒）。
+      \item 軀幹值 (Posture)：受擊增加 17.25\%；完美格擋增加 6.9\%（滿值時不倒地並保留顯示）；普通格擋增加 10.35\% 並造成 25\% 穿透傷害。
+    \end{itemize}
+  \item \textbf{敵人與 Boss 數值：}
+    \begin{itemize}
+      \item 一般敵人 (Enemy Base)：採用百分比制軀幹值（直接受傷 15\%、完美彈刀 6\%、普通格擋 9\%、格擋成功 5\%）。崩潰後恢復時間為 6 秒（受追擊則縮短為 3 秒）。
+      \item 物理優化：屍體停留期間碰撞層級設為 0，確保不會阻礙玩家位移。
+      \item Boss：軀幹值百分比為直接受傷 9\%、完美彈刀 8\%、普通格擋 5\%。完美閃避回饋改由專屬百分比計算。
+      \item 特定數值：武士 (Warrior) 生命 70.0/攻擊 26.0；火把敵人 (Torchman) 生命 42.0/攻擊 18.0。
+    \end{itemize}
+  \item \textbf{系統安全性與測試同步：}
+    \begin{itemize}
+      \item 實作了 GameSettings 的安全查詢機制（偵測 /root/GameSettings），確保在 Headless 測試環境下不會因單例缺失而崩潰。
+      \item 同步更新所有測試腳本（如心跳、道具、Boss 死亡回饋等），確保預期值與最新平衡數值一致。
+    \end{itemize}
+\end{itemize}
+
 \section{創意、藝術與設計}
 
 \subsection{創意與原創性}
