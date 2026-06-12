@@ -310,7 +310,7 @@ func _save_current_checkpoint_progress() -> void:
 	var save_position := player.global_position
 	if "spawn_position" in player:
 		save_position = player.spawn_position
-	var health := 100.0
+	var health := 120.0
 	if player.get("health") != null:
 		health = float(player.get("health"))
 	sm.save_game(current_map_id, save_position, health)
@@ -404,7 +404,7 @@ func _return_to_start_page() -> void:
 func _get_respawn_snapshot() -> Dictionary:
 	var player := _get_player()
 	var spawn := Vector2(430, 571)
-	var health := 100.0
+	var health := 120.0
 	if player != null:
 		spawn = player.spawn_position if "spawn_position" in player else player.global_position
 		health = float(player.get("max_health")) if player.get("max_health") != null else health

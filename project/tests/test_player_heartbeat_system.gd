@@ -81,7 +81,7 @@ func _initialize() -> void:
 	player.heartbeat = 100.0
 	player.heartbeat_combat_timer = 1.5
 	player._update_heartbeat(1.0)
-	if player.heartbeat != 104.0:
+	if player.heartbeat != 102.0:
 		push_error("Combat movement should only add combat pressure, not movement target rise")
 		quit(1)
 		return
@@ -94,8 +94,8 @@ func _initialize() -> void:
 		quit(1)
 		return
 	player._update_heartbeat(1.0)
-	if player.heartbeat != 108.0:
-		push_error("Combat heartbeat should rise by 4 per second while combat is active")
+	if player.heartbeat != 106.0:
+		push_error("Combat heartbeat should rise by 2 per second while combat is active")
 		quit(1)
 		return
 

@@ -76,11 +76,11 @@ func _initialize() -> void:
 		push_error("Using gourd should consume one count")
 		quit(1)
 		return
-	if not is_equal_approx(float(player.get("max_health")), 100.0):
+	if not is_equal_approx(float(player.get("max_health")), 120.0):
 		push_error("Gourd should not increase max health")
 		quit(1)
 		return
-	if not is_equal_approx(float(player.get("health")), 100.0):
+	if not is_equal_approx(float(player.get("health")), 120.0):
 		push_error("Gourd should heal 30 percent of max health")
 		quit(1)
 		return
@@ -110,7 +110,7 @@ func _initialize() -> void:
 		push_error("Gourd should remain usable after the first drink")
 		quit(1)
 		return
-	if not is_equal_approx(float(player.get("health")), 70.0):
+	if not is_equal_approx(float(player.get("health")), 76.0):
 		push_error("Gourd should restore exactly 30 percent of max health")
 		quit(1)
 		return
@@ -145,13 +145,13 @@ func _initialize() -> void:
 		push_error("Adrenaline capsule should use the 0.8s eat animation")
 		quit(1)
 		return
-	if float(player.get("heartbeat")) <= base_heartbeat:
-		push_error("Adrenaline capsule should raise heartbeat")
+	if not is_equal_approx(float(player.get("heartbeat")), base_heartbeat):
+		push_error("Adrenaline capsule should not change heartbeat instantly")
 		quit(1)
 		return
 	player.set("action_timer", 0.0)
 	player._update_action_state(0.01)
-	var raised_heartbeat := float(player.get("heartbeat"))
+	var heartbeat_after_capsule := float(player.get("heartbeat"))
 	if not player.use_item("pill"):
 		push_error("Blood pressure pill should be usable")
 		quit(1)
@@ -160,8 +160,8 @@ func _initialize() -> void:
 		push_error("Blood pressure pill should use the 0.8s eat animation")
 		quit(1)
 		return
-	if float(player.get("heartbeat")) >= raised_heartbeat:
-		push_error("Blood pressure pill should lower heartbeat")
+	if not is_equal_approx(float(player.get("heartbeat")), heartbeat_after_capsule):
+		push_error("Blood pressure pill should not change heartbeat instantly")
 		quit(1)
 		return
 	player.set("action_timer", 0.0)
