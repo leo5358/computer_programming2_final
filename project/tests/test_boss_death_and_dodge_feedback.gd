@@ -41,7 +41,7 @@ func _initialize() -> void:
 		return
 
 	boss.reset_combat_state()
-	boss.posture = boss.max_posture - boss.dodge_posture_damage
+	boss.posture = boss.max_posture - boss._boss_posture_amount_from_percent(boss.posture_gain_on_perfect_parried_boss)
 	boss.receive_dodge_feedback()
 	if not boss.posture_broken:
 		push_error("Perfect dodge feedback should posture-break the boss through boss-specific logic")

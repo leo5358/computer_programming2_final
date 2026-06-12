@@ -29,8 +29,8 @@ func _initialize() -> void:
 		push_error("Defeated enemy corpse should not expose a collision layer to the player")
 		quit(1)
 		return
-	if int(warrior.collision_mask) == 0:
-		push_error("Defeated enemy corpse should keep its collision mask so it remains grounded")
+	if int(warrior.collision_mask) != 0:
+		push_error("Defeated enemy corpse should clear its collision mask so it cannot be pushed")
 		quit(1)
 		return
 	if warrior.corpse_timer < 4.9:

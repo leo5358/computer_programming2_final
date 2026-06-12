@@ -50,9 +50,9 @@ func _ready() -> void:
 	}
 	custom_animation_speeds = {"walk": 5.0, "attack": 10.0, "deflect": 14.0, "thrust": 8.0}
 	custom_animation_loops = {"walk": true, "attack": false, "deflect": false, "thrust": false}
-	max_health = 60.0
+	max_health = 70.0
 	max_posture = 100.0
-	attack_damage = 13.0
+	attack_damage = 26.0
 	attack_posture_damage = 22.0
 	patrol_speed = 38.0
 	chase_speed = 92.0
@@ -87,11 +87,11 @@ func _ready() -> void:
 	whiff_cooldown_multiplier = 0.42
 	posture_recovery_pause = 1.25
 	posture_recovery_rate = 12.0
-	perfect_parry_posture_damage = 20.0
-	normal_block_posture_damage = 8.0
+	posture_gain_on_perfect_parried_percent = 6.0
+	posture_gain_on_partial_guarded_percent = 9.0
 	parried_recovery_duration = 1.55
 	guard_chance = 0.5
-	guard_posture_damage = 3.0
+	posture_gain_on_guard_success_percent = 5.0
 	deflect_duration = 0.28
 	guard_lockout_duration = 0.45
 	direct_hit_thrust_lockout_time = 0.72

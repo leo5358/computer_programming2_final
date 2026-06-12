@@ -64,9 +64,9 @@ func _ready() -> void:
 	}
 	custom_animation_speeds = {"idle": 5.0, "walk": 10.0, "attack": 8.0, "hurt": 8.0, "death": 8.0}
 	custom_animation_loops = {"idle": true, "walk": true, "attack": false, "hurt": false, "death": false}
-	max_health = 32.0
+	max_health = 42.0
 	max_posture = 70.0
-	attack_damage = 8.0
+	attack_damage = 18.0
 	attack_posture_damage = 14.0
 	patrol_speed = 42.0
 	chase_speed = 78.0

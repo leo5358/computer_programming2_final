@@ -223,7 +223,7 @@ const VISUAL_CENTER_X_BOSS := 64.0
 const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 
 # --- Boss Parameters ---
-@export var posture_gain_on_direct_damage_boss := 11.0
+@export var posture_gain_on_direct_damage_boss := 9.0
 @export var leash_range_boss := 900.0
 @export var detection_range_boss := 900.0
 @export var attack_start_distance_boss := 112.0
@@ -265,9 +265,9 @@ const WALK_ANCHOR_STRENGTH_BOSS := 0.45
 @export var hit_spark_time_boss := 0.16
 @export var hit_freeze_time_boss := 0.055
 @export var hurt_feedback_time_boss := 0.66
-@export var posture_gain_on_perfect_parried_boss := 10.0
-@export var posture_gain_on_partial_guarded_boss := 6.0
-@export var posture_gain_on_guard_success_boss := 6.0
+@export var posture_gain_on_perfect_parried_boss := 8.0
+@export var posture_gain_on_partial_guarded_boss := 5.0
+@export var posture_gain_on_guard_success_boss := 5.0
 @export var posture_break_idle_reset_delay_boss := 6.0
 @export var posture_break_hit_reset_delay_boss := 3.0
 @export var deflect_feedback_time_boss := 0.50
@@ -684,7 +684,7 @@ func _disable_boss_collision() -> void:
 func receive_dodge_feedback() -> void:
 	if defeated_flag:
 		return
-	posture = clamp(posture + dodge_posture_damage, 0.0, max_posture)
+	posture = clamp(posture + _boss_posture_amount_from_percent(posture_gain_on_perfect_parried_boss), 0.0, max_posture)
 	_mark_combat_pressure()
 	_interrupt_attack_boss_internal()
 	dodge_spark_timer = 0.18
@@ -1412,7 +1412,7 @@ func _update_attack_visual_boss_internal(show_visual: bool, active: bool) -> voi
 	if attack_visual == null:
 		return
 	_update_attack_hitbox_boss_internal()
-	var effective_show := show_visual and GameSettings.is_easy_mode
+	var effective_show := show_visual and _is_easy_mode_enabled_boss()
 	attack_visual.visible = effective_show and (active or is_attack_parry_window_open())
 	_update_perilous_warning_boss_internal(effective_show and is_attack_parry_window_open())
 	if not effective_show:
@@ -1427,6 +1427,12 @@ func _update_attack_visual_boss_internal(show_visual: bool, active: bool) -> voi
 	else:
 		attack_visual.color = Color(1.0, 0.22, 0.08, 0.62) if active else Color(1.0, 0.86, 0.08, 0.48)
 
+func _is_easy_mode_enabled_boss() -> bool:
+	var settings := get_node_or_null("/root/GameSettings")
+	if settings == null:
+		return true
+	var value: Variant = settings.get("is_easy_mode")
+	return true if value == null else bool(value)
 
 func _update_perilous_warning_boss_internal(show_warning: bool) -> void:
 	var show := show_warning and is_current_attack_perilous()

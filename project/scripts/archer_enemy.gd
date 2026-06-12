@@ -62,7 +62,7 @@ func _ready() -> void:
 	too_close_distance = 100.0
 	vision_range = 520.0
 	vision_height = 140.0
-	attack_cooldown_duration = 0.6
+	attack_cooldown_duration = 1
 	attack_cue_start = 0.38
 	attack_hit_start = 0.60
 	attack_hit_end = 0.68
