@@ -94,12 +94,18 @@ libxrandr-dev libxi-dev libgl-dev libasound2-dev libpulse-dev
 ### System & Debug
 | Action | Key | Description |
 | :--- | :---: | :--- |
-| **Toggle Debug** | `F1` | Show/Hide internal combat data |
-| **Force BPM** | `F2` | Set BPM to 200 (Adrenaline test) |
-| **Reset Combat** | `F5` | Instantly reset the encounter |
+| **Toggle Debug** | `NumLock` | Show/Hide internal combat data |
+| **Force BPM** | `ScrollLock` | Set BPM to 200 (Adrenaline test) |
+| **Reset Combat** | `F3` | Reset combat state through the combat runtime |
+| **Reset Test Field** | `F5` | Clear debug-spawned enemies and respawn map enemies |
 | **Toggle Mute** | `M` | Mute/Unmute Background Music |
 | **Hurtbox Debug** | `B` | Toggle visualization of collision boxes |
 | **Autopilot** | `P` | Toggle AI-assisted combat verification |
+| **Spawn Debug Enemy** | `7` / `8` / `9` | Spawn Torchman, Warrior, or Archer |
+| **Spawn Debug Boss** | `0` | Spawn a Boss locked to the chop attack profile |
+| **Boss Room Warp** | `O` | Warp to the boss interior |
+| **Debug Player Death** | `N` | Trigger player death for checkpoint/death-flow testing |
+| **Boss Final Execution Test** | `I` | Trigger the full boss final-execution ritual |
 
 ---
 
@@ -116,7 +122,7 @@ libxrandr-dev libxi-dev libgl-dev libasound2-dev libpulse-dev
 
 ## Debugging
 
-The project includes a comprehensive **Debug Overlay** (toggle with `F1`). It displays real-time data from the C module, including:
+The project includes a comprehensive **Debug Overlay** (toggle with `NumLock`). It displays real-time data from the combat module, including:
 - Exact Parry timing (Delta T)
 - Player/Boss State machine status
 - BPM influence on Posture recovery
